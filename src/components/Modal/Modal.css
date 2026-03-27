@@ -1,0 +1,137 @@
+.modal-overlay {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--color-bg-overlay);
+  z-index: 1050;
+  padding: 1rem;
+}
+
+.modal-content {
+  max-width: 760px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modalSlideIn 0.3s ease-out;
+  border-radius: 16px;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  background: var(--color-primary);
+  color: var(--color-text-light);
+  border-bottom: 0;
+}
+
+.modal-header-icon {
+  font-size: 1.35rem;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.modal-close-btn {
+  filter: invert(1) grayscale(100%);
+  opacity: 0.85;
+}
+
+.modal-card {
+  background: #f5f7fb;
+  border: 1px solid #e3e8f2;
+  border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+.modal-label {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #5f6775;
+}
+
+.modal-main-date {
+  font-size: 2.1rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #2b303b;
+}
+
+.modal-text {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: #2b303b;
+  line-height: 1.45;
+}
+
+.modal-link {
+  color: #2d6cdf;
+  font-size: 1rem;
+  text-decoration: none;
+}
+
+.modal-link:hover {
+  text-decoration: underline;
+}
+
+.modal-time-badge {
+  background: #f4ead6;
+  color: #b97811;
+  font-size: 1.15rem;
+  font-weight: 600;
+  padding: 0.55rem 1rem;
+}
+
+.modal-time-badge--expired {
+  background: #fce6e6;
+  color: #c62828;
+}
+
+.modal-responsible-badge {
+  background: #d9e7f7;
+  color: #2b6cb0;
+  font-size: 1.15rem;
+  font-weight: 500;
+  padding: 0.55rem 1rem;
+}
+
+.modal-footer {
+  border-top: 1px solid #e3e8f2;
+  background: #f7f8fc;
+}
+
+@media (max-width: 768px) {
+  .modal-content {
+    max-width: 100%;
+    border-radius: 12px;
+  }
+  
+  .modal-title {
+    font-size: 1.35rem;
+  }
+
+  .modal-main-date {
+    font-size: 1.6rem;
+  }
+
+  .modal-label {
+    font-size: 1rem;
+  }
+
+  .modal-time-badge,
+  .modal-responsible-badge {
+    font-size: 0.95rem;
+  }
+}

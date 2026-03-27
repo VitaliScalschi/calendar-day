@@ -1,0 +1,21 @@
+.search-bar-container {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0;
+  align-items: stretch;
+  width: 100%;
+}
+
+.input {
+    padding: 0.5rem 1rem !important;
+  }
+
+@media (max-width: 768px) {
+  .search-bar-container {
+    flex-direction: column;
+  }
+
+  .search-bar-container > button {
+    width: 100%;
+  }
+}

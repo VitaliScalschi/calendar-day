@@ -1,0 +1,27 @@
+.election-day-card {
+  border-radius: 14px;
+}
+
+.election-day-card__header {
+  background: var(--color-primary)
+}
+
+.election-day-card__panel {
+  border-color: #e3e8f2 !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+.election-badge-days {
+  background: #f4ead6;
+  color: #b97811;
+}
+
+.election-badge-active {
+  background: #d9e7f7;
+  color: #2b6cb0;
+}
+
+.election-badge-completed {
+  background: #d8f1ea;
+  color: #1e7f6d;
+}

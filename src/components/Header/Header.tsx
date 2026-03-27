@@ -1,0 +1,40 @@
+import { Link, NavLink } from 'react-router-dom'
+import './Header.css'
+
+const TITLE_HEADER = "Comisia Electorală Centrală"
+const SUB_TITLE_HEADER = 'a Republicii Moldova';
+
+function Header() {
+  return (
+    <header className="header w-100">
+      <div className="container d-flex align-items-center justify-content-between py-2">
+        <div className="d-flex align-items-center gap-3">
+          <img src="/logo.svg" className="logo" alt="logo" />
+          <div className="header-brand">
+            <p className="header-title mb-0">{TITLE_HEADER}</p>
+            <span className="header-subtitle">{SUB_TITLE_HEADER}</span>
+          </div>
+        </div>
+
+        <nav className="header-nav d-flex align-items-center gap-3" aria-label="Navigare principală">
+          <NavLink
+            to="/"
+            className={({ isActive }) => `btn btn-link header-nav-link ${isActive ? 'is-active' : ''}`}
+            end
+          >
+            Home
+          </NavLink>
+          <NavLink
+            to="/history"
+            className={({ isActive }) => `btn btn-link header-nav-link ${isActive ? 'is-active' : ''}`}
+          >
+            Arhiva
+          </NavLink>
+        </nav>
+      </div>
+    </header>
+  )
+}
+
+export default Header
+
