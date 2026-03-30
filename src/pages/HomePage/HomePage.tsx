@@ -325,8 +325,8 @@ function HomePage() {
   return (
     <div className="App d-flex flex-column min-vh-100">
       <Header />
-      <Main />
-      <main className="main-content container-fluid">
+      {/* <Main /> */}
+      <main className="main-content container-fluid mt-4">
         <div className="container">
           {errorTabs ? (
             <div className="alert alert-warning" role="alert">
