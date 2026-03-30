@@ -11,8 +11,8 @@ function Header() {
         <div className="d-flex align-items-center gap-3">
           <img src="/logo.svg" className="logo" alt="logo" />
           <div className="header-brand">
-            <p className="header-title mb-0" >PROGRAMUL CALENDARISTIC</p>
-            <span className="header-subtitle">{TITLE_HEADER}</span>
+            <p className="header-title mb-0">{TITLE_HEADER}</p>
+            <span className="header-subtitle">{SUB_TITLE_HEADER}</span>
           </div>
         </div>
 
