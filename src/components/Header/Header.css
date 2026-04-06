@@ -1,5 +1,5 @@
 .header {
-  background: #eef0f3;
+  background: var(--color-primary);
   color: var(--color-text-primary);
   border-bottom: 1px solid #e4e7eb;
 }
@@ -31,7 +31,7 @@
 }
 
 .header-nav-link {
-  color: #2c3340;
+  color: #ffffff;
   text-decoration: none;
   border-radius: 0 !important;
   border-bottom: 2px solid transparent;
@@ -41,7 +41,7 @@
 }
 
 .header-nav-link:focus-visible {
-  color: black !important;
+  color: rgb(255, 255, 255) !important;
   box-shadow: none !important;
 }
 
@@ -52,7 +52,7 @@
 
 .header-nav-link.is-active {
   font-weight: 700;
-  border-bottom-color: var(--color-primary);
+  border-bottom-color: white;
 }
 
 .header-nav-more {

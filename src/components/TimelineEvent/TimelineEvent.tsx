@@ -1,32 +1,56 @@
-import React from 'react'
 import StatusBadge from '../StatusBadge/StatusBadge'
 import { calculateDaysRemaining, formatDateTime } from '../../utils/dateUtils'
-import type { TimelineEventProps, EventStatus } from '../../interface/index'
+import type { TimelineEventProps } from '../../interface/index'
 
 import './TimelineEvent.css'
 
 function TimelineEvent({ 
-  id, 
-  name, 
+  title, 
   deadline, 
   responsible, 
   onClick 
 }: TimelineEventProps) {
-  const daysRemaining = deadline ? calculateDaysRemaining(deadline) : null;
-  
-  // Determină statusul bazat pe zilele rămase
-  const getStatus = (): EventStatus => {
-    if (daysRemaining === null) return 'upcoming';
-    if (daysRemaining === 0) return 'urgent';
-    if (daysRemaining < 0) return 'expired';
-    if (daysRemaining <= 3) return 'urgent';
-    if (daysRemaining <= 7) return 'in_progress';
-    return 'upcoming';
+  const getNormalizedRange = (value?: string): { start: string; end: string } | null => {
+    if (!value) return null;
+    const v = value.trim();
+
+    const fullRangeMatch = v.match(/^(\d{1,2}\/\d{1,2}\/\d{4})\s*-\s*(\d{1,2}\/\d{1,2}\/\d{4})$/);
+    if (fullRangeMatch) {
+      const [, start, end] = fullRangeMatch;
+      return { start: formatDateTime(start), end: formatDateTime(end) };
+    }
+
+    const shortRangeMatch = v.match(/^(\d{1,2})\s*-\s*(\d{1,2}\/\d{1,2}\/\d{4})$/);
+    if (shortRangeMatch) {
+      const [, startDay, end] = shortRangeMatch;
+      const [, endMonth, endYear] = end.split('/');
+      const start = `${startDay.padStart(2, '0')}/${endMonth}/${endYear}`;
+      return { start: formatDateTime(start), end: formatDateTime(end) };
+    }
+
+    return null;
   };
 
-  const status = getStatus();
+  const normalizedRange = getNormalizedRange(deadline);
+  const isRangeDeadline = Boolean(normalizedRange);
+
+  const formatDeadlineDisplay = (value?: string): string => {
+    if (!value) return '';
+    if (normalizedRange) return `${normalizedRange.start} - ${normalizedRange.end}`;
+
+    return formatDateTime(value.trim());
+  };
+
+  const getDeadlineForStatus = (value?: string): string | null => {
+    if (!value) return null;
+    if (normalizedRange) return normalizedRange.end;
+    return value.trim();
+  };
+
+  const statusDate = getDeadlineForStatus(deadline);
+  const daysRemaining = statusDate ? calculateDaysRemaining(statusDate) : null;
   
-  // Formatează data pentru afișare în format "12 Feb" cu "2026" dedesubt
+  // Formatează data pentru afișare în format "12 Feb" cu "2026"
   const formatEventDate = (dateStr: string): { dayMonth: string; year: string } => {
     try {
       let date: Date;
@@ -56,9 +80,12 @@ function TimelineEvent({
     }
   };
 
-  const dateParts = deadline ? formatEventDate(deadline) : { dayMonth: 'Data necunoscută', year: '' };
-  const displayTitle = name || 'Eveniment electoral';
-  const deadlineFormatted = deadline ? formatDateTime(deadline) : '';
+  const dateStartParts = normalizedRange
+    ? formatEventDate(normalizedRange.start)
+    : (deadline ? formatEventDate(deadline) : { dayMonth: 'Data necunoscută', year: '' });
+  const dateEndParts = normalizedRange ? formatEventDate(normalizedRange.end) : null;
+  const displayTitle = title || 'Eveniment electoral';
+  const deadlineFormatted = formatDeadlineDisplay(deadline);
 
   // Determină culoarea cercului bazat pe status
   const getDotColor = () => {
@@ -70,8 +97,11 @@ function TimelineEvent({
   return (
     <div className="timeline-event" onClick={onClick}>
       <div className="timeline-date-section">
-        <div className="timeline-date-day">{dateParts.dayMonth}</div>
-        {dateParts.year && <div className="timeline-date-year">{dateParts.year}</div>}
+        <div className="timeline-date-day">{dateStartParts.dayMonth}</div>
+        {dateEndParts ? <div className="timeline-date-day">- {dateEndParts.dayMonth}</div> : null}
+        {(dateEndParts?.year || dateStartParts.year) && (
+          <div className="timeline-date-year">{dateEndParts?.year ?? dateStartParts.year}</div>
+        )}
       </div>
       <div className="timeline-center-section">
         <div className="timeline-line-wrapper">
@@ -80,17 +110,12 @@ function TimelineEvent({
         </div>
       </div>
       <div className="timeline-content border rounded border-gray-300 p-3 shadow-sm bg-white">
-        <div className='d-flex justify-content-between align-items-start'>
-            <h4 className="timeline-title me-2">{displayTitle}</h4>
-          <div className="timeline-header">
-            <StatusBadge status={status} />
-          </div>
-        </div>
+        <h4 className="timeline-title me-2">{displayTitle}</h4>
         <div className="d-flex justify-content-between align-items-center">
         <div>
           {deadlineFormatted && (
           <div className="timeline-deadline">
-            Până la: <strong>{deadlineFormatted}</strong>
+            {isRangeDeadline ? 'Perioada: ' : 'Până la: '}<strong>{deadlineFormatted}</strong>
           </div>
         )}
         {daysRemaining !== null && (

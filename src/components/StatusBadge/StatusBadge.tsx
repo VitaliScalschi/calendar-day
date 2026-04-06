@@ -1,8 +1,6 @@
 import { useMemo } from 'react'
 import './StatusBadge.css'
-import type { EventStatus, StatusBadgeProps } from './StatusBadge.interface'
-
-export type { EventStatus } from './StatusBadge.interface'
+import type { EventStatus, StatusBadgeProps } from '../../interface/index'
 
 const statusConfig: Record<EventStatus, { label: string; className: string }> = {
   'in_progress': { label: 'În desfășurare', className: 'status-in-progress' },

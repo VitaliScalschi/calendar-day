@@ -4,9 +4,9 @@ import './EventDeadline.css'
 import { EventDeadlineProps } from '../../interface/index'
 import { calculateDaysRemaining, formatDateTime } from '../../utils/dateUtils'
 
-function EventDeadline({ id, name, deadline, description, regulations, responsible, onClick }: EventDeadlineProps) {
+function EventDeadline({ id, title, deadline, description, regulations, responsible, onClick }: EventDeadlineProps) {
   const daysRemaining = deadline ? calculateDaysRemaining(deadline) : null;
-  const displayTitle = name || 'Eveniment electoral';
+  const displayTitle = title || 'Eveniment electoral';
   const displayDate = deadline ? formatDateTime(deadline) : 'Data necunoscută';
 
   return (

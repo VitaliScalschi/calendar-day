@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '@fortawesome/fontawesome-free/css/all.css'
+import 'react-date-range/dist/styles.css';
+import 'react-date-range/dist/theme/default.css';
 import App from './App'
 import './index.css'
 

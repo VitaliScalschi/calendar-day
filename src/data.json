@@ -8,10 +8,12 @@
       {
         "id": "1",
         "election_id": "1",
-        "name": "Stabilirea alegerilor locale noi",
+        "title": "Stabilirea alegerilor locale noi", 
+        "additional_info": "În termen de 60 de zile de la data constatării încetării mandatului",
         "deadline": "08/03/2026",
         "responsible": "CEC (DMA)",
         "description": "Adoptarea hotărârilor privind stabilirea alegerilor locale noi pentru data de 17 mai 2026",
+        "group":["political_organ"],
         "regulations": [
           {
             "id": "r1",
@@ -23,10 +25,11 @@
       {
         "id": "2",
         "election_id": "1",
-        "name": "Începutul perioadei electorale",
+        "title": "Începutul perioadei electorale",
         "deadline": "16/02/2026",
         "responsible": "CEC (DMA)",
         "description": "Începutul perioadei electorale",
+        "group":["political_organ"],
         "regulations": [
           {
             "id": "r1",
@@ -38,9 +41,10 @@
       {
         "id": "3",
         "election_id": "1",
-        "name": "Repartizarea atribuțiilor CEC",
+        "title": "Repartizarea atribuțiilor CEC",
         "deadline": "24/02/2026",
         "responsible": "CEC (DMA)",
+        "group":["political_organ"],
         "description": "Repartizarea atribuțiilor între membrii Comisiei Electorale Centrale în perioada electorală",
         "regulations": [
           {
@@ -54,9 +58,10 @@
       {
         "id": "4",
         "election_id": "1",
-        "name": "Publicarea listei partidelor",
+        "title": "Publicarea listei partidelor",
         "deadline": "24/02/2026",
         "responsible": "CEC (DJ)",
+        "group":["political", "political_organ"],
         "description": "Publicarea listei partidelor politice care au dreptul de a participa la alegerile locale noi și referendum în baza datelor prezentate de Agenția Servicii Publice",
         "regulations": [
           { "id": "r1", "title": "art. 27 lit. g)", "link": "" },
@@ -68,9 +73,10 @@
       {
         "id": "5",
         "election_id": "1",
-        "name": "Stabilirea responsabilităților autorităților",
+        "title": "Stabilirea responsabilităților autorităților",
         "deadline": "24/02/2026",
         "responsible": "CEC (DJ)",
+        "group":["political_organ"],
         "description": "Adoptarea hotărârii privind stabilirea responsabilităților suplimentare ale autorităților administrației publice centrale și entităților în procesul electoral",
         "regulations": [
           { "id": "r1", "title": "art. 28 din Codul electoral", "link": "" },
@@ -81,9 +87,10 @@
       {
         "id": "6",
         "election_id": "1",
-        "name": "Prezentarea candidaturilor CECE nivel I",
+        "title": "Prezentarea candidaturilor CECE nivel I",
         "deadline": "23/03/2026",
         "responsible": "Partide politice, Consilii locale, CEC",
+        "group":["public"],
         "description": "Prezentarea candidaturilor la CEC pentru constituirea consiliilor electorale de circumscripție de nivelul I",
         "regulations": [
           { "id": "r1", "title": "art. 35 alin. (5), (7)", "link": "" }
@@ -93,8 +100,9 @@
       {
         "id": "7",
         "election_id": "1",
-        "name": "Constituirea circumscripțiilor electorale",
+        "title": "Constituirea circumscripțiilor electorale",
         "deadline": "23/03/2026",
+        "group":["political"],
         "responsible": "CEC (DMA)",
         "description": "Constituirea circumscripțiilor electorale de nivelul I",
         "regulations": [
@@ -105,9 +113,10 @@
       {
         "id": "8",
         "election_id": "1",
-        "name": "Constituirea consiliilor electorale",
+        "title": "Constituirea consiliilor electorale",
         "deadline": "28/03/2026",
         "responsible": "CEC",
+        "group":["political_organ"],
         "description": "Constituirea consiliilor electorale de circumscripție de nivelul I",
         "regulations": [
           { "id": "r1", "title": "art. 35 alin. (6)", "link": "" }
@@ -117,8 +126,9 @@
       {
         "id": "9",
         "election_id": "1",
-        "name": "Alegerea conducerii CECE",
+        "title": "Alegerea conducerii CECE",
         "deadline": "30/03/2026",
+        "group":["political_organ"],
         "responsible": "CECE nivel I",
         "description": "Alegerea președintelui și secretarului consiliului electoral și transmiterea rezultatelor către CEC",
         "regulations": [
@@ -128,8 +138,9 @@
       {
         "id": "10",
         "election_id": "1",
-        "name": "Publicarea informațiilor CECE",
+        "title": "Publicarea informațiilor CECE",
         "deadline": "01/04/2026",
+        "group":["political", "political_organ", "public"],
         "responsible": "CEC",
         "description": "Publicarea componenței, sediului și programului consiliului electoral",
         "regulations": [
@@ -139,9 +150,10 @@
       {
     "id": "11",
     "election_id": "1",
-    "name": "Propuneri pentru constituirea secțiilor de votare",
+    "title": "Propuneri pentru constituirea secțiilor de votare",
     "deadline": "09/04/2026",
     "responsible": "APL, CECE nivel I",
+    "group":["political_organ", "public"],
     "description": "Prezentarea propunerilor din partea primarilor privind constituirea secțiilor de votare",
     "regulations": [
       { "id": "r1", "title": "art. 37 alin. (1) lit. b)", "link": "" },
@@ -151,8 +163,9 @@
   {
     "id": "12",
     "election_id": "1",
-    "name": "Constituirea secțiilor de votare",
+    "title": "Constituirea secțiilor de votare",
     "deadline": "12/04/2026",
+    "group":["political_organ", "public"],
     "responsible": "CECE nivel I, CEC, APL",
     "description": "Constituirea secțiilor de votare în baza propunerilor primarilor",
     "regulations": [
@@ -163,8 +176,9 @@
   {
     "id": "13",
     "election_id": "1",
-    "name": "Publicarea informațiilor despre secții",
+    "title": "Publicarea informațiilor despre secții",
     "deadline": "14/04/2026",
+    "group":["political_organ"],
     "responsible": "CECE nivel I, CEC",
     "description": "Publicarea informațiilor despre hotarele secțiilor de votare și transmiterea hotărârilor către CEC",
     "regulations": [
@@ -174,8 +188,9 @@
   {
     "id": "14",
     "election_id": "1",
-    "name": "Prezentarea candidaturilor BESV",
+    "title": "Prezentarea candidaturilor BESV",
     "deadline": "17/04/2026",
+    "group":["political_organ"],
     "responsible": "APL, partide politice, CECE",
     "description": "Prezentarea candidaturilor pentru constituirea birourilor electorale ale secțiilor de votare",
     "regulations": [
@@ -185,8 +200,9 @@
   {
     "id": "15",
     "election_id": "1",
-    "name": "Constituirea birourilor electorale",
+    "title": "Constituirea birourilor electorale",
     "deadline": "22/04/2026",
+    "group":["political_organ"],
     "responsible": "CECE nivel I, CEC",
     "description": "Constituirea birourilor electorale ale secțiilor de votare și transmiterea hotărârilor către CEC",
     "regulations": [
@@ -197,8 +213,9 @@
   {
     "id": "16",
     "election_id": "1",
-    "name": "Alegerea conducerii BESV",
+    "title": "Alegerea conducerii BESV",
     "deadline": "24/04/2026",
+    "group":["political_organ"],
     "responsible": "BESV, CECE",
     "description": "Alegerea președintelui și secretarului biroului electoral, publicarea componenței și transmiterea hotărârilor",
     "regulations": [
@@ -208,8 +225,9 @@
   {
     "id": "17",
     "election_id": "1",
-    "name": "Determinarea numărului de membri",
+    "title": "Determinarea numărului de membri",
     "deadline": "28/03/2026",
+    "group":["political_organ"],
     "responsible": "CEC",
     "description": "Determinarea numărului de membri ai organelor electorale care pot fi degrevați",
     "regulations": [
@@ -219,7 +237,8 @@
   {
     "id": "18",
     "election_id": "1",
-    "name": "Degrevarea membrilor CECE",
+    "title": "Degrevarea membrilor CECE",
+    "group":["political_organ"],
     "deadline": "31/03/2026",
     "responsible": "CECE, CEC",
     "description": "Degrevarea membrilor consiliilor electorale și aprobarea statelor de personal",
@@ -230,8 +249,9 @@
   {
     "id": "19",
     "election_id": "1",
-    "name": "Degrevarea membrilor BESV",
+    "title": "Degrevarea membrilor BESV",
     "deadline": "25/04/2026",
+    "group":["political_organ"],
     "responsible": "BESV, CECE, CEC",
     "description": "Degrevarea membrilor birourilor electorale la propunerea acestora",
     "regulations": [
@@ -241,8 +261,9 @@
   {
     "id": "20",
     "election_id": "1",
-    "name": "Raport financiar CECE",
-    "deadline": "În termen de 45 de zile de la confirmarea rezultatelor",
+    "title": "Raport financiar CECE",
+    "deadline": "10/04/2026",
+    "group":["political_organ"],
     "responsible": "CECE, CEC",
     "description": "Prezentarea raportului financiar privind gestionarea mijloacelor alocate",
     "regulations": [
@@ -252,8 +273,10 @@
   {
     "id": "21",
     "election_id": "1",
-    "name": "Instruirea electorală",
-    "deadline": "După 28 martie 2026",
+    "title": "Instruirea electorală pentru membrii organelor electorale",
+    "deadline": "28/03/2026 - 15/04/2026",
+    "group":["political", "political_organ"],
+    "additional_info": "În perioada 28 martie - 15 aprilie 2026 sunt organizate instruiri pentru membrii organelor electorale și alte persoane implicate în procesul electoral, conform prevederilor legale.",
     "responsible": "CICDE, CEC, CECE, BESV",
     "description": "Organizarea instruirilor pentru membrii organelor electorale și alte persoane implicate",
     "regulations": [
@@ -263,8 +286,9 @@
   {
     "id": "22",
     "election_id": "1",
-    "name": "Acordarea suportului logistic",
-    "deadline": "După constituirea organelor electorale",
+    "title": "Acordarea suportului logistic",
+    "deadline": "15/03/2026 - 15/04/2026",
+    "group":["political", "political_organ", "public"],
     "responsible": "ASP, MAI, APL",
     "description": "Acordarea de sprijin consiliilor și birourilor electorale",
     "regulations": [
@@ -274,9 +298,10 @@
   {
     "id": "23",
     "election_id": "1",
-    "name": "Graficul pentru blocuri electorale",
-    "deadline": "Până la 24 februarie 2026 inclusiv",
+    "title": "Graficul pentru blocuri electorale",
+    "deadline": "24/02/2026",
     "responsible": "CEC",
+    "group":["political", "political_organ", "public"],
     "description": "Stabilirea graficului de recepționare a documentelor pentru blocuri electorale",
     "regulations": [
       { "id": "r1", "title": "Regulamentul blocuri electorale nr. 3592/2025", "link": "" }
@@ -285,9 +310,10 @@
   {
     "id": "24",
     "election_id": "1",
-    "name": "Crearea comisiei pentru blocuri",
-    "deadline": "Până la 25 februarie 2026 inclusiv",
+    "title": "Crearea comisiei pentru blocuri",
+    "deadline": "25/02/2026",
     "responsible": "CEC",
+    "group":["political", "political_organ", "public"],
     "description": "Crearea comisiei de recepționare și verificare a documentelor pentru blocuri electorale",
     "regulations": [
       { "id": "r1", "title": "art. 64 Cod electoral", "link": "" }
@@ -296,8 +322,9 @@
   {
     "id": "25",
     "election_id": "1",
-    "name": "Depunerea documentelor blocurilor electorale",
-    "deadline": "26 februarie – 1 aprilie 2026",
+    "title": "Depunerea documentelor blocurilor electorale",
+    "deadline": "26/02/2026 - 01/04/2026",
+    "group":["political", "political_organ"],
     "responsible": "CEC, partide politice",
     "description": "Prezentarea documentelor pentru înregistrarea blocurilor electorale",
     "regulations": [
@@ -307,7 +334,8 @@
   {
     "id": "26",
     "election_id": "1",
-    "name": "Examinarea documentelor blocurilor electorale",
+    "title": "Examinarea documentelor blocurilor electorale",
+    "group":["political", "public"],
     "deadline": "În termen de 5 zile de la primirea documentelor",
     "responsible": "CEC (DMA)",
     "description": "Examinarea documentelor și adoptarea hotărârii privind înregistrarea sau refuzul de a înregistra blocul electoral",
@@ -318,8 +346,9 @@
   {
     "id": "27",
     "election_id": "1",
-    "name": "Aderarea la blocuri electorale",
-    "deadline": "Până la 7 aprilie 2026 inclusiv",
+    "title": "Aderarea la blocuri electorale",
+    "group":["political", "political_organ", "public"],
+    "deadline": "07/03/2026",
     "responsible": "Blocuri electorale, partide politice, CEC",
     "description": "Aderarea la blocurile electorale constituite",
     "regulations": [
@@ -329,8 +358,9 @@
   {
     "id": "28",
     "election_id": "1",
-    "name": "Desemnarea candidaților",
-    "deadline": "Începând cu 28 martie 2026",
+    "group":["political", "political_organ", "public"],
+    "title": "Desemnarea candidaților",
+    "deadline": "28/03/2026 - 20/04/2026",
     "responsible": "Partide politice, blocuri, candidați independenți",
     "description": "Desemnarea candidaților la funcțiile elective",
     "regulations": [
@@ -340,8 +370,9 @@
   {
     "id": "29",
     "election_id": "1",
-    "name": "Stabilirea locului pentru depunerea documentelor",
-    "deadline": "Până la 30 martie 2026 inclusiv",
+    "group":["political", "political_organ", "public"],
+    "title": "Stabilirea locului pentru depunerea documentelor",
+    "deadline": "30/03/2026",
     "responsible": "CECE nivel I",
     "description": "Stabilirea locului și timpului primirii documentelor pentru înregistrarea candidaților",
     "regulations": [
@@ -351,7 +382,8 @@
   {
     "id": "30",
     "election_id": "1",
-    "name": "Constituirea grupurilor de inițiativă",
+    "group":["political", "political_organ", "public"],
+    "title": "Constituirea grupurilor de inițiativă",
     "deadline": "După constituirea CECE",
     "responsible": "CECE nivel I, CEC",
     "description": "Constituirea și înregistrarea grupurilor de inițiativă și eliberarea listelor de subscripție",
@@ -362,7 +394,8 @@
   {
     "id": "31",
     "election_id": "1",
-    "name": "Depunerea documentelor candidaților",
+    "group":["political", "political_organ", "public"],
+    "title": "Depunerea documentelor candidaților",
     "deadline": "După constituirea CECE",
     "responsible": "Partide, blocuri, independenți, CECE",
     "description": "Depunerea documentelor pentru înregistrarea candidaților",
@@ -373,7 +406,8 @@
   {
     "id": "32",
     "election_id": "1",
-    "name": "Tragerea la sorți",
+    "group":["political", "political_organ", "public"],
+    "title": "Tragerea la sorți",
     "deadline": "În ziua depunerii documentelor",
     "responsible": "CECE nivel I",
     "description": "Determinarea ordinii de înscriere a candidaților în buletinul de vot",
@@ -384,7 +418,8 @@
   {
     "id": "33",
     "election_id": "1",
-    "name": "Verificarea listelor de subscripție",
+    "group":["political", "political_organ", "public"],
+    "title": "Verificarea listelor de subscripție",
     "deadline": "În termen de 5 zile",
     "responsible": "CECE nivel I",
     "description": "Verificarea listelor de subscripție și informarea despre rezultate",
@@ -395,7 +430,8 @@
   {
     "id": "34",
     "election_id": "1",
-    "name": "Înregistrarea candidaților",
+    "group":["political", "political_organ", "public"],
+    "title": "Înregistrarea candidaților",
     "deadline": "În termen de 7 zile",
     "responsible": "CECE nivel I",
     "description": "Examinarea dosarelor și înregistrarea sau refuzul candidaților",
@@ -406,7 +442,8 @@
   {
     "id": "35",
     "election_id": "1",
-    "name": "Eliberarea legitimațiilor",
+    "group":["political", "political_organ", "public"],
+    "title": "Eliberarea legitimațiilor",
     "deadline": "În termen de 3 zile",
     "responsible": "CECE nivel I, CEC",
     "description": "Eliberarea legitimațiilor candidaților înregistrați",
@@ -417,8 +454,9 @@
   {
     "id": "36",
     "election_id": "1",
-    "name": "Înregistrarea concurenților electorali",
-    "deadline": "Până la 7 aprilie 2026 inclusiv",
+    "group":["political", "political_organ", "public"],
+    "title": "Înregistrarea concurenților electorali",
+    "deadline": "07/04/2026",
     "responsible": "Partide, blocuri, independenți",
     "description": "Depunerea documentelor pentru înregistrarea concurenților electorali",
     "regulations": [
@@ -428,8 +466,9 @@
   {
     "id": "37",
     "election_id": "1",
-    "name": "Publicarea listei candidaților",
-    "deadline": "Până la 14 aprilie 2026 inclusiv",
+    "group":["political", "political_organ", "public"],
+    "title": "Publicarea listei candidaților",
+    "deadline": "14/04/2026",
     "responsible": "CECE nivel I",
     "description": "Publicarea listei candidaților înregistrați și transmiterea către BESV",
     "regulations": [
@@ -439,8 +478,9 @@
   {
     "id": "38",
     "election_id": "1",
-    "name": "Transmiterea datelor către SIAS",
-    "deadline": "Imediat după înregistrare",
+    "group":["political", "political_organ", "public"],
+    "title": "Transmiterea datelor către SIAS",
+    "deadline": "08/04/2026",
     "responsible": "CECE nivel I, CEC",
     "description": "Transmiterea hotărârilor pentru introducerea datelor în SIAS „Alegeri”",
     "regulations": [
@@ -450,8 +490,9 @@
   {
     "id": "39",
     "election_id": "1",
-    "name": "Modificarea listelor de candidați",
-    "deadline": "Până la 16 aprilie 2026 / 7 mai 2026",
+    "group":["political", "political_organ", "public"],
+    "title": "Modificarea listelor de candidați",
+    "deadline": "16/04/2026 - 07/05/2026",
     "responsible": "Concurenți electorali",
     "description": "Solicitarea modificării sau retragerii candidaților din liste",
     "regulations": [
@@ -461,8 +502,9 @@
   {
     "id": "40",
     "election_id": "1",
-    "name": "Confirmarea reprezentanților",
-    "deadline": "Până la 14 mai 2026 inclusiv",
+    "group":["political", "political_organ", "public"],
+    "title": "Confirmarea reprezentanților",
+    "deadline": "14/05/2026",
     "responsible": "CEC, CECE",
     "description": "Confirmarea reprezentanților concurenților electorali și eliberarea legitimațiilor",
     "regulations": [
@@ -472,8 +514,9 @@
   {
     "id": "41",
     "election_id": "1",
-    "name": "Stabilirea persoanelor de încredere",
-    "deadline": "Până la 16 aprilie 2026 inclusiv",
+    "group":["political", "political_organ", "public"],
+    "title": "Stabilirea persoanelor de încredere",
+    "deadline": "16/04/2026",
     "responsible": "CECE nivel I",
     "description": "Stabilirea numărului de persoane de încredere ale concurenților electorali",
     "regulations": [
@@ -483,8 +526,9 @@
   {
     "id": "42",
     "election_id": "1",
-    "name": "Înregistrarea persoanelor de încredere",
-    "deadline": "Cel târziu cu 7 zile înainte de alegeri",
+    "group":["political", "political_organ", "public"],
+    "title": "Înregistrarea persoanelor de încredere",
+    "deadline": "10/05/2026",
     "responsible": "Concurenți electorali, CECE",
     "description": "Selectarea și înregistrarea persoanelor de încredere",
     "regulations": [
@@ -494,8 +538,9 @@
   {
     "id": "43",
     "election_id": "1",
-    "name": "Stabilirea procedurii pentru referendum",
-    "deadline": "Până la 30 martie 2026 inclusiv",
+    "group":["political", "political_organ", "public"],
+    "title": "Stabilirea procedurii pentru referendum",
+    "deadline": "30/03/2026",
     "responsible": "CECE nivel I",
     "description": "Stabilirea locului și timpului pentru depunerea documentelor participanților la referendum",
     "regulations": [
@@ -505,8 +550,9 @@
   {
     "id": "44",
     "election_id": "1",
-    "name": "Depunerea documentelor referendum",
-    "deadline": "Până la 7 aprilie 2026 inclusiv",
+    "group":["political", "political_organ", "public"],
+    "title": "Depunerea documentelor referendum",
+    "deadline": "07/04/2026",
     "responsible": "Partide politice, CECE",
     "description": "Depunerea documentelor pentru înregistrarea participanților la referendum",
     "regulations": [
@@ -516,7 +562,8 @@
   {
     "id": "45",
     "election_id": "1",
-    "name": "Înregistrarea participanților referendum",
+    "group":["political", "political_organ", "public"],
+    "title": "Înregistrarea participanților referendum",
     "deadline": "În termen de 3 zile",
     "responsible": "CECE nivel I",
     "description": "Înregistrarea sau refuzul participanților la referendum",
@@ -527,8 +574,9 @@
   {
     "id": "46",
     "election_id": "1",
-    "name": "Confirmarea reprezentanților referendum",
-    "deadline": "Până la 14 mai 2026 inclusiv",
+    "group":["political", "political_organ", "public"],
+    "title": "Confirmarea reprezentanților referendum",
+    "deadline": "14/05/2026",
     "responsible": "CECE nivel I",
     "description": "Confirmarea reprezentanților participanților la referendum",
     "regulations": [
@@ -538,8 +586,9 @@
   {
     "id": "47",
     "election_id": "1",
-    "name": "Persoane de încredere referendum",
-    "deadline": "Cel târziu cu 7 zile înainte de alegeri",
+    "group":["political", "political_organ", "public"],
+    "title": "Persoane de încredere referendum",
+    "deadline": "10/05/2026",
     "responsible": "Participanți referendum, CECE",
     "description": "Înregistrarea persoanelor de încredere ale participanților la referendum",
     "regulations": [
@@ -549,8 +598,9 @@
   {
     "id": "48",
     "election_id": "1",
-    "name": "Declarații publicitate electorală",
-    "deadline": "Până la 23 februarie 2026 inclusiv",
+    "group":["political", "political_organ", "public"],
+    "title": "Declarații publicitate electorală",
+    "deadline": "23/02/2026",
     "responsible": "Furnizori publicitate",
     "description": "Prezentarea declarațiilor privind condițiile de publicitate electorală",
     "regulations": [
@@ -560,8 +610,9 @@
   {
     "id": "49",
     "election_id": "1",
-    "name": "Începerea campaniei electorale",
-    "deadline": "Începând cu 17 aprilie 2026",
+    "group":["political", "political_organ", "public"],
+    "title": "Începerea campaniei electorale",
+    "deadline": "17/04/2026 - 10/05/2026",
     "responsible": "Concurenți, participanți referendum",
     "description": "Începerea campaniei electorale",
     "regulations": [
@@ -571,8 +622,9 @@
   {
     "id": "50",
     "election_id": "1",
-    "name": "Stabilirea locurilor de afișaj",
-    "deadline": "Până la 14 aprilie 2026 inclusiv",
+    "group":["political", "political_organ", "public"],
+    "title": "Stabilirea locurilor de afișaj",
+    "deadline": "14/04/2026",
     "responsible": "APL",
     "description": "Stabilirea locurilor pentru afișaj electoral și întâlniri cu alegătorii",
     "regulations": [
@@ -582,7 +634,8 @@
   {
     "id": "51",
     "election_id": "1",
-    "name": "Raportarea publicității electorale",
+    "group":["political", "political_organ", "public"],
+    "title": "Raportarea publicității electorale",
     "deadline": "Săptămânal, în ziua de luni",
     "responsible": "Difuzori de publicitate",
     "description": "Prezentarea informațiilor despre spațiile de publicitate electorală și sumele încasate",
@@ -593,7 +646,8 @@
   {
     "id": "52",
     "election_id": "1",
-    "name": "Prezentarea informațiilor către CEC",
+    "group":["political", "political_organ", "public"],
+    "title": "Prezentarea informațiilor către CEC",
     "deadline": "În termen de 48 de ore de la solicitare",
     "responsible": "CEC, agenții publicitate, APL",
     "description": "Prezentarea informațiilor despre contractele de publicitate electorală",
@@ -604,8 +658,9 @@
   {
     "id": "53",
     "election_id": "1",
-    "name": "Finalizarea campaniei electorale",
-    "deadline": "Până la 15 mai 2026 ora 23:59:59",
+    "group":["political", "political_organ", "public"],
+    "title": "Finalizarea campaniei electorale",
+    "deadline": "15/05/2026",
     "responsible": "Concurenți, participanți referendum",
     "description": "Încheierea campaniei electorale",
     "regulations": [
@@ -615,8 +670,9 @@
   {
     "id": "54",
     "election_id": "1",
-    "name": "Înlăturarea materialelor electorale",
-    "deadline": "Până la 16 mai 2026 ora 23:59:59",
+    "group":["political", "political_organ", "public"],
+    "title": "Înlăturarea materialelor electorale",
+    "deadline": "16/05/2026",
     "responsible": "Difuzori publicitate, APL",
     "description": "Înlăturarea afișajului electoral și materialelor publicitare",
     "regulations": [
@@ -626,8 +682,9 @@
   {
     "id": "55",
     "election_id": "1",
-    "name": "Plafon financiar grupuri inițiativă",
-    "deadline": "Până la 28 martie 2026",
+    "group":["political", "political_organ", "public"],
+    "title": "Plafon financiar grupuri inițiativă",
+    "deadline": "28/03/2026",
     "responsible": "CEC",
     "description": "Stabilirea plafonului mijloacelor financiare pentru grupuri de inițiativă",
     "regulations": [
@@ -637,7 +694,8 @@
   {
     "id": "56",
     "election_id": "1",
-    "name": "Confirmarea trezorierului",
+    "group":["political", "political_organ", "public"],
+    "title": "Confirmarea trezorierului",
     "deadline": "La înregistrare",
     "responsible": "CECE, grupuri inițiativă",
     "description": "Confirmarea persoanei responsabile de finanțele grupului",
@@ -648,7 +706,8 @@
   {
     "id": "57",
     "election_id": "1",
-    "name": "Cod fiscal provizoriu",
+    "group":["political", "political_organ", "public"],
+    "title": "Cod fiscal provizoriu",
     "deadline": "După înregistrare",
     "responsible": "Grupuri inițiativă, Fisc",
     "description": "Depunerea cererii pentru cod fiscal provizoriu",
@@ -659,7 +718,8 @@
   {
     "id": "58",
     "election_id": "1",
-    "name": "Informare cont inițiativă",
+    "group":["political", "political_organ", "public"],
+    "title": "Informare cont inițiativă",
     "deadline": "În 24 ore",
     "responsible": "Grupuri inițiativă",
     "description": "Informarea despre deschiderea contului financiar",
@@ -670,7 +730,8 @@
   {
     "id": "59",
     "election_id": "1",
-    "name": "Informare fără cont",
+    "group":["political", "political_organ", "public"],
+    "title": "Informare fără cont",
     "deadline": "În 3 zile și săptămânal",
     "responsible": "Grupuri inițiativă",
     "description": "Informarea despre nedeschiderea contului financiar",
@@ -681,7 +742,8 @@
   {
     "id": "60",
     "election_id": "1",
-    "name": "Raport financiar inițiativă",
+    "group":["political", "political_organ", "public"],
+    "title": "Raport financiar inițiativă",
     "deadline": "Săptămânal și final",
     "responsible": "Grupuri inițiativă",
     "description": "Prezentarea rapoartelor financiare",
@@ -692,7 +754,8 @@
   {
     "id": "61",
     "election_id": "1",
-    "name": "Publicare cont inițiativă",
+    "group":["political", "political_organ", "public"],
+    "title": "Publicare cont inițiativă",
     "deadline": "În 24 ore",
     "responsible": "CEC, CECE",
     "description": "Publicarea informațiilor despre conturi",
@@ -703,7 +766,8 @@
   {
     "id": "62",
     "election_id": "1",
-    "name": "Închiderea cont inițiativă",
+    "group":["political", "political_organ", "public"],
+    "title": "Închiderea cont inițiativă",
     "deadline": "În 3 zile după finalizare",
     "responsible": "Grupuri inițiativă",
     "description": "Informarea despre sold sau închiderea contului",
@@ -714,7 +778,8 @@
   {
     "id": "63",
     "election_id": "1",
-    "name": "Raport media inițiativă",
+    "group":["political", "political_organ", "public"],
+    "title": "Raport media inițiativă",
     "deadline": "Săptămânal",
     "responsible": "Furnizori media",
     "description": "Raportarea veniturilor din publicitate",
@@ -725,7 +790,8 @@
   {
     "id": "64",
     "election_id": "1",
-    "name": "Raport difuzori publicitate",
+    "group":["political", "political_organ", "public"],
+    "title": "Raport difuzori publicitate",
     "deadline": "Săptămânal",
     "responsible": "Difuzori publicitate",
     "description": "Raportarea veniturilor din publicitate",
@@ -736,7 +802,8 @@
   {
     "id": "65",
     "election_id": "1",
-    "name": "Raport bancar inițiativă",
+    "group":["political", "political_organ", "public"],
+    "title": "Raport bancar inițiativă",
     "deadline": "Săptămânal",
     "responsible": "Instituții bancare",
     "description": "Informarea despre rulajul mijloacelor financiare",
@@ -747,8 +814,9 @@
   {
     "id": "66",
     "election_id": "1",
-    "name": "Plafon fond electoral",
-    "deadline": "Până la 28 martie 2026",
+    "group":["political", "political_organ", "public"],
+    "title": "Plafon fond electoral",
+    "deadline": "28/03/2026",
     "responsible": "CEC",
     "description": "Stabilirea plafonului pentru fond electoral",
     "regulations": [
@@ -758,8 +826,9 @@
   {
     "id": "67",
     "election_id": "1",
-    "name": "Plafon referendum",
-    "deadline": "Până la 28 martie 2026",
+    "group":["political", "political_organ", "public"],
+    "title": "Plafon referendum",
+    "deadline": "28/03/2026",
     "responsible": "CEC",
     "description": "Plafon pentru participanții la referendum",
     "regulations": [
@@ -769,8 +838,9 @@
   {
     "id": "68",
     "election_id": "1",
-    "name": "Credit fără dobândă",
-    "deadline": "Până la 28 martie 2026",
+    "group":["political", "political_organ", "public"],
+    "title": "Credit fără dobândă",
+    "deadline": "28/03/2026",
     "responsible": "CEC",
     "description": "Stabilirea creditului pentru concurenți",
     "regulations": [
@@ -780,7 +850,8 @@
   {
     "id": "69",
     "election_id": "1",
-    "name": "Mandatari financiari",
+    "group":["political", "political_organ", "public"],
+    "title": "Mandatari financiari",
     "deadline": "După înregistrare",
     "responsible": "Concurenți, Ministerul Finanțelor",
     "description": "Desemnarea mandatarilor financiari",
@@ -791,8 +862,9 @@
   {
     "id": "70",
     "election_id": "1",
-    "name": "Raport financiar partide",
-    "deadline": "La începutul perioadei electorale",
+    "group":["political", "political_organ", "public"],
+    "title": "Raport financiar partide",
+    "deadline": "17/02/2026 - 17/04/2026",
     "responsible": "Partide politice",
     "description": "Raport privind soldul mijloacelor financiare",
     "regulations": [
@@ -802,7 +874,8 @@
   {
     "id": "71",
     "election_id": "1",
-    "name": "Confirmare trezorieri",
+    "group":["political", "political_organ", "public"],
+    "title": "Confirmare trezorieri",
     "deadline": "La înregistrare",
     "responsible": "CEC, CECE",
     "description": "Confirmarea persoanelor responsabile de finanțe",
@@ -813,7 +886,8 @@
   {
     "id": "72",
     "election_id": "1",
-    "name": "Cod fiscal concurenți",
+    "group":["political", "political_organ", "public"],
+    "title": "Cod fiscal concurenți",
     "deadline": "După înregistrare",
     "responsible": "Concurenți, Fisc",
     "description": "Obținerea codului fiscal provizoriu",
@@ -824,7 +898,8 @@
   {
     "id": "73",
     "election_id": "1",
-    "name": "Informare cont electoral",
+    "group":["political", "political_organ", "public"],
+    "title": "Informare cont electoral",
     "deadline": "În 24 ore",
     "responsible": "Concurenți",
     "description": "Informarea despre deschiderea contului electoral",
@@ -835,7 +910,8 @@
   {
     "id": "74",
     "election_id": "1",
-    "name": "Informare fără cont electoral",
+    "group":["political", "political_organ", "public"],
+    "title": "Informare fără cont electoral",
     "deadline": "În 3 zile și săptămânal",
     "responsible": "Concurenți",
     "description": "Informarea despre nedeschiderea contului",
@@ -846,7 +922,8 @@
   {
     "id": "75",
     "election_id": "1",
-    "name": "Raport financiar campanie",
+    "group":["political", "political_organ", "public"],
+    "title": "Raport financiar campanie",
     "deadline": "Săptămânal și final",
     "responsible": "Concurenți",
     "description": "Raportarea finanțării campaniei electorale",
@@ -857,7 +934,8 @@
   {
     "id": "76",
     "election_id": "1",
-    "name": "Raport referendum",
+    "group":["political", "political_organ", "public"],
+    "title": "Raport referendum",
     "deadline": "Săptămânal și final",
     "responsible": "Participanți referendum",
     "description": "Raportarea finanțării referendumului",
@@ -868,7 +946,8 @@
   {
     "id": "77",
     "election_id": "1",
-    "name": "Publicare conturi electorale",
+    "group":["political", "political_organ", "public"],
+    "title": "Publicare conturi electorale",
     "deadline": "În 24 ore",
     "responsible": "CEC",
     "description": "Publicarea informațiilor despre conturi",
@@ -879,7 +958,8 @@
   {
     "id": "78",
     "election_id": "1",
-    "name": "Închiderea conturilor",
+    "group":["political", "political_organ", "public"],
+    "title": "Închiderea conturilor",
     "deadline": "În 3 zile după final",
     "responsible": "Concurenți",
     "description": "Informarea despre solduri și închiderea conturilor",
@@ -890,7 +970,8 @@
   {
     "id": "79",
     "election_id": "1",
-    "name": "Raport media electoral",
+    "group":["political", "political_organ", "public"],
+    "title": "Raport media electoral",
     "deadline": "Săptămânal",
     "responsible": "Furnizori media",
     "description": "Raportarea veniturilor din publicitate electorală",
@@ -901,7 +982,8 @@
   {
     "id": "80",
     "election_id": "1",
-    "name": "Raport bancar electoral",
+    "group":["political", "political_organ", "public"],
+    "title": "Raport bancar electoral",
     "deadline": "Săptămânal",
     "responsible": "Bănci",
     "description": "Raportarea rulajului conturilor electorale",
@@ -912,7 +994,8 @@
   {
     "id": "81",
     "election_id": "1",
-    "name": "Restituirea creditelor (retragere)",
+    "group":["political", "political_organ", "public"],
+    "title": "Restituirea creditelor (retragere)",
     "deadline": "În 2 luni",
     "responsible": "Concurenți, Ministerul Finanțelor",
     "description": "Restituirea creditelor după retragere",
@@ -923,7 +1006,8 @@
   {
     "id": "82",
     "election_id": "1",
-    "name": "Restituirea creditelor finale",
+    "group":["political", "political_organ", "public"],
+    "title": "Restituirea creditelor finale",
     "deadline": "În 3 luni",
     "responsible": "Concurenți, Ministerul Finanțelor",
     "description": "Restituirea creditelor după alegeri",
@@ -934,8 +1018,9 @@
   {
     "id": "83",
     "election_id": "1",
-    "name": "Transmiterea listelor electorale",
-    "deadline": "Până la 25 aprilie 2026",
+    "group":["political", "political_organ", "public"],
+    "title": "Transmiterea listelor electorale",
+    "deadline": "25/04/2026",
     "responsible": "CEC, BESV",
     "description": "Transmiterea listelor electorale către secții",
     "regulations": [
@@ -945,8 +1030,9 @@
   {
     "id": "84",
     "election_id": "1",
-    "name": "Publicarea listelor electorale",
-    "deadline": "Începând cu 27 aprilie 2026",
+    "group":["political", "political_organ", "public"],
+    "title": "Publicarea listelor electorale",
+    "deadline": "27/04/2026 - 10/05/2026",
     "responsible": "BESV, CEC",
     "description": "Punerea la dispoziția publicului a listelor electorale",
     "regulations": [
@@ -956,8 +1042,9 @@
   {
     "id": "85",
     "election_id": "1",
-    "name": "Actualizarea listelor electorale",
-    "deadline": "Până la 10 mai 2026",
+    "group":["political", "political_organ", "public"],
+    "title": "Actualizarea listelor electorale",
+    "deadline": "10/05/2026",
     "responsible": "Alegători, BESV, APL",
     "description": "Verificarea și actualizarea listelor electorale",
     "regulations": [
@@ -967,8 +1054,9 @@
   {
     "id": "86",
     "election_id": "1",
-    "name": "Tipărirea listelor actualizate",
-    "deadline": "Până la 10 mai 2026",
+    "group":["political", "political_organ", "public"],
+    "title": "Tipărirea listelor actualizate",
+    "deadline": "10/05/2026",
     "responsible": "CEC, APL, BESV",
     "description": "Tipărirea și transmiterea listelor actualizate",
     "regulations": [
@@ -978,8 +1066,9 @@
   {
     "id": "87",
     "election_id": "1",
-    "name": "Informarea alegătorilor",
-    "deadline": "Până la 7 mai 2026",
+    "group":["political", "political_organ", "public"],
+    "title": "Informarea alegătorilor",
+    "deadline": "07/05/2026",
     "responsible": "BESV, CEC",
     "description": "Informarea alegătorilor despre locul și timpul votării",
     "regulations": [
@@ -989,8 +1078,9 @@
   {
     "id": "88",
     "election_id": "1",
-    "name": "Cereri vot la domiciliu",
-    "deadline": "3–16 mai 2026",
+    "group":["political", "political_organ", "public"],
+    "title": "Cereri vot la domiciliu",
+    "deadline": "03/05/2026 - 16/05/2026",
     "responsible": "BESV",
     "description": "Primirea cererilor pentru vot la locul aflării",
     "regulations": [
@@ -1000,8 +1090,9 @@
   {
     "id": "89",
     "election_id": "1",
-    "name": "Aprobarea materialelor electorale",
-    "deadline": "Începând cu 16 februarie 2026",
+    "group":["political", "political_organ", "public"],
+    "title": "Aprobarea materialelor electorale",
+    "deadline": "16/02/2026 - 10/05/2026",
     "responsible": "CEC",
     "description": "Aprobarea modelelor documentelor electorale",
     "regulations": [
@@ -1011,15 +1102,15 @@
   {
     "id": "90",
     "election_id": "1",
-    "name": "Acreditarea observatorilor",
-    "deadline": "Până la 10 mai 2026",
+    "group":["political", "political_organ", "public"],
+    "title": "Acreditarea observatorilor",
+    "deadline": "10/05/2026",
     "responsible": "CEC",
     "description": "Acreditarea observatorilor și monitorizarea alegerilor",
     "regulations": [
       { "id": "r1", "title": "art. 88 Cod electoral", "link": "" }
     ]
-  }
-    ]
+  }]
   },
   {
     "id": "2",
@@ -1030,7 +1121,8 @@
       {
         "id": "1",
         "election_id": "2",
-        "name": "Stabilirea alegerilor locale noi",
+        "group":["political", "political_organ", "public"],
+        "title": "Stabilirea alegerilor locale noi",
         "deadline": "08/03/2026",
         "responsible": "CEC (DMA)",
         "description": "Adoptarea hotărârilor privind stabilirea alegerilor locale noi pentru data de 17 mai 2026",
@@ -1045,7 +1137,8 @@
       {
         "id": "2",
         "election_id": "2",
-        "name": "Începutul perioadei electorale",
+        "group":["political", "political_organ", "public"],
+        "title": "Începutul perioadei electorale",
         "deadline": "16/02/2026",
         "responsible": "CEC (DMA)",
         "description": "Începutul perioadei electorale",
@@ -1060,7 +1153,7 @@
       {
         "id": "3",
         "election_id": "2",
-        "name": "Repartizarea atribuțiilor CEC",
+        "title": "Repartizarea atribuțiilor CEC",
         "deadline": "24/02/2026",
         "responsible": "CEC (DMA)",
         "description": "Repartizarea atribuțiilor între membrii Comisiei Electorale Centrale în perioada electorală",
@@ -1076,7 +1169,7 @@
       {
         "id": "4",
         "election_id": "2",
-        "name": "Publicarea listei partidelor",
+        "title": "Publicarea listei partidelor",
         "deadline": "24/02/2026",
         "responsible": "CEC (DJ)",
         "description": "Publicarea listei partidelor politice care au dreptul de a participa la alegerile locale noi și referendum în baza datelor prezentate de Agenția Servicii Publice",
@@ -1090,7 +1183,7 @@
       {
         "id": "5",
         "election_id": "2",
-        "name": "Stabilirea responsabilităților autorităților",
+        "title": "Stabilirea responsabilităților autorităților",
         "deadline": "24/02/2026",
         "responsible": "CEC (DJ)",
         "description": "Adoptarea hotărârii privind stabilirea responsabilităților suplimentare ale autorităților administrației publice centrale și entităților în procesul electoral",
@@ -1103,7 +1196,7 @@
       {
         "id": "6",
         "election_id": "2",
-        "name": "Prezentarea candidaturilor CECE nivel I",
+        "title": "Prezentarea candidaturilor CECE nivel I",
         "deadline": "23/03/2026",
         "responsible": "Partide politice, Consilii locale, CEC",
         "description": "Prezentarea candidaturilor la CEC pentru constituirea consiliilor electorale de circumscripție de nivelul I",
@@ -1115,7 +1208,7 @@
       {
         "id": "7",
         "election_id": "2",
-        "name": "Constituirea circumscripțiilor electorale",
+        "title": "Constituirea circumscripțiilor electorale",
         "deadline": "23/03/2026",
         "responsible": "CEC (DMA)",
         "description": "Constituirea circumscripțiilor electorale de nivelul I",
@@ -1127,7 +1220,7 @@
       {
         "id": "8",
         "election_id": "2",
-        "name": "Constituirea consiliilor electorale",
+        "title": "Constituirea consiliilor electorale",
         "deadline": "28/03/2026",
         "responsible": "CEC",
         "description": "Constituirea consiliilor electorale de circumscripție de nivelul I",
@@ -1139,7 +1232,7 @@
       {
         "id": "9",
         "election_id": "2",
-        "name": "Alegerea conducerii CECE",
+        "title": "Alegerea conducerii CECE",
         "deadline": "30/03/2026",
         "responsible": "CECE nivel I",
         "description": "Alegerea președintelui și secretarului consiliului electoral și transmiterea rezultatelor către CEC",
@@ -1150,7 +1243,7 @@
       {
         "id": "10",
         "election_id": "2",
-        "name": "Publicarea informațiilor CECE",
+        "title": "Publicarea informațiilor CECE",
         "deadline": "01/04/2026",
         "responsible": "CEC",
         "description": "Publicarea componenței, sediului și programului consiliului electoral",
@@ -1161,7 +1254,7 @@
       {
     "id": "11",
     "election_id": "2",
-    "name": "Propuneri pentru constituirea secțiilor de votare",
+    "title": "Propuneri pentru constituirea secțiilor de votare",
     "deadline": "09/04/2026",
     "responsible": "APL, CECE nivel I",
     "description": "Prezentarea propunerilor din partea primarilor privind constituirea secțiilor de votare",
@@ -1173,7 +1266,7 @@
   {
     "id": "12",
     "election_id": "2",
-    "name": "Constituirea secțiilor de votare",
+    "title": "Constituirea secțiilor de votare",
     "deadline": "12/04/2026",
     "responsible": "CECE nivel I, CEC, APL",
     "description": "Constituirea secțiilor de votare în baza propunerilor primarilor",
@@ -1185,7 +1278,7 @@
   {
     "id": "13",
     "election_id": "2",
-    "name": "Publicarea informațiilor despre secții",
+    "title": "Publicarea informațiilor despre secții",
     "deadline": "14/04/2026",
     "responsible": "CECE nivel I, CEC",
     "description": "Publicarea informațiilor despre hotarele secțiilor de votare și transmiterea hotărârilor către CEC",
@@ -1196,7 +1289,7 @@
   {
     "id": "14",
     "election_id": "2",
-    "name": "Prezentarea candidaturilor BESV",
+    "title": "Prezentarea candidaturilor BESV",
     "deadline": "17/04/2026",
     "responsible": "APL, partide politice, CECE",
     "description": "Prezentarea candidaturilor pentru constituirea birourilor electorale ale secțiilor de votare",
@@ -1207,7 +1300,7 @@
   {
     "id": "15",
     "election_id": "2",
-    "name": "Constituirea birourilor electorale",
+    "title": "Constituirea birourilor electorale",
     "deadline": "22/04/2026",
     "responsible": "CECE nivel I, CEC",
     "description": "Constituirea birourilor electorale ale secțiilor de votare și transmiterea hotărârilor către CEC",
@@ -1219,7 +1312,7 @@
   {
     "id": "16",
     "election_id": "2",
-    "name": "Alegerea conducerii BESV",
+    "title": "Alegerea conducerii BESV",
     "deadline": "24/04/2026",
     "responsible": "BESV, CECE",
     "description": "Alegerea președintelui și secretarului biroului electoral, publicarea componenței și transmiterea hotărârilor",
@@ -1230,7 +1323,7 @@
   {
     "id": "17",
     "election_id": "2",
-    "name": "Determinarea numărului de membri",
+    "title": "Determinarea numărului de membri",
     "deadline": "28/03/2026",
     "responsible": "CEC",
     "description": "Determinarea numărului de membri ai organelor electorale care pot fi degrevați",
@@ -1241,7 +1334,7 @@
   {
     "id": "18",
     "election_id": "2",
-    "name": "Degrevarea membrilor CECE",
+    "title": "Degrevarea membrilor CECE",
     "deadline": "31/03/2026",
     "responsible": "CECE, CEC",
     "description": "Degrevarea membrilor consiliilor electorale și aprobarea statelor de personal",
@@ -1252,7 +1345,7 @@
   {
     "id": "19",
     "election_id": "2",
-    "name": "Degrevarea membrilor BESV",
+    "title": "Degrevarea membrilor BESV",
     "deadline": "25/04/2026",
     "responsible": "BESV, CECE, CEC",
     "description": "Degrevarea membrilor birourilor electorale la propunerea acestora",
@@ -1263,7 +1356,7 @@
   {
     "id": "20",
     "election_id": "2",
-    "name": "Raport financiar CECE",
+    "title": "Raport financiar CECE",
     "deadline": "În termen de 45 de zile de la confirmarea rezultatelor",
     "responsible": "CECE, CEC",
     "description": "Prezentarea raportului financiar privind gestionarea mijloacelor alocate",
@@ -1274,7 +1367,7 @@
   {
     "id": "21",
     "election_id": "2",
-    "name": "Instruirea electorală",
+    "title": "Instruirea electorală",
     "deadline": "După 28 martie 2026",
     "responsible": "CICDE, CEC, CECE, BESV",
     "description": "Organizarea instruirilor pentru membrii organelor electorale și alte persoane implicate",
@@ -1285,7 +1378,7 @@
   {
     "id": "22",
     "election_id": "2",
-    "name": "Acordarea suportului logistic",
+    "title": "Acordarea suportului logistic",
     "deadline": "După constituirea organelor electorale",
     "responsible": "ASP, MAI, APL",
     "description": "Acordarea de sprijin consiliilor și birourilor electorale",
@@ -1296,7 +1389,7 @@
   {
     "id": "23",
     "election_id": "2",
-    "name": "Graficul pentru blocuri electorale",
+    "title": "Graficul pentru blocuri electorale",
     "deadline": "Până la 24 februarie 2026 inclusiv",
     "responsible": "CEC",
     "description": "Stabilirea graficului de recepționare a documentelor pentru blocuri electorale",
@@ -1307,7 +1400,7 @@
   {
     "id": "24",
     "election_id": "2",
-    "name": "Crearea comisiei pentru blocuri",
+    "title": "Crearea comisiei pentru blocuri",
     "deadline": "Până la 25 februarie 2026 inclusiv",
     "responsible": "CEC",
     "description": "Crearea comisiei de recepționare și verificare a documentelor pentru blocuri electorale",
@@ -1318,7 +1411,7 @@
   {
     "id": "25",
     "election_id": "2",
-    "name": "Depunerea documentelor blocurilor electorale",
+    "title": "Depunerea documentelor blocurilor electorale",
     "deadline": "26 februarie – 1 aprilie 2026",
     "responsible": "CEC, partide politice",
     "description": "Prezentarea documentelor pentru înregistrarea blocurilor electorale",
@@ -1329,7 +1422,7 @@
   {
     "id": "26",
     "election_id": "2",
-    "name": "Examinarea documentelor blocurilor electorale",
+    "title": "Examinarea documentelor blocurilor electorale",
     "deadline": "În termen de 5 zile de la primirea documentelor",
     "responsible": "CEC (DMA)",
     "description": "Examinarea documentelor și adoptarea hotărârii privind înregistrarea sau refuzul de a înregistra blocul electoral",
@@ -1340,7 +1433,7 @@
   {
     "id": "27",
     "election_id": "2",
-    "name": "Aderarea la blocuri electorale",
+    "title": "Aderarea la blocuri electorale",
     "deadline": "Până la 7 aprilie 2026 inclusiv",
     "responsible": "Blocuri electorale, partide politice, CEC",
     "description": "Aderarea la blocurile electorale constituite",
@@ -1351,7 +1444,7 @@
   {
     "id": "28",
     "election_id": "2",
-    "name": "Desemnarea candidaților",
+    "title": "Desemnarea candidaților",
     "deadline": "Începând cu 28 martie 2026",
     "responsible": "Partide politice, blocuri, candidați independenți",
     "description": "Desemnarea candidaților la funcțiile elective",
@@ -1362,7 +1455,7 @@
   {
     "id": "29",
     "election_id": "2",
-    "name": "Stabilirea locului pentru depunerea documentelor",
+    "title": "Stabilirea locului pentru depunerea documentelor",
     "deadline": "Până la 30 martie 2026 inclusiv",
     "responsible": "CECE nivel I",
     "description": "Stabilirea locului și timpului primirii documentelor pentru înregistrarea candidaților",
@@ -1373,7 +1466,7 @@
   {
     "id": "30",
     "election_id": "2",
-    "name": "Constituirea grupurilor de inițiativă",
+    "title": "Constituirea grupurilor de inițiativă",
     "deadline": "După constituirea CECE",
     "responsible": "CECE nivel I, CEC",
     "description": "Constituirea și înregistrarea grupurilor de inițiativă și eliberarea listelor de subscripție",
@@ -1384,7 +1477,7 @@
   {
     "id": "31",
     "election_id": "2",
-    "name": "Depunerea documentelor candidaților",
+    "title": "Depunerea documentelor candidaților",
     "deadline": "După constituirea CECE",
     "responsible": "Partide, blocuri, independenți, CECE",
     "description": "Depunerea documentelor pentru înregistrarea candidaților",
@@ -1395,7 +1488,7 @@
   {
     "id": "32",
     "election_id": "2",
-    "name": "Tragerea la sorți",
+    "title": "Tragerea la sorți",
     "deadline": "În ziua depunerii documentelor",
     "responsible": "CECE nivel I",
     "description": "Determinarea ordinii de înscriere a candidaților în buletinul de vot",
@@ -1406,7 +1499,7 @@
   {
     "id": "33",
     "election_id": "2",
-    "name": "Verificarea listelor de subscripție",
+    "title": "Verificarea listelor de subscripție",
     "deadline": "În termen de 5 zile",
     "responsible": "CECE nivel I",
     "description": "Verificarea listelor de subscripție și informarea despre rezultate",
@@ -1417,7 +1510,7 @@
   {
     "id": "34",
     "election_id": "2",
-    "name": "Înregistrarea candidaților",
+    "title": "Înregistrarea candidaților",
     "deadline": "În termen de 7 zile",
     "responsible": "CECE nivel I",
     "description": "Examinarea dosarelor și înregistrarea sau refuzul candidaților",
@@ -1428,7 +1521,7 @@
   {
     "id": "35",
     "election_id": "2",
-    "name": "Eliberarea legitimațiilor",
+    "title": "Eliberarea legitimațiilor",
     "deadline": "În termen de 3 zile",
     "responsible": "CECE nivel I, CEC",
     "description": "Eliberarea legitimațiilor candidaților înregistrați",
@@ -1439,7 +1532,7 @@
   {
     "id": "36",
     "election_id": "2",
-    "name": "Înregistrarea concurenților electorali",
+    "title": "Înregistrarea concurenților electorali",
     "deadline": "Până la 7 aprilie 2026 inclusiv",
     "responsible": "Partide, blocuri, independenți",
     "description": "Depunerea documentelor pentru înregistrarea concurenților electorali",
@@ -1450,7 +1543,7 @@
   {
     "id": "37",
     "election_id": "2",
-    "name": "Publicarea listei candidaților",
+    "title": "Publicarea listei candidaților",
     "deadline": "Până la 14 aprilie 2026 inclusiv",
     "responsible": "CECE nivel I",
     "description": "Publicarea listei candidaților înregistrați și transmiterea către BESV",
@@ -1461,7 +1554,7 @@
   {
     "id": "38",
     "election_id": "2",
-    "name": "Transmiterea datelor către SIAS",
+    "title": "Transmiterea datelor către SIAS",
     "deadline": "Imediat după înregistrare",
     "responsible": "CECE nivel I, CEC",
     "description": "Transmiterea hotărârilor pentru introducerea datelor în SIAS „Alegeri”",
@@ -1472,7 +1565,7 @@
   {
     "id": "39",
     "election_id": "2",
-    "name": "Modificarea listelor de candidați",
+    "title": "Modificarea listelor de candidați",
     "deadline": "Până la 16 aprilie 2026 / 7 mai 2026",
     "responsible": "Concurenți electorali",
     "description": "Solicitarea modificării sau retragerii candidaților din liste",
@@ -1483,7 +1576,7 @@
   {
     "id": "40",
     "election_id": "2",
-    "name": "Confirmarea reprezentanților",
+    "title": "Confirmarea reprezentanților",
     "deadline": "Până la 14 mai 2026 inclusiv",
     "responsible": "CEC, CECE",
     "description": "Confirmarea reprezentanților concurenților electorali și eliberarea legitimațiilor",
@@ -1494,7 +1587,7 @@
   {
     "id": "41",
     "election_id": "2",
-    "name": "Stabilirea persoanelor de încredere",
+    "title": "Stabilirea persoanelor de încredere",
     "deadline": "Până la 16 aprilie 2026 inclusiv",
     "responsible": "CECE nivel I",
     "description": "Stabilirea numărului de persoane de încredere ale concurenților electorali",
@@ -1505,7 +1598,7 @@
   {
     "id": "42",
     "election_id": "2",
-    "name": "Înregistrarea persoanelor de încredere",
+    "title": "Înregistrarea persoanelor de încredere",
     "deadline": "Cel târziu cu 7 zile înainte de alegeri",
     "responsible": "Concurenți electorali, CECE",
     "description": "Selectarea și înregistrarea persoanelor de încredere",
@@ -1516,7 +1609,7 @@
   {
     "id": "43",
     "election_id": "2",
-    "name": "Stabilirea procedurii pentru referendum",
+    "title": "Stabilirea procedurii pentru referendum",
     "deadline": "Până la 30 martie 2026 inclusiv",
     "responsible": "CECE nivel I",
     "description": "Stabilirea locului și timpului pentru depunerea documentelor participanților la referendum",
@@ -1527,7 +1620,7 @@
   {
     "id": "44",
     "election_id": "2",
-    "name": "Depunerea documentelor referendum",
+    "title": "Depunerea documentelor referendum",
     "deadline": "Până la 7 aprilie 2026 inclusiv",
     "responsible": "Partide politice, CECE",
     "description": "Depunerea documentelor pentru înregistrarea participanților la referendum",
@@ -1538,7 +1631,7 @@
   {
     "id": "45",
     "election_id": "2",
-    "name": "Înregistrarea participanților referendum",
+    "title": "Înregistrarea participanților referendum",
     "deadline": "În termen de 3 zile",
     "responsible": "CECE nivel I",
     "description": "Înregistrarea sau refuzul participanților la referendum",
@@ -1549,7 +1642,7 @@
   {
     "id": "46",
     "election_id": "2",
-    "name": "Confirmarea reprezentanților referendum",
+    "title": "Confirmarea reprezentanților referendum",
     "deadline": "Până la 14 mai 2026 inclusiv",
     "responsible": "CECE nivel I",
     "description": "Confirmarea reprezentanților participanților la referendum",
@@ -1560,7 +1653,7 @@
   {
     "id": "47",
     "election_id": "2",
-    "name": "Persoane de încredere referendum",
+    "title": "Persoane de încredere referendum",
     "deadline": "Cel târziu cu 7 zile înainte de alegeri",
     "responsible": "Participanți referendum, CECE",
     "description": "Înregistrarea persoanelor de încredere ale participanților la referendum",
@@ -1571,7 +1664,7 @@
   {
     "id": "48",
     "election_id": "2",
-    "name": "Declarații publicitate electorală",
+    "title": "Declarații publicitate electorală",
     "deadline": "Până la 23 februarie 2026 inclusiv",
     "responsible": "Furnizori publicitate",
     "description": "Prezentarea declarațiilor privind condițiile de publicitate electorală",
@@ -1582,7 +1675,7 @@
   {
     "id": "49",
     "election_id": "2",
-    "name": "Începerea campaniei electorale",
+    "title": "Începerea campaniei electorale",
     "deadline": "Începând cu 17 aprilie 2026",
     "responsible": "Concurenți, participanți referendum",
     "description": "Începerea campaniei electorale",
@@ -1593,7 +1686,7 @@
   {
     "id": "50",
     "election_id": "2",
-    "name": "Stabilirea locurilor de afișaj",
+    "title": "Stabilirea locurilor de afișaj",
     "deadline": "Până la 14 aprilie 2026 inclusiv",
     "responsible": "APL",
     "description": "Stabilirea locurilor pentru afișaj electoral și întâlniri cu alegătorii",
@@ -1604,7 +1697,7 @@
   {
     "id": "51",
     "election_id": "2",
-    "name": "Raportarea publicității electorale",
+    "title": "Raportarea publicității electorale",
     "deadline": "Săptămânal, în ziua de luni",
     "responsible": "Difuzori de publicitate",
     "description": "Prezentarea informațiilor despre spațiile de publicitate electorală și sumele încasate",
@@ -1615,7 +1708,7 @@
   {
     "id": "52",
     "election_id": "2",
-    "name": "Prezentarea informațiilor către CEC",
+    "title": "Prezentarea informațiilor către CEC",
     "deadline": "În termen de 48 de ore de la solicitare",
     "responsible": "CEC, agenții publicitate, APL",
     "description": "Prezentarea informațiilor despre contractele de publicitate electorală",
@@ -1626,7 +1719,7 @@
   {
     "id": "53",
     "election_id": "2",
-    "name": "Finalizarea campaniei electorale",
+    "title": "Finalizarea campaniei electorale",
     "deadline": "Până la 15 mai 2026 ora 23:59:59",
     "responsible": "Concurenți, participanți referendum",
     "description": "Încheierea campaniei electorale",
@@ -1637,7 +1730,7 @@
   {
     "id": "54",
     "election_id": "2",
-    "name": "Înlăturarea materialelor electorale",
+    "title": "Înlăturarea materialelor electorale",
     "deadline": "Până la 16 mai 2026 ora 23:59:59",
     "responsible": "Difuzori publicitate, APL",
     "description": "Înlăturarea afișajului electoral și materialelor publicitare",
@@ -1648,7 +1741,7 @@
   {
     "id": "55",
     "election_id": "2",
-    "name": "Plafon financiar grupuri inițiativă",
+    "title": "Plafon financiar grupuri inițiativă",
     "deadline": "Până la 28 martie 2026",
     "responsible": "CEC",
     "description": "Stabilirea plafonului mijloacelor financiare pentru grupuri de inițiativă",
@@ -1659,7 +1752,7 @@
   {
     "id": "56",
     "election_id": "2",
-    "name": "Confirmarea trezorierului",
+    "title": "Confirmarea trezorierului",
     "deadline": "La înregistrare",
     "responsible": "CECE, grupuri inițiativă",
     "description": "Confirmarea persoanei responsabile de finanțele grupului",
@@ -1670,7 +1763,7 @@
   {
     "id": "57",
     "election_id": "2",
-    "name": "Cod fiscal provizoriu",
+    "title": "Cod fiscal provizoriu",
     "deadline": "După înregistrare",
     "responsible": "Grupuri inițiativă, Fisc",
     "description": "Depunerea cererii pentru cod fiscal provizoriu",
@@ -1681,7 +1774,7 @@
   {
     "id": "58",
     "election_id": "2",
-    "name": "Informare cont inițiativă",
+    "title": "Informare cont inițiativă",
     "deadline": "În 24 ore",
     "responsible": "Grupuri inițiativă",
     "description": "Informarea despre deschiderea contului financiar",
@@ -1692,7 +1785,7 @@
   {
     "id": "59",
     "election_id": "2",
-    "name": "Informare fără cont",
+    "title": "Informare fără cont",
     "deadline": "În 3 zile și săptămânal",
     "responsible": "Grupuri inițiativă",
     "description": "Informarea despre nedeschiderea contului financiar",
@@ -1703,7 +1796,7 @@
   {
     "id": "60",
     "election_id": "2",
-    "name": "Raport financiar inițiativă",
+    "title": "Raport financiar inițiativă",
     "deadline": "Săptămânal și final",
     "responsible": "Grupuri inițiativă",
     "description": "Prezentarea rapoartelor financiare",
@@ -1714,7 +1807,7 @@
   {
     "id": "61",
     "election_id": "2",
-    "name": "Publicare cont inițiativă",
+    "title": "Publicare cont inițiativă",
     "deadline": "În 24 ore",
     "responsible": "CEC, CECE",
     "description": "Publicarea informațiilor despre conturi",
@@ -1725,7 +1818,7 @@
   {
     "id": "62",
     "election_id": "2",
-    "name": "Închiderea cont inițiativă",
+    "title": "Închiderea cont inițiativă",
     "deadline": "În 3 zile după finalizare",
     "responsible": "Grupuri inițiativă",
     "description": "Informarea despre sold sau închiderea contului",
@@ -1736,7 +1829,7 @@
   {
     "id": "63",
     "election_id": "2",
-    "name": "Raport media inițiativă",
+    "title": "Raport media inițiativă",
     "deadline": "Săptămânal",
     "responsible": "Furnizori media",
     "description": "Raportarea veniturilor din publicitate",
@@ -1747,7 +1840,7 @@
   {
     "id": "64",
     "election_id": "2",
-    "name": "Raport difuzori publicitate",
+    "title": "Raport difuzori publicitate",
     "deadline": "Săptămânal",
     "responsible": "Difuzori publicitate",
     "description": "Raportarea veniturilor din publicitate",
@@ -1758,7 +1851,7 @@
   {
     "id": "65",
     "election_id": "2",
-    "name": "Raport bancar inițiativă",
+    "title": "Raport bancar inițiativă",
     "deadline": "Săptămânal",
     "responsible": "Instituții bancare",
     "description": "Informarea despre rulajul mijloacelor financiare",
@@ -1769,7 +1862,7 @@
   {
     "id": "66",
     "election_id": "2",
-    "name": "Plafon fond electoral",
+    "title": "Plafon fond electoral",
     "deadline": "Până la 28 martie 2026",
     "responsible": "CEC",
     "description": "Stabilirea plafonului pentru fond electoral",
@@ -1780,7 +1873,7 @@
   {
     "id": "67",
     "election_id": "2",
-    "name": "Plafon referendum",
+    "title": "Plafon referendum",
     "deadline": "Până la 28 martie 2026",
     "responsible": "CEC",
     "description": "Plafon pentru participanții la referendum",
@@ -1791,7 +1884,7 @@
   {
     "id": "68",
     "election_id": "2",
-    "name": "Credit fără dobândă",
+    "title": "Credit fără dobândă",
     "deadline": "Până la 28 martie 2026",
     "responsible": "CEC",
     "description": "Stabilirea creditului pentru concurenți",
@@ -1802,7 +1895,7 @@
   {
     "id": "69",
     "election_id": "2",
-    "name": "Mandatari financiari",
+    "title": "Mandatari financiari",
     "deadline": "După înregistrare",
     "responsible": "Concurenți, Ministerul Finanțelor",
     "description": "Desemnarea mandatarilor financiari",
@@ -1813,7 +1906,7 @@
   {
     "id": "70",
     "election_id": "2",
-    "name": "Raport financiar partide",
+    "title": "Raport financiar partide",
     "deadline": "La începutul perioadei electorale",
     "responsible": "Partide politice",
     "description": "Raport privind soldul mijloacelor financiare",
@@ -1824,7 +1917,7 @@
   {
     "id": "71",
     "election_id": "2",
-    "name": "Confirmare trezorieri",
+    "title": "Confirmare trezorieri",
     "deadline": "La înregistrare",
     "responsible": "CEC, CECE",
     "description": "Confirmarea persoanelor responsabile de finanțe",
@@ -1835,7 +1928,7 @@
   {
     "id": "72",
     "election_id": "2",
-    "name": "Cod fiscal concurenți",
+    "title": "Cod fiscal concurenți",
     "deadline": "După înregistrare",
     "responsible": "Concurenți, Fisc",
     "description": "Obținerea codului fiscal provizoriu",
@@ -1846,7 +1939,7 @@
   {
     "id": "73",
     "election_id": "2",
-    "name": "Informare cont electoral",
+    "title": "Informare cont electoral",
     "deadline": "În 24 ore",
     "responsible": "Concurenți",
     "description": "Informarea despre deschiderea contului electoral",
@@ -1857,7 +1950,7 @@
   {
     "id": "74",
     "election_id": "2",
-    "name": "Informare fără cont electoral",
+    "title": "Informare fără cont electoral",
     "deadline": "În 3 zile și săptămânal",
     "responsible": "Concurenți",
     "description": "Informarea despre nedeschiderea contului",
@@ -1868,7 +1961,7 @@
   {
     "id": "75",
     "election_id": "2",
-    "name": "Raport financiar campanie",
+    "title": "Raport financiar campanie",
     "deadline": "Săptămânal și final",
     "responsible": "Concurenți",
     "description": "Raportarea finanțării campaniei electorale",
@@ -1879,7 +1972,7 @@
   {
     "id": "76",
     "election_id": "2",
-    "name": "Raport referendum",
+    "title": "Raport referendum",
     "deadline": "Săptămânal și final",
     "responsible": "Participanți referendum",
     "description": "Raportarea finanțării referendumului",
@@ -1890,7 +1983,7 @@
   {
     "id": "77",
     "election_id": "2",
-    "name": "Publicare conturi electorale",
+    "title": "Publicare conturi electorale",
     "deadline": "În 24 ore",
     "responsible": "CEC",
     "description": "Publicarea informațiilor despre conturi",
@@ -1901,7 +1994,7 @@
   {
     "id": "78",
     "election_id": "2",
-    "name": "Închiderea conturilor",
+    "title": "Închiderea conturilor",
     "deadline": "În 3 zile după final",
     "responsible": "Concurenți",
     "description": "Informarea despre solduri și închiderea conturilor",
@@ -1912,7 +2005,7 @@
   {
     "id": "79",
     "election_id": "2",
-    "name": "Raport media electoral",
+    "title": "Raport media electoral",
     "deadline": "Săptămânal",
     "responsible": "Furnizori media",
     "description": "Raportarea veniturilor din publicitate electorală",
@@ -1923,7 +2016,7 @@
   {
     "id": "80",
     "election_id": "2",
-    "name": "Raport bancar electoral",
+    "title": "Raport bancar electoral",
     "deadline": "Săptămânal",
     "responsible": "Bănci",
     "description": "Raportarea rulajului conturilor electorale",
@@ -1934,7 +2027,7 @@
   {
     "id": "81",
     "election_id": "2",
-    "name": "Restituirea creditelor (retragere)",
+    "title": "Restituirea creditelor (retragere)",
     "deadline": "În 2 luni",
     "responsible": "Concurenți, Ministerul Finanțelor",
     "description": "Restituirea creditelor după retragere",
@@ -1945,7 +2038,7 @@
   {
     "id": "82",
     "election_id": "2",
-    "name": "Restituirea creditelor finale",
+    "title": "Restituirea creditelor finale",
     "deadline": "În 3 luni",
     "responsible": "Concurenți, Ministerul Finanțelor",
     "description": "Restituirea creditelor după alegeri",
@@ -1956,7 +2049,7 @@
   {
     "id": "83",
     "election_id": "2",
-    "name": "Transmiterea listelor electorale",
+    "title": "Transmiterea listelor electorale",
     "deadline": "Până la 25 aprilie 2026",
     "responsible": "CEC, BESV",
     "description": "Transmiterea listelor electorale către secții",
@@ -1967,7 +2060,7 @@
   {
     "id": "84",
     "election_id": "2",
-    "name": "Publicarea listelor electorale",
+    "title": "Publicarea listelor electorale",
     "deadline": "Începând cu 27 aprilie 2026",
     "responsible": "BESV, CEC",
     "description": "Punerea la dispoziția publicului a listelor electorale",
@@ -1978,7 +2071,7 @@
   {
     "id": "85",
     "election_id": "2",
-    "name": "Actualizarea listelor electorale",
+    "title": "Actualizarea listelor electorale",
     "deadline": "Până la 10 mai 2026",
     "responsible": "Alegători, BESV, APL",
     "description": "Verificarea și actualizarea listelor electorale",
@@ -1989,7 +2082,7 @@
   {
     "id": "86",
     "election_id": "2",
-    "name": "Tipărirea listelor actualizate",
+    "title": "Tipărirea listelor actualizate",
     "deadline": "Până la 10 mai 2026",
     "responsible": "CEC, APL, BESV",
     "description": "Tipărirea și transmiterea listelor actualizate",
@@ -2000,7 +2093,7 @@
   {
     "id": "87",
     "election_id": "2",
-    "name": "Informarea alegătorilor",
+    "title": "Informarea alegătorilor",
     "deadline": "Până la 7 mai 2026",
     "responsible": "BESV, CEC",
     "description": "Informarea alegătorilor despre locul și timpul votării",
@@ -2011,7 +2104,7 @@
   {
     "id": "88",
     "election_id": "2",
-    "name": "Cereri vot la domiciliu",
+    "title": "Cereri vot la domiciliu",
     "deadline": "3–16 mai 2026",
     "responsible": "BESV",
     "description": "Primirea cererilor pentru vot la locul aflării",
@@ -2022,7 +2115,7 @@
   {
     "id": "89",
     "election_id": "2",
-    "name": "Aprobarea materialelor electorale",
+    "title": "Aprobarea materialelor electorale",
     "deadline": "Începând cu 16 februarie 2026",
     "responsible": "CEC",
     "description": "Aprobarea modelelor documentelor electorale",
@@ -2033,7 +2126,7 @@
   {
     "id": "90",
     "election_id": "2",
-    "name": "Acreditarea observatorilor",
+    "title": "Acreditarea observatorilor",
     "deadline": "Până la 10 mai 2026",
     "responsible": "CEC",
     "description": "Acreditarea observatorilor și monitorizarea alegerilor",

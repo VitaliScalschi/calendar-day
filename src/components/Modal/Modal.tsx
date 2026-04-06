@@ -1,9 +1,14 @@
 import { useEffect } from 'react'
-import './Modal.css'
 import { calculateDaysRemaining, formatDateTime } from '../../utils/dateUtils'
 import type { ModalProps } from '../../interface/index'
+import './Modal.css'
+
+const TITLE_CARD = 'Detalii Eveniment'
 
 function Modal({ isOpen, onClose, deadline }: ModalProps) {
+
+  console.log('Modal opened with deadline:', deadline)
+
   useEffect(() => {
     const originalOverflow = document.body.style.overflow;
     const originalTouchAction = document.body.style.touchAction;
@@ -21,6 +26,8 @@ function Modal({ isOpen, onClose, deadline }: ModalProps) {
 
   if (!isOpen || !deadline) return null
 
+  console.log('Deadline in Modal:', deadline)
+
   const daysRemaining = deadline.deadline ? calculateDaysRemaining(deadline.deadline) : null;
   const timeBadgeText =
     daysRemaining === null
@@ -34,16 +41,25 @@ function Modal({ isOpen, onClose, deadline }: ModalProps) {
   return (
     <div className="modal-overlay d-flex align-items-center justify-content-center position-fixed p-2 p-md-3" onClick={onClose}>
       <div className="modal-content card border-0 shadow-lg bg-white w-100" onClick={(e) => e.stopPropagation()}>
-        <div className="card-header modal-header d-flex justify-content-between align-items-center px-4 py-3">
-          <div className="d-flex align-items-center gap-2 text-white">
-            <span className="modal-header-icon" aria-hidden="true">📅</span>
-            <h2 className="modal-title mb-0">Detalii eveniment</h2>
+        <div className="card-header modal-header d-flex justify-content-between align-items-center px-4 py-2">
+          <div className="d-flex align-items-center gap-2">
+            <span className="modal-header-icon" aria-hidden="true">
+              <i className="fa-solid fa-calendar-days fa-lg"></i>
+            </span>
+            <h3 className="modal-title mb-0">{TITLE_CARD}</h3>
           </div>
           <button type="button" className="btn-close modal-close-btn" onClick={onClose} aria-label="Close"></button>
         </div>
 
         <div className="card-body p-4">
-          <div className="modal-card p-4">
+          {deadline.title && (
+            <div className="modal-card p-3">
+              <h6 className="modal-label mb-2">Subiect eveniment:</h6>
+              <p className="modal-text mb-0">{deadline.title}</p>
+              <p className="mt-1 fs-6"><i>{deadline.additional_info}</i></p>
+            </div>
+          )}
+          <div className="modal-card p-3 mt-3">
             <h6 className="modal-label mb-2">Termen limită</h6>
             <p className="modal-main-date mb-3">
               {deadline.deadline ? formatDateTime(deadline.deadline) : 'Data necunoscută'}

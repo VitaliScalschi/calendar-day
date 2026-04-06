@@ -1,31 +1,20 @@
-.useful-info {
-  flex-shrink: 0;
-  width: 350px;
-}
-
-@media (max-width: 968px) {
-  .useful-info {
-    width: 100%;
-    max-width: 400px;
-  }
-}
-
 .useful-info-card {
-  border-radius: 14px;
+  background: #f6f8fb;
 }
 
-.useful-info-title {
-  background: var(--color-primary);
+.icon {
+  color:var(--color-primary)
 }
 
-.useful-info-content {
-  border-color: #e3e8f2 !important;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+.useful-info-card__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1f2937;
 }
 
 .info-item {
-  font-size: 1rem;
-  color: var(--color-text-secondary);
+  font-size: 0.92rem;
+  color: #4b5563;
   transition: color 0.2s;
 }
 

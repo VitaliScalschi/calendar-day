@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { MONTH_NAMES, WEEK_DAYS, TITLE } from './constant'
+import { MONTH_NAMES, WEEK_DAYS } from './constant'
 import { calculateDaysRemaining } from '../../utils/dateUtils'
 import type { CalendarProps, EventDeadlineProps } from '../../interface/index'
 
@@ -54,9 +54,67 @@ function Calendar({ eday, deadlines = [], selectedDateKey: selectedDateKeyProp =
     return null;
   };
 
+  const getDeadlineRange = (value?: string): { start: string; end: string } | null => {
+    if (!value) return null;
+    const v = value.trim();
+    const fullRangeMatch = v.match(/^(\d{1,2}\/\d{1,2}\/\d{4})\s*-\s*(\d{1,2}\/\d{1,2}\/\d{4})$/);
+    if (fullRangeMatch) {
+      const [, start, end] = fullRangeMatch;
+      const startKey = parseDateKey(start);
+      const endKey = parseDateKey(end);
+      if (startKey && endKey) return { start: startKey, end: endKey };
+      return null;
+    }
+
+    const shortRangeMatch = v.match(/^(\d{1,2})\s*-\s*(\d{1,2}\/\d{1,2}\/\d{4})$/);
+    if (shortRangeMatch) {
+      const [, startDay, end] = shortRangeMatch;
+      const [, endMonth, endYear] = end.split('/');
+      const start = `${startDay.padStart(2, '0')}/${endMonth}/${endYear}`;
+      const startKey = parseDateKey(start);
+      const endKey = parseDateKey(end);
+      if (startKey && endKey) return { start: startKey, end: endKey };
+    }
+
+    return null;
+  };
+
+  const expandDateRange = (startKey: string, endKey: string): string[] => {
+    const keys: string[] = [];
+    const current = new Date(`${startKey}T00:00:00`);
+    const end = new Date(`${endKey}T00:00:00`);
+    if (Number.isNaN(current.getTime()) || Number.isNaN(end.getTime())) return keys;
+    if (current > end) return keys;
+
+    while (current <= end) {
+      keys.push(`${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}-${String(current.getDate()).padStart(2, '0')}`);
+      current.setDate(current.getDate() + 1);
+    }
+    return keys;
+  };
+
+  const getStatusDateValue = (value?: string): string | null => {
+    if (!value) return null;
+    const range = getDeadlineRange(value);
+    if (!range) return value;
+    const [year, month, day] = range.end.split('-');
+    return `${day}/${month}/${year}`;
+  };
+
   const deadlinesByDateKey = useMemo(() => {
     const map = new Map<string, EventDeadlineProps[]>();
     for (const d of deadlines) {
+      const range = getDeadlineRange(d.deadline);
+      if (range) {
+        const keys = expandDateRange(range.start, range.end);
+        for (const key of keys) {
+          const list = map.get(key) ?? [];
+          list.push(d);
+          map.set(key, list);
+        }
+        continue;
+      }
+
       const key = parseDateKey(d.deadline);
       if (!key) continue;
       const list = map.get(key) ?? [];
@@ -138,7 +196,10 @@ function Calendar({ eday, deadlines = [], selectedDateKey: selectedDateKeyProp =
       const dayDeadlines = deadlinesByDateKey.get(cellKey) ?? [];
       const isExpiredDate =
         dayDeadlines.length > 0 &&
-        dayDeadlines.every((d) => (d.deadline ? calculateDaysRemaining(d.deadline) < 0 : false));
+        dayDeadlines.every((d) => {
+          const statusValue = getStatusDateValue(d.deadline);
+          return statusValue ? calculateDaysRemaining(statusValue) < 0 : false;
+        });
       const inDeadlineRange =
         deadlineRange ? cellKey >= deadlineRange.first && cellKey <= deadlineRange.last : false;
 
@@ -172,7 +233,7 @@ function Calendar({ eday, deadlines = [], selectedDateKey: selectedDateKeyProp =
           }}
         >
           {day}
-          {isExpiredDate && <span className="calendar-day-cross" aria-hidden="true">×</span>}
+          {/* {isExpiredDate && <span className="calendar-day-cross" aria-hidden="true">×</span>} */}
         </div>
       );
     }
@@ -181,15 +242,10 @@ function Calendar({ eday, deadlines = [], selectedDateKey: selectedDateKeyProp =
   }
   
   return (
-    <div className="card border-0 shadow-sm mb-4 calendar-card overflow-hidden">
-      <div className="card-header calendar-card__header d-flex align-items-center gap-2 py-2 px-3">
-        <span aria-hidden="true">🗓️</span>
-        <h3 className="h5 mb-0 text-white fw-semibold">{TITLE}</h3>
-      </div>
-
-      <div className="card-body p-3 bg-light-subtle">
-        <div className="calendar-card__panel border rounded-3 p-3 bg-white">
-          <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+    <div className="card shadow-sm mb-4 border rounded calendar-card--compact overflow-hidden">
+      
+        <div className="calendar-card__panel p-2">
+          <div className="d-flex justify-content-between align-items-center mb-2 pb-2">
             <button 
               type="button" 
               className="btn btn-sm btn-outline-primary calendar-nav-btn"
@@ -199,8 +255,7 @@ function Calendar({ eday, deadlines = [], selectedDateKey: selectedDateKeyProp =
               <span className="calendar-nav-icon" aria-hidden="true">‹</span>
             </button>
             <div className="d-flex flex-column align-items-center gap-0">
-              <span className="fs-5 fw-semibold">{MONTH_NAMES[month]}</span>
-              <span className="small text-secondary">{year}</span>
+              <span className="fs-5 fw-semibold">{MONTH_NAMES[month]} {year}</span>
             </div>
             <button 
               type="button" 
@@ -211,29 +266,28 @@ function Calendar({ eday, deadlines = [], selectedDateKey: selectedDateKeyProp =
               <span className="calendar-nav-icon" aria-hidden="true">›</span>
             </button>
           </div>
-          
+
           <div className="d-flex mb-2 text-center text-secondary small fw-semibold">
             {WEEK_DAYS.map((day, index) => (
               <div key={index} className="flex-fill">{day}</div>
             ))}
           </div>
-          
+
           <div className="calendar-days">
             {renderDays()}
           </div>
-          
+
           <div className="mt-3 text-center border-top pt-2">
             <button 
               type="button" 
               className="btn btn-sm btn-outline-primary"
               onClick={goToToday}
             >
-              Astăzi
+              Azi
             </button>
           </div>
-
         </div>
-      </div>
+
     </div>
   )
 }

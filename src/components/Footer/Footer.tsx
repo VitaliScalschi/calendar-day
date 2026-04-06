@@ -44,25 +44,25 @@ export const SOCIAL_LINKS = [
 
 function Footer() {
   return (
-    <footer className="footer-app border-top bg-body-tertiary">
+    <footer className="footer-app border-top d-flex flex-column align-items-center justify-content-center">
       <div className="container py-2">
         <div className="row g-3 g-lg-4 align-items-center">
           <div className="col-12 col-md-6 col-lg-4">
             <div className="d-flex flex-column flex-sm-row align-items-center justify-content-center justify-content-sm-start gap-2 gap-sm-3 text-center text-sm-start">
               <img
-                src="/logo.svg"
+                src="/logo.png"
                 alt="CEC Logo"
                 className="footer-logo flex-shrink-0"
               />
-              <div className="footer-title text-muted small mb-0">{TITLE}</div>
+              <div className="footer-title small mb-0">{TITLE}</div>
             </div>
           </div>
           <div className="col-12 col-md-6 col-lg-4">
             <div className="text-center text-md-center px-md-2">
-              <p className="footer-meta text-muted small mb-0">
+              <p className="footer-meta small mb-0">
                 <span className="d-block d-sm-inline">17 mai 2026</span>
                 <span className="d-none d-sm-inline"> — </span>
-                <span className="d-block d-sm-inline fw-semibold text-body-secondary">
+                <span className="d-block d-sm-inline fw-semibold">
                   Programul Calendaristic
                 </span>
               </p>
