@@ -7,8 +7,6 @@ const TITLE_CARD = 'Detalii Eveniment'
 
 function Modal({ isOpen, onClose, deadline }: ModalProps) {
 
-  console.log('Modal opened with deadline:', deadline)
-
   useEffect(() => {
     const originalOverflow = document.body.style.overflow;
     const originalTouchAction = document.body.style.touchAction;
@@ -26,7 +24,9 @@ function Modal({ isOpen, onClose, deadline }: ModalProps) {
 
   if (!isOpen || !deadline) return null
 
-  console.log('Deadline in Modal:', deadline)
+  const responsibleLabel = Array.isArray(deadline.responsible)
+    ? deadline.responsible.join(', ')
+    : deadline.responsible;
 
   const daysRemaining = deadline.deadline ? calculateDaysRemaining(deadline.deadline) : null;
   const timeBadgeText =
@@ -100,7 +100,7 @@ function Modal({ isOpen, onClose, deadline }: ModalProps) {
               <div className="modal-card p-3">
                 <h6 className="modal-label mb-2">Responsabili</h6>
                 <span className="badge rounded-pill modal-responsible-badge">
-                  {deadline.responsible}
+                  {responsibleLabel}
                 </span>
               </div>
             )}

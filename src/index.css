@@ -40,6 +40,10 @@ body {
   background-color: var(--color-bg-secondary);
 }
 
+.form-select:focus-visible {
+  box-shadow: none;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;

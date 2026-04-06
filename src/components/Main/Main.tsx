@@ -164,7 +164,9 @@ function Main({
   const responsibleOptions = Array.from(
     new Set(
       (currentElectionDeadlines ?? [])
-        .map((d) => d.responsible?.trim())
+        .map((d) => d.responsible)
+        .flat()
+        .map((r) => r?.trim())
         .filter((v): v is string => Boolean(v))
     )
   ).sort((a, b) => a.localeCompare(b));
