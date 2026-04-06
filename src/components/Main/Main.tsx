@@ -3,6 +3,7 @@ import {ElectionInfoCard} from '../index';
 import type { ElectionItem, FilterType, MainProps } from '../../interface/index';
 import { calculateDaysRemaining } from '../../utils/dateUtils';
 import { convertFromSQLDate } from '../../utils/dateUtils';
+import { filterDeadlinesByTargetGroups, getActiveElections, type TargetGroupKey } from '../../utils/electionFilters';
 import MainFiltersColumn from './components/MainFiltersColumn';
 import MainEventsColumn from './components/MainEventsColumn';
 import './Main.css';
@@ -10,6 +11,7 @@ import './Main.css';
 const DEFAULT_FILTER: FilterType = 'today';
 const DEFAULT_RESPONSIBLE = '';
 const DEFAULT_SEARCH = '';
+const DEFAULT_TARGET_GROUPS: TargetGroupKey[] = [];
 
 function Main({
   data,
@@ -22,24 +24,25 @@ function Main({
   const [draftSearchQuery, setDraftSearchQuery] = useState(DEFAULT_SEARCH);
   const [draftFilter, setDraftFilter] = useState<FilterType>(DEFAULT_FILTER);
   const [draftSelectedResponsible, setDraftSelectedResponsible] = useState(DEFAULT_RESPONSIBLE);
+  const [draftTargetGroups, setDraftTargetGroups] = useState<TargetGroupKey[]>(DEFAULT_TARGET_GROUPS);
   const [draftDateKey, setDraftDateKey] = useState<string | null>(null);
 
   const [appliedSearchQuery, setAppliedSearchQuery] = useState(DEFAULT_SEARCH);
   const [appliedFilter, setAppliedFilter] = useState<FilterType>(DEFAULT_FILTER);
   const [appliedSelectedResponsible, setAppliedSelectedResponsible] = useState(DEFAULT_RESPONSIBLE);
+  const [appliedTargetGroups, setAppliedTargetGroups] = useState<TargetGroupKey[]>(DEFAULT_TARGET_GROUPS);
   const [appliedDateKey, setAppliedDateKey] = useState<string | null>(null);
 
   const [searchResetKey, setSearchResetKey] = useState(0);
 
-  const activeElections = data.filter((election) => election.is_active);
+  const activeElections = getActiveElections(data);
   const selectedElection =
-    (selectedElectionId ? data.find((election) => election.id === selectedElectionId) : null) ||
+    (selectedElectionId ? activeElections.find((election) => election.id === selectedElectionId) : null) ||
     activeElections[0] ||
-    data[0] ||
     null;
 
   const appliedElection =
-    (appliedElectionId ? data.find((election) => election.id === appliedElectionId) : null) ||
+    (appliedElectionId ? activeElections.find((election) => election.id === appliedElectionId) : null) ||
     selectedElection;
 
   const handleSearch = (query: string) => {
@@ -50,15 +53,31 @@ function Main({
     setDraftFilter(filter);
   };
 
+  const handleElectionChange = (electionId: string) => {
+    setSelectedElectionId(electionId);
+    // Election type should update results immediately.
+    setAppliedElectionId(electionId);
+    onElectionChange(electionId);
+  };
+
+  const handleTargetGroupToggle = (group: string) => {
+    setDraftTargetGroups((prev) => {
+      const groupKey = group as TargetGroupKey;
+      return prev.includes(groupKey) ? prev.filter((g) => g !== groupKey) : [...prev, groupKey];
+    });
+  };
+
   const resetAllFilters = () => {
     setDraftFilter(DEFAULT_FILTER);
     setDraftSelectedResponsible(DEFAULT_RESPONSIBLE);
+    setDraftTargetGroups(DEFAULT_TARGET_GROUPS);
     setDraftSearchQuery(DEFAULT_SEARCH);
     setDraftDateKey(null);
 
     // Apply reset immediately.
     setAppliedFilter(DEFAULT_FILTER);
     setAppliedSelectedResponsible(DEFAULT_RESPONSIBLE);
+    setAppliedTargetGroups(DEFAULT_TARGET_GROUPS);
     setAppliedSearchQuery(DEFAULT_SEARCH);
     setAppliedDateKey(null);
     setAppliedElectionId(selectedElectionId);
@@ -75,6 +94,7 @@ function Main({
     setAppliedElectionId(selectedElectionId);
     setAppliedFilter(draftFilter);
     setAppliedSelectedResponsible(draftSelectedResponsible);
+    setAppliedTargetGroups(draftTargetGroups);
     setAppliedSearchQuery(draftSearchQuery);
     setAppliedDateKey(draftDateKey);
     onElectionChange(selectedElectionId);
@@ -133,10 +153,11 @@ function Main({
     return `${day}/${month}/${year}`;
   };
 
-  const getDeadlinesForCurrentDateFilter = (deadlines?: ElectionItem['deadlines']) => {
+  const getFilteredDeadlines = (deadlines?: ElectionItem['deadlines'], selectedGroups: string[] = []) => {
     if (!deadlines || !Array.isArray(deadlines)) return [];
-    if (!appliedDateKey) return deadlines;
-    return deadlines.filter((d) => isDateInDeadline(d.deadline, appliedDateKey));
+    const byTargetGroups = filterDeadlinesByTargetGroups(deadlines, selectedGroups);
+    if (!appliedDateKey) return byTargetGroups;
+    return byTargetGroups.filter((d) => isDateInDeadline(d.deadline, appliedDateKey));
   };
 
   const currentElectionDeadlines = selectedElection?.deadlines ?? [];
@@ -148,12 +169,17 @@ function Main({
     )
   ).sort((a, b) => a.localeCompare(b));
 
-  const hasActiveFilters = draftFilter !== 'in_progress' || draftSelectedResponsible !== '' || draftSearchQuery.trim() !== '' || Boolean(draftDateKey);
+  const hasActiveFilters =
+    draftFilter !== 'in_progress' ||
+    draftSelectedResponsible !== '' ||
+    draftTargetGroups.length > 0 ||
+    draftSearchQuery.trim() !== '' ||
+    Boolean(draftDateKey);
 
   const canApplyFilters =
-    selectedElectionId !== appliedElectionId ||
     draftFilter !== appliedFilter ||
     draftSelectedResponsible !== appliedSelectedResponsible ||
+    draftTargetGroups.join('|') !== appliedTargetGroups.join('|') ||
     draftSearchQuery !== appliedSearchQuery ||
     draftDateKey !== appliedDateKey;
 
@@ -200,32 +226,44 @@ function Main({
     : 'Data indisponibila';
 
   useEffect(() => {
-    if (data.length > 0) {
-      const active = data.find(election => election.is_active);
-      const initialElectionId = active ? active.id : data[0].id;
+    if (activeElections.length === 0) {
+      setSelectedElectionId(null);
+      setAppliedElectionId(null);
+      return;
+    }
+
+    // Initialize once from active election or first active tab.
+    if (!selectedElectionId) {
+      const initialElectionId = activeElectionId && activeElections.some((election) => election.id === activeElectionId)
+        ? activeElectionId
+        : activeElections[0].id;
       setSelectedElectionId(initialElectionId);
       setAppliedElectionId(initialElectionId);
       if (!activeElectionId) {
         onElectionChange(initialElectionId);
       }
     }
-  
-  }, [data]);
+  }, [data, activeElectionId, selectedElectionId, onElectionChange]);
 
 
   useEffect(() => {
-    if (activeElectionId && activeElectionId !== selectedElectionId) {
+    const isActiveElectionId = !!activeElectionId && activeElections.some((election) => election.id === activeElectionId);
+
+    // Sync from parent only when externally applied election changes.
+    if (isActiveElectionId && activeElectionId !== appliedElectionId) {
       setSelectedElectionId(activeElectionId);
       setAppliedElectionId(activeElectionId);
     }
-  }, [activeElectionId, selectedElectionId]);
+  }, [activeElectionId, appliedElectionId, activeElections]);
 
   return (
     <div className="main-layout row g-3 align-items-start">
       <MainFiltersColumn
         electionOptions={electionOptions}
         selectedElectionId={selectedElectionId}
-        onElectionChange={setSelectedElectionId}
+        onElectionChange={handleElectionChange}
+        selectedTargetGroups={draftTargetGroups}
+        onTargetGroupToggle={handleTargetGroupToggle}
         draftFilter={draftFilter}
         onFilterChange={handleFilterChange}
         filterCounts={filterCounts}
@@ -245,7 +283,8 @@ function Main({
         searchResetKey={searchResetKey}
         onSearch={handleSearch}
         appliedElection={appliedElection}
-        getDeadlinesForCurrentDateFilter={getDeadlinesForCurrentDateFilter}
+        getFilteredDeadlines={getFilteredDeadlines}
+        appliedTargetGroups={appliedTargetGroups}
         appliedSearchQuery={appliedSearchQuery}
         appliedFilter={appliedFilter}
         appliedDateKey={appliedDateKey}
