@@ -1,6 +1,6 @@
 import type { EventFilterProps, FilterType } from '../../interface/index'
 import './EventFilter.css'
-import responsable from './filter.json'
+import { TARGET_GROUP_KEYS } from '../../utils/electionFilters'
 
 const filters: Array<{ key: FilterType; label: string }> = [
   { key: 'all', label: 'Toate' },
@@ -9,7 +9,7 @@ const filters: Array<{ key: FilterType; label: string }> = [
   { key: 'expired', label: 'Expirate' }
 ]
 
-const electionOptionsMock: Array<{ key: string; label: string }> = [
+const targetGroupOptions: Array<{ key: string; label: string }> = [
   { key: 'political', label: 'Partidele Politice' },
   { key: 'political_organ', label: 'Organele Electorale' },
   { key: 'public', label: 'Publicul Larg' }
@@ -19,6 +19,8 @@ function EventFilter({
   electionOptions,
   selectedElectionId,
   onElectionChange,
+  selectedTargetGroups,
+  onTargetGroupToggle,
   activeFilter,
   onFilterChange,
   filterCounts,
@@ -32,13 +34,12 @@ function EventFilter({
   calendarSlot,
   searchSlot,
 }: EventFilterProps) {
-
-  console.log('filterCounts' ,filterCounts )
   return (
     <div className="event-filter-panel border rounded p-2">
       <h3 className="event-filter-title">Filtrează</h3>
-
-      <div className="event-filter-section">
+      {
+        electionOptions.length > 1 && (
+        <div className="event-filter-section">
         <label className="responsible-filter__label mb-0" htmlFor="responsible-filter-select">
             Tip alegeri:
           </label>
@@ -55,22 +56,26 @@ function EventFilter({
             </label>
           ))}
         </div>
+        <div className="event-filter-divider" />
       </div>
-
-      <div className="event-filter-divider" />
+        )
+      }
 
       <div className="event-filter-section">
         <label className="responsible-filter__label mb-0" htmlFor="responsible-filter-select">
             Grupuri țintă:
           </label>
         <div className="event-filter-election-group">
-          {electionOptionsMock.map((option) => (
+          {targetGroupOptions
+            .filter((option) => TARGET_GROUP_KEYS.includes(option.key as (typeof TARGET_GROUP_KEYS)[number]))
+            .map((option) => (
             <label key={option.key} className="event-filter-election-item">
               <input
                 type="checkbox"
-                name="election-filter"
-                checked={selectedElectionId === option.key}
-                onChange={() => onElectionChange(option.key)}
+                name="target-group-filter"
+                checked={selectedTargetGroups.includes(option.key)}
+                disabled={!selectedElectionId}
+                onChange={() => onTargetGroupToggle(option.key)}
               />
               <span>{option.label}</span>
             </label>
@@ -112,9 +117,9 @@ function EventFilter({
             aria-label="Filtrează după responsabil"
           >
             <option value="">Toți</option>
-            {responsable.map((responsible) => (
-              <option key={responsible.value} value={responsible.value}>
-                {responsible.label}
+            {responsibleOptions.map((responsible) => (
+              <option key={responsible} value={responsible}>
+                {responsible}
               </option>
             ))}
           </select>

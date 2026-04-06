@@ -5,7 +5,8 @@ type MainEventsColumnProps = {
   searchResetKey: number;
   onSearch: (query: string) => void;
   appliedElection: ElectionItem | null;
-  getDeadlinesForCurrentDateFilter: (deadlines?: ElectionItem['deadlines']) => ElectionItem['deadlines'];
+  getFilteredDeadlines: (deadlines?: ElectionItem['deadlines'], selectedGroups?: string[]) => ElectionItem['deadlines'];
+  appliedTargetGroups: string[];
   appliedSearchQuery: string;
   appliedFilter: FilterType;
   appliedDateKey: string | null;
@@ -16,7 +17,8 @@ function MainEventsColumn({
   searchResetKey,
   onSearch,
   appliedElection,
-  getDeadlinesForCurrentDateFilter,
+  getFilteredDeadlines,
+  appliedTargetGroups,
   appliedSearchQuery,
   appliedFilter,
   appliedDateKey,
@@ -34,7 +36,7 @@ function MainEventsColumn({
       <div className="main-layout__results">
         {appliedElection?.deadlines && Array.isArray(appliedElection.deadlines) && appliedElection.deadlines.length > 0 ? (
           <EventDeadlines
-            data={getDeadlinesForCurrentDateFilter(appliedElection.deadlines) || []}
+            data={getFilteredDeadlines(appliedElection.deadlines, appliedTargetGroups) || []}
             searchQuery={appliedSearchQuery}
             activeFilter={appliedFilter}
             selectedDateKey={appliedDateKey}

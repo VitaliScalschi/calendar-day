@@ -8,7 +8,6 @@ export {default as Calendar} from './Calendar/Calendar';
 export {default as ElectionDayCard} from './ElectionDayCard/ElectionDayCard';
 export {default as Modal} from './Modal/Modal';
 export {default as TimelineEvent} from './TimelineEvent/TimelineEvent';
-export {default as StatusBadge, type EventStatus} from './StatusBadge/StatusBadge';
 export {default as SearchBar} from './SearchBar/SearchBar';
 export {default as EventFilter} from './EventFilter/EventFilter';
 export {default as ScrollToTop} from './ScrollToTop/ScrollToTop';

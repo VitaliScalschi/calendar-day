@@ -11,6 +11,8 @@ export interface EventFilterProps {
   electionOptions: ElectionFilterOption[];
   selectedElectionId: string | null;
   onElectionChange: (electionId: string) => void;
+  selectedTargetGroups: string[];
+  onTargetGroupToggle: (group: string) => void;
   activeFilter: FilterType;
   onFilterChange: (filter: FilterType) => void;
   filterCounts?: Partial<Record<FilterType, number>>;

@@ -5,6 +5,8 @@ type MainFiltersColumnProps = {
   electionOptions: Array<{ id: string; label: string }>;
   selectedElectionId: string | null;
   onElectionChange: (value: string) => void;
+  selectedTargetGroups: string[];
+  onTargetGroupToggle: (group: string) => void;
   draftFilter: FilterType;
   onFilterChange: (filter: FilterType) => void;
   filterCounts: Record<FilterType, number>;
@@ -24,6 +26,8 @@ function MainFiltersColumn({
   electionOptions,
   selectedElectionId,
   onElectionChange,
+  selectedTargetGroups,
+  onTargetGroupToggle,
   draftFilter,
   onFilterChange,
   filterCounts,
@@ -45,6 +49,8 @@ function MainFiltersColumn({
           electionOptions={electionOptions}
           selectedElectionId={selectedElectionId}
           onElectionChange={onElectionChange}
+          selectedTargetGroups={selectedTargetGroups}
+          onTargetGroupToggle={onTargetGroupToggle}
           activeFilter={draftFilter}
           onFilterChange={onFilterChange}
           filterCounts={filterCounts}
