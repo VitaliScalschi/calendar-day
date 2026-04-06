@@ -1,4 +1,4 @@
-import { Header, Footer, ScrollToTop } from '../../components'
+import { Header, Footer, ScrollToTop, DateRangePicker } from '../../components'
 
 function HistoryPage() {
   return (
@@ -15,6 +15,8 @@ function HistoryPage() {
                 Aici poți adăuga conținutul paginii „Istoria”.
               </p>
             </div>
+
+            <DateRangePicker />
           </div>
         </div>
       </main>

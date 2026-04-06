@@ -49,10 +49,22 @@ export function calculateDaysRemaining(targetDate: Date | string): number {
   let date: Date;
   
   if (typeof targetDate === 'string') {
-    if (targetDate.includes('T') || /^\d{4}-\d{2}-\d{2}/.test(targetDate)) {
-      date = new Date(targetDate);
+    const raw = targetDate.trim();
+
+    // Dacă string-ul conține un range (ex: "13/04/2026 - 17/04/2026" sau "01 - 14/04/2026"),
+    // calculăm zilele rămase până la "capătul" intervalului.
+    const ddmmDates = raw.match(/\d{1,2}\/\d{1,2}\/\d{4}/g);
+    const isoDates = raw.match(/\d{4}-\d{2}-\d{2}/g);
+    const processed = (ddmmDates && ddmmDates.length >= 2)
+      ? ddmmDates[ddmmDates.length - 1]
+      : (isoDates && isoDates.length >= 2)
+        ? isoDates[isoDates.length - 1]
+        : raw;
+
+    if (processed.includes('T') || /^\d{4}-\d{2}-\d{2}/.test(processed)) {
+      date = new Date(processed);
     } else {
-      date = parseDate(targetDate);
+      date = parseDate(processed);
     }
   } else {
     date = targetDate;

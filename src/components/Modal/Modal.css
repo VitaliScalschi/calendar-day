@@ -63,7 +63,7 @@
 }
 
 .modal-main-date {
-  font-size: 2.1rem;
+  font-size: 1.25rem;
   font-weight: 700;
   line-height: 1.2;
   color: #2b303b;
@@ -89,7 +89,7 @@
 .modal-time-badge {
   background: #f4ead6;
   color: #b97811;
-  font-size: 1.15rem;
+  font-size: 1rem;
   font-weight: 600;
   padding: 0.55rem 1rem;
 }

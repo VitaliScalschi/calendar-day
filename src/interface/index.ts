@@ -8,7 +8,8 @@ export * from './search-bar';
 export * from './status';
 export * from './time-line-events';
 export * from './user';
-export * from './tab';
+export * from './election';
+export * from './date-range-picker';
 
 
 export interface Regulation {

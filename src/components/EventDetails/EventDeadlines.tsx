@@ -35,8 +35,48 @@ function EventDeadlines({data, searchQuery = '', activeFilter = 'all', selectedD
 
   const getDeadlineStatus = (deadline: EventDeadlineProps): StatusDeadline => {
     if (!deadline.deadline) return StatusDeadline.Upcoming;
-    
-    const daysRemaining = calculateDaysRemaining(deadline.deadline);
+
+    const parseDateKey = (value?: string): string | null => {
+      if (!value) return null;
+      const v = value.trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+      if (/^\d{4}-\d{2}-\d{2}T/.test(v)) return v.slice(0, 10);
+      if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) {
+        const [day, month, year] = v.split('/');
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      }
+      return null;
+    };
+
+    const getDeadlineRange = (value?: string): { start: string; end: string } | null => {
+      if (!value) return null;
+      const v = value.trim();
+      const fullRangeMatch = v.match(/^(\d{1,2}\/\d{1,2}\/\d{4})\s*-\s*(\d{1,2}\/\d{1,2}\/\d{4})$/);
+      if (fullRangeMatch) {
+        const [, start, end] = fullRangeMatch;
+        const startKey = parseDateKey(start);
+        const endKey = parseDateKey(end);
+        if (startKey && endKey) return { start: startKey, end: endKey };
+      }
+      const shortRangeMatch = v.match(/^(\d{1,2})\s*-\s*(\d{1,2}\/\d{1,2}\/\d{4})$/);
+      if (shortRangeMatch) {
+        const [, startDay, end] = shortRangeMatch;
+        const [, endMonth, endYear] = end.split('/');
+        const start = `${startDay.padStart(2, '0')}/${endMonth}/${endYear}`;
+        const startKey = parseDateKey(start);
+        const endKey = parseDateKey(end);
+        if (startKey && endKey) return { start: startKey, end: endKey };
+      }
+      return null;
+    };
+
+    const range = getDeadlineRange(deadline.deadline);
+    const statusValue = range ? (() => {
+      const [year, month, day] = range.end.split('-');
+      return `${day}/${month}/${year}`;
+    })() : deadline.deadline;
+
+    const daysRemaining = calculateDaysRemaining(statusValue);
     
     if (daysRemaining < 0) return StatusDeadline.Expired;
     if (daysRemaining === 0) return StatusDeadline.Urgent;
@@ -76,15 +116,50 @@ function EventDeadlines({data, searchQuery = '', activeFilter = 'all', selectedD
       return null;
     };
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+    const getDeadlineRange = (value?: string): { start: string; end: string } | null => {
+      if (!value) return null;
+      const v = value.trim();
+      const fullRangeMatch = v.match(/^(\d{1,2}\/\d{1,2}\/\d{4})\s*-\s*(\d{1,2}\/\d{1,2}\/\d{4})$/);
+      if (fullRangeMatch) {
+        const [, start, end] = fullRangeMatch;
+        const startKey = parseDateKey(start);
+        const endKey = parseDateKey(end);
+        if (startKey && endKey) return { start: startKey, end: endKey };
+      }
+      const shortRangeMatch = v.match(/^(\d{1,2})\s*-\s*(\d{1,2}\/\d{1,2}\/\d{4})$/);
+      if (shortRangeMatch) {
+        const [, startDay, end] = shortRangeMatch;
+        const [, endMonth, endYear] = end.split('/');
+        const start = `${startDay.padStart(2, '0')}/${endMonth}/${endYear}`;
+        const startKey = parseDateKey(start);
+        const endKey = parseDateKey(end);
+        if (startKey && endKey) return { start: startKey, end: endKey };
+      }
+      return null;
+    };
+
+    const isDateInDeadline = (value: string | undefined, selectedKey: string): boolean => {
+      const range = getDeadlineRange(value);
+      if (range) return selectedKey >= range.start && selectedKey <= range.end;
+      return parseDateKey(value) === selectedKey;
+    };
+
     // Aplică filtrul de status doar când NU avem o dată selectată din calendar.
     // Când selectezi o dată, prioritatea e să vezi toate evenimentele din ziua respectivă.
     if (!selectedDateKey && activeFilter !== 'all') {
-      result = result.filter(deadline => {
-        const status = getDeadlineStatus(deadline);
+        result = result.filter(deadline => {
+          const status = getDeadlineStatus(deadline);
         
         if (activeFilter === 'in_progress') {
           // Include atât evenimentele în desfășurare, cât și cele care urmează
           return status === StatusDeadline.InProgress || status === StatusDeadline.Urgent || status === StatusDeadline.Upcoming;
+        }
+        if (activeFilter === 'today') {
+          return isDateInDeadline(deadline.deadline, todayKey);
         }
         if (activeFilter === StatusDeadline.Expired) {
           return status === StatusDeadline.Expired;
@@ -97,7 +172,7 @@ function EventDeadlines({data, searchQuery = '', activeFilter = 'all', selectedD
     const searchLower = searchQuery.toLowerCase();
     if (searchLower) {
       result = result.filter(deadline => {
-        const name = deadline.name?.toLowerCase() || '';
+        const name = deadline.title?.toLowerCase() || '';
         const description = deadline.description?.toLowerCase() || '';
         const responsible = deadline.responsible?.toLowerCase() || '';
         
@@ -109,7 +184,7 @@ function EventDeadlines({data, searchQuery = '', activeFilter = 'all', selectedD
 
 
     if (selectedDateKey) {
-      result = result.filter((deadline) => parseDateKey(deadline.deadline) === selectedDateKey);
+      result = result.filter((deadline) => isDateInDeadline(deadline.deadline, selectedDateKey));
     }
 
 
@@ -135,7 +210,7 @@ function EventDeadlines({data, searchQuery = '', activeFilter = 'all', selectedD
   return (
     <>
       <section className="event-deadlines">
-        <div className="timeline-container bg-light-subtle">
+        <div className="timeline-container position-relative py-2 px-3 border rounded h-100">
           {displayedDeadlines && displayedDeadlines.length > 0 ? (
             <>
               {displayedDeadlines.map((deadline: EventDeadlineProps) => (
@@ -147,7 +222,7 @@ function EventDeadlines({data, searchQuery = '', activeFilter = 'all', selectedD
               ))}
               
               {hasMore && (
-                <div className="text-center my-4">
+                <div className="text-center my-3">
                   <button 
                     type="button" 
                     className="btn btn-primary"

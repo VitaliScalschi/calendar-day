@@ -9,11 +9,13 @@ export interface Regulation {
 export interface EventDeadlineProps {
   id: string;
   election_id: string;
-  name?: string;
+  title?: string;
   deadline?: string;
   responsible?: string;
   description?: string;
   regulations?: Regulation[];
+  group?: string[];
+  additional_info?: string;
   onClick?: () => void;
 }
 

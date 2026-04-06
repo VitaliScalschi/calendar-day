@@ -1,5 +1,6 @@
 .footer-app {
   width: 100%;
+  background: var(--color-primary);
 }
 
 .footer-logo {
@@ -17,6 +18,7 @@
 }
 
 .footer-title {
+  color: var(--color-text-light);
   line-height: 1.35;
   max-width: 280px;
 }
@@ -28,12 +30,13 @@
 }
 
 .footer-meta {
+  color: var(--color-text-light);
   line-height: 1.45;
   word-break: break-word;
 }
 
 .footer-social__link {
-  color: #6c757d;
+  color:var(--color-text-light);
   font-size: 1.35rem;
   text-decoration: none;
   display: inline-flex;

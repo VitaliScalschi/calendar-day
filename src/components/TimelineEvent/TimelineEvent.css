@@ -3,7 +3,7 @@
   display: flex;
   align-items: flex-start;
   gap: 1.5rem;
-  padding-bottom: 2rem;
+  padding-bottom: 1.5rem;
   padding-left: 0;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -148,7 +148,7 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   transition: all 0.2s ease;
   min-width: 0;
-  margin-left: 40px;
+  margin-left: 10px;
 }
 
 .timeline-event:hover .timeline-content {

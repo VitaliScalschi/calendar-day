@@ -9,10 +9,10 @@ function Header() {
     <header className="header w-100">
       <div className="container d-flex align-items-center justify-content-between py-2">
         <div className="d-flex align-items-center gap-3">
-          <img src="/logo.svg" className="logo" alt="logo" />
+          <img src="/logo.png" className="logo" alt="logo" />
           <div className="header-brand">
-            <p className="header-title mb-0">{TITLE_HEADER}</p>
-            <span className="header-subtitle">{SUB_TITLE_HEADER}</span>
+            <p className="header-title text-white mb-0">PROGRAMUL CALENDARISTIC</p>
+            <span className="header-subtitle text-white">{TITLE_HEADER}</span>
           </div>
         </div>
 

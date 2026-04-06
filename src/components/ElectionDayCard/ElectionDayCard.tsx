@@ -1,4 +1,3 @@
-import React from 'react'
 import './ElectionDayCard.css'
 import { calculateDaysRemaining, convertFromSQLDate } from '../../utils/dateUtils'
 import type { ElectionDayCardProps } from '../../interface/index'
@@ -10,28 +9,27 @@ const ElectionDay = 'Ziua alegerilor';
 
 function ElectionDayCard({ eday, title, deadlines = [] }: ElectionDayCardProps) {
   const displayTitle = title || ElectionDay;
-  
+
   const formatEday = (edayStr: string | undefined): string => {
     if (!edayStr) return 'Data nu este disponibilă';
-    
+
     if (/^\d{4}-\d{2}-\d{2}/.test(edayStr)) {
       return convertFromSQLDate(edayStr);
     }
-    
+
     return edayStr;
   };
 
   const displayDate = formatEday(eday);
 
   const daysRemaining = eday ? calculateDaysRemaining(eday) : null;
-  
+
   const activeStages = deadlines.filter(d => {
     if (!d.deadline) return false;
     const days = calculateDaysRemaining(d.deadline);
     return days !== null && days >= 0;
   }).length;
-  
- 
+
   const completedStages = deadlines.filter(d => {
     if (!d.deadline) return false;
     const days = calculateDaysRemaining(d.deadline);
