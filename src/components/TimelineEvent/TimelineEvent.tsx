@@ -4,7 +4,14 @@ import type { TimelineEventProps } from '../../interface/index'
 
 import './TimelineEvent.css'
 
-function TimelineEvent({ 
+const GroupLabel = new Map<string, string>([
+  ['political', 'Partidele Politice'],
+  ['political_organ', 'Organele Electorale'],
+  ['public', 'Publicul Larg']
+])
+
+function TimelineEvent({
+  group,
   title, 
   deadline, 
   responsible, 
@@ -129,9 +136,19 @@ function TimelineEvent({
             )}
           </div>
         )}
+
+        <div className="event-filter-divider" />
+
+        {group && (
+          <div className="timeline-responsible">
+            Grupul țintă: <strong>{group.map(g => GroupLabel.get(g) || g).join(', ')}</strong> 
+          </div>
+        )}
+        <div className="event-filter-divider" />
+
         {responsible && (
           <div className="timeline-responsible">
-            Responsabil: <strong>{responsible}</strong>
+            Responsabil: <strong>{responsible.map(g => GroupLabel.get(g) || g).join(', ')}</strong>
           </div>
         )}
 

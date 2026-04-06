@@ -89,6 +89,12 @@ function EventDeadlines({data, searchQuery = '', activeFilter = 'all', selectedD
   const filteredData = useMemo(() => {
     let result = data;
 
+    const normalizeResponsible = (responsible?: string[] | string): string[] => {
+      if (!responsible) return [];
+      if (Array.isArray(responsible)) return responsible.map((r) => r.trim()).filter(Boolean);
+      return responsible.split(',').map((r) => r.trim()).filter(Boolean);
+    };
+
     const parseDeadlineValue = (value?: string): number | null => {
       if (!value) return null;
 
@@ -174,7 +180,7 @@ function EventDeadlines({data, searchQuery = '', activeFilter = 'all', selectedD
       result = result.filter(deadline => {
         const name = deadline.title?.toLowerCase() || '';
         const description = deadline.description?.toLowerCase() || '';
-        const responsible = deadline.responsible?.toLowerCase() || '';
+        const responsible = normalizeResponsible(deadline.responsible).join(' ').toLowerCase();
         
         return name.includes(searchLower) || 
                description.includes(searchLower) || 
@@ -189,7 +195,7 @@ function EventDeadlines({data, searchQuery = '', activeFilter = 'all', selectedD
 
 
     if (selectedResponsible) {
-      result = result.filter((deadline) => (deadline.responsible ?? '').trim() === selectedResponsible);
+      result = result.filter((deadline) => normalizeResponsible(deadline.responsible).includes(selectedResponsible));
     }
 
     return [...result].sort((a, b) => {

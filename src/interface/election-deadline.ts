@@ -11,7 +11,7 @@ export interface EventDeadlineProps {
   election_id: string;
   title?: string;
   deadline?: string;
-  responsible?: string;
+  responsible?: string[];
   description?: string;
   regulations?: Regulation[];
   group?: string[];

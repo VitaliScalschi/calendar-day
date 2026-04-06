@@ -11,7 +11,7 @@
         "title": "Stabilirea alegerilor locale noi++++++++++++++++++++", 
         "additional_info": "În termen de 60 de zile de la data constatării încetării mandatului",
         "deadline": "08/03/2026",
-        "responsible": "CEC (DMA)",
+        "responsible": ["CEC (DMA)"],
         "description": "Adoptarea hotărârilor privind stabilirea alegerilor locale noi pentru data de 17 mai 2026",
         "group":["political_organ"],
         "regulations": [
@@ -27,7 +27,7 @@
         "election_id": "1",
         "title": "Începutul perioadei electorale",
         "deadline": "16/02/2026",
-        "responsible": "CEC (DMA)",
+        "responsible": ["CEC (DMA)"],
         "description": "Începutul perioadei electorale",
         "group":["political_organ"],
         "regulations": [
@@ -43,7 +43,7 @@
         "election_id": "1",
         "title": "Repartizarea atribuțiilor CEC",
         "deadline": "24/02/2026",
-        "responsible": "CEC (DMA)",
+        "responsible": ["CEC (DMA)"],
         "group":["political_organ"],
         "description": "Repartizarea atribuțiilor între membrii Comisiei Electorale Centrale în perioada electorală",
         "regulations": [
@@ -60,7 +60,7 @@
         "election_id": "1",
         "title": "Publicarea listei partidelor",
         "deadline": "24/02/2026",
-        "responsible": "CEC (DJ)",
+        "responsible": ["CEC (DJ)"],
         "group":["political", "political_organ"],
         "description": "Publicarea listei partidelor politice care au dreptul de a participa la alegerile locale noi și referendum în baza datelor prezentate de Agenția Servicii Publice",
         "regulations": [
@@ -75,7 +75,7 @@
         "election_id": "1",
         "title": "Stabilirea responsabilităților autorităților",
         "deadline": "24/02/2026",
-        "responsible": "CEC (DJ)",
+        "responsible": ["CEC (DJ)"],
         "group":["political_organ"],
         "description": "Adoptarea hotărârii privind stabilirea responsabilităților suplimentare ale autorităților administrației publice centrale și entităților în procesul electoral",
         "regulations": [
@@ -89,7 +89,7 @@
         "election_id": "1",
         "title": "Prezentarea candidaturilor CECE nivel I",
         "deadline": "23/03/2026",
-        "responsible": "Partide politice, Consilii locale, CEC",
+        "responsible": ["Partide politice", "Consilii locale", "CEC"],
         "group":["public"],
         "description": "Prezentarea candidaturilor la CEC pentru constituirea consiliilor electorale de circumscripție de nivelul I",
         "regulations": [
@@ -103,7 +103,7 @@
         "title": "Constituirea circumscripțiilor electorale",
         "deadline": "23/03/2026",
         "group":["political"],
-        "responsible": "CEC (DMA)",
+        "responsible": ["CEC (DMA)"],
         "description": "Constituirea circumscripțiilor electorale de nivelul I",
         "regulations": [
           { "id": "r1", "title": "art. 157 alin. (1)", "link": "" }
@@ -115,7 +115,7 @@
         "election_id": "1",
         "title": "Constituirea consiliilor electorale",
         "deadline": "28/03/2026",
-        "responsible": "CEC",
+        "responsible": ["CEC"],
         "group":["political_organ"],
         "description": "Constituirea consiliilor electorale de circumscripție de nivelul I",
         "regulations": [
@@ -129,7 +129,7 @@
         "title": "Alegerea conducerii CECE",
         "deadline": "30/03/2026",
         "group":["political_organ"],
-        "responsible": "CECE nivel I",
+        "responsible": ["CECE nivel I"],
         "description": "Alegerea președintelui și secretarului consiliului electoral și transmiterea rezultatelor către CEC",
         "regulations": [
           { "id": "r1", "title": "art. 35 alin. (9)", "link": "" }
@@ -141,7 +141,7 @@
         "title": "Publicarea informațiilor CECE",
         "deadline": "01/04/2026",
         "group":["political", "political_organ", "public"],
-        "responsible": "CEC",
+        "responsible": ["CEC"],
         "description": "Publicarea componenței, sediului și programului consiliului electoral",
         "regulations": [
           { "id": "r1", "title": "art. 228 alin. (5)", "link": "" }
@@ -152,7 +152,7 @@
     "election_id": "1",
     "title": "Propuneri pentru constituirea secțiilor de votare",
     "deadline": "09/04/2026",
-    "responsible": "APL, CECE nivel I",
+    "responsible": ["APL", "CECE nivel I"],
     "group":["political_organ", "public"],
     "description": "Prezentarea propunerilor din partea primarilor privind constituirea secțiilor de votare",
     "regulations": [
@@ -166,7 +166,7 @@
     "title": "Constituirea secțiilor de votare",
     "deadline": "12/04/2026",
     "group":["political_organ", "public"],
-    "responsible": "CECE nivel I, CEC, APL",
+    "responsible":[ "CECE nivel I", "CEC", "APL"],
     "description": "Constituirea secțiilor de votare în baza propunerilor primarilor",
     "regulations": [
       { "id": "r1", "title": "art. 37 alin. (1) lit. b)", "link": "" },
@@ -179,7 +179,7 @@
     "title": "Publicarea informațiilor despre secții",
     "deadline": "14/04/2026",
     "group":["political_organ"],
-    "responsible": "CECE nivel I, CEC",
+    "responsible": ["CECE nivel I", "CEC"],
     "description": "Publicarea informațiilor despre hotarele secțiilor de votare și transmiterea hotărârilor către CEC",
     "regulations": [
       { "id": "r1", "title": "art. 38 alin. (6)", "link": "" }
@@ -191,7 +191,7 @@
     "title": "Prezentarea candidaturilor BESV",
     "deadline": "17/04/2026",
     "group":["political_organ"],
-    "responsible": "APL, partide politice, CECE",
+    "responsible": ["APL", "Partide politice", "CECE"],
     "description": "Prezentarea candidaturilor pentru constituirea birourilor electorale ale secțiilor de votare",
     "regulations": [
       { "id": "r1", "title": "art. 38 alin. (9)-(11)", "link": "" }
@@ -203,7 +203,7 @@
     "title": "Constituirea birourilor electorale",
     "deadline": "22/04/2026",
     "group":["political_organ"],
-    "responsible": "CECE nivel I, CEC",
+    "responsible": ["CECE nivel I", "CEC"],
     "description": "Constituirea birourilor electorale ale secțiilor de votare și transmiterea hotărârilor către CEC",
     "regulations": [
       { "id": "r1", "title": "art. 37 alin. (1)", "link": "" },
@@ -216,7 +216,7 @@
     "title": "Alegerea conducerii BESV",
     "deadline": "24/04/2026",
     "group":["political_organ"],
-    "responsible": "BESV, CECE",
+    "responsible": ["BESV", "CECE"],
     "description": "Alegerea președintelui și secretarului biroului electoral, publicarea componenței și transmiterea hotărârilor",
     "regulations": [
       { "id": "r1", "title": "art. 38 alin. (13)", "link": "" }
@@ -228,7 +228,7 @@
     "title": "Determinarea numărului de membri",
     "deadline": "28/03/2026",
     "group":["political_organ"],
-    "responsible": "CEC",
+    "responsible": ["CEC"],
     "description": "Determinarea numărului de membri ai organelor electorale care pot fi degrevați",
     "regulations": [
       { "id": "r1", "title": "art. 27 lit. f)", "link": "" }
@@ -240,7 +240,7 @@
     "title": "Degrevarea membrilor CECE",
     "group":["political_organ"],
     "deadline": "31/03/2026",
-    "responsible": "CECE, CEC",
+    "responsible": ["CECE", "CEC"],
     "description": "Degrevarea membrilor consiliilor electorale și aprobarea statelor de personal",
     "regulations": [
       { "id": "r1", "title": "art. 45 alin. (4)", "link": "" }
@@ -252,7 +252,7 @@
     "title": "Degrevarea membrilor BESV",
     "deadline": "25/04/2026",
     "group":["political_organ"],
-    "responsible": "BESV, CECE, CEC",
+    "responsible": ["BESV", "CECE", "CEC"],
     "description": "Degrevarea membrilor birourilor electorale la propunerea acestora",
     "regulations": [
       { "id": "r1", "title": "art. 45 alin. (3)", "link": "" }
@@ -264,7 +264,7 @@
     "title": "Raport financiar CECE",
     "deadline": "10/04/2026",
     "group":["political_organ"],
-    "responsible": "CECE, CEC",
+    "responsible": ["CECE", "CEC"],
     "description": "Prezentarea raportului financiar privind gestionarea mijloacelor alocate",
     "regulations": [
       { "id": "r1", "title": "pct. 68 Regulament CECE", "link": "" }
@@ -277,7 +277,7 @@
     "deadline": "28/03/2026 - 15/04/2026",
     "group":["political", "political_organ"],
     "additional_info": "În perioada 28 martie - 15 aprilie 2026 sunt organizate instruiri pentru membrii organelor electorale și alte persoane implicate în procesul electoral, conform prevederilor legale.",
-    "responsible": "CICDE, CEC, CECE, BESV",
+    "responsible": ["CICDE", "CEC", "CECE", "BESV"],
     "description": "Organizarea instruirilor pentru membrii organelor electorale și alte persoane implicate",
     "regulations": [
       { "id": "r1", "title": "art. 25 lit. m)", "link": "" }
@@ -289,7 +289,7 @@
     "title": "Acordarea suportului logistic",
     "deadline": "15/03/2026 - 15/04/2026",
     "group":["political", "political_organ", "public"],
-    "responsible": "ASP, MAI, APL",
+    "responsible":[ "ASP", "MAI", "APL"],
     "description": "Acordarea de sprijin consiliilor și birourilor electorale",
     "regulations": [
       { "id": "r1", "title": "art. 44 Cod electoral", "link": "" }
@@ -300,7 +300,7 @@
     "election_id": "1",
     "title": "Graficul pentru blocuri electorale",
     "deadline": "24/02/2026",
-    "responsible": "CEC",
+    "responsible": ["CEC"],
     "group":["political", "political_organ", "public"],
     "description": "Stabilirea graficului de recepționare a documentelor pentru blocuri electorale",
     "regulations": [
@@ -312,7 +312,7 @@
     "election_id": "1",
     "title": "Crearea comisiei pentru blocuri",
     "deadline": "25/02/2026",
-    "responsible": "CEC",
+    "responsible": ["CEC"],
     "group":["political", "political_organ", "public"],
     "description": "Crearea comisiei de recepționare și verificare a documentelor pentru blocuri electorale",
     "regulations": [
@@ -325,7 +325,7 @@
     "title": "Depunerea documentelor blocurilor electorale",
     "deadline": "26/02/2026 - 01/04/2026",
     "group":["political", "political_organ"],
-    "responsible": "CEC, partide politice",
+    "responsible":[ "CEC", "Partide politice"],
     "description": "Prezentarea documentelor pentru înregistrarea blocurilor electorale",
     "regulations": [
       { "id": "r1", "title": "art. 64 Cod electoral", "link": "" }
@@ -337,7 +337,7 @@
     "title": "Examinarea documentelor blocurilor electorale",
     "group":["political", "public"],
     "deadline": "În termen de 5 zile de la primirea documentelor",
-    "responsible": "CEC (DMA)",
+    "responsible": ["CEC (DMA)"],
     "description": "Examinarea documentelor și adoptarea hotărârii privind înregistrarea sau refuzul de a înregistra blocul electoral",
     "regulations": [
       { "id": "r1", "title": "art. 64 alin. (6) Cod electoral", "link": "" }
@@ -349,7 +349,7 @@
     "title": "Aderarea la blocuri electorale",
     "group":["political", "political_organ", "public"],
     "deadline": "07/03/2026",
-    "responsible": "Blocuri electorale, partide politice, CEC",
+    "responsible": ["Blocuri electorale", "Partide politice", "CEC"],
     "description": "Aderarea la blocurile electorale constituite",
     "regulations": [
       { "id": "r1", "title": "Regulamentul blocuri electorale nr. 3592/2025", "link": "" }
@@ -361,7 +361,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Desemnarea candidaților",
     "deadline": "28/03/2026 - 20/04/2026",
-    "responsible": "Partide politice, blocuri, candidați independenți",
+    "responsible": ["Partide politice", "Blocuri", "Candidați independenți"],
     "description": "Desemnarea candidaților la funcțiile elective",
     "regulations": [
       { "id": "r1", "title": "art. 63 alin. (1)", "link": "" }
@@ -373,7 +373,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Stabilirea locului pentru depunerea documentelor",
     "deadline": "30/03/2026",
-    "responsible": "CECE nivel I",
+    "responsible": ["CECE nivel I"],
     "description": "Stabilirea locului și timpului primirii documentelor pentru înregistrarea candidaților",
     "regulations": [
       { "id": "r1", "title": "art. 68 alin. (4)", "link": "" }
@@ -385,7 +385,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Constituirea grupurilor de inițiativă",
     "deadline": "După constituirea CECE",
-    "responsible": "CECE nivel I, CEC",
+    "responsible": ["CECE nivel I", "CEC"],
     "description": "Constituirea și înregistrarea grupurilor de inițiativă și eliberarea listelor de subscripție",
     "regulations": [
       { "id": "r1", "title": "art. 65, 164 Cod electoral", "link": "" }
@@ -397,7 +397,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Depunerea documentelor candidaților",
     "deadline": "După constituirea CECE",
-    "responsible": "Partide, blocuri, independenți, CECE",
+    "responsible": ["Partide", "Blocuri", "Independenți", "CECE"],
     "description": "Depunerea documentelor pentru înregistrarea candidaților",
     "regulations": [
       { "id": "r1", "title": "art. 68 alin. (1)", "link": "" }
@@ -409,7 +409,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Tragerea la sorți",
     "deadline": "În ziua depunerii documentelor",
-    "responsible": "CECE nivel I",
+    "responsible": ["CECE nivel I"],
     "description": "Determinarea ordinii de înscriere a candidaților în buletinul de vot",
     "regulations": [
       { "id": "r1", "title": "art. 68 alin. (4)", "link": "" }
@@ -421,7 +421,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Verificarea listelor de subscripție",
     "deadline": "În termen de 5 zile",
-    "responsible": "CECE nivel I",
+    "responsible": ["CECE nivel I"],
     "description": "Verificarea listelor de subscripție și informarea despre rezultate",
     "regulations": [
       { "id": "r1", "title": "art. 65, 66 Cod electoral", "link": "" }
@@ -433,7 +433,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Înregistrarea candidaților",
     "deadline": "În termen de 7 zile",
-    "responsible": "CECE nivel I",
+    "responsible": ["CECE nivel I"],
     "description": "Examinarea dosarelor și înregistrarea sau refuzul candidaților",
     "regulations": [
       { "id": "r1", "title": "art. 68 alin. (5)", "link": "" }
@@ -445,7 +445,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Eliberarea legitimațiilor",
     "deadline": "În termen de 3 zile",
-    "responsible": "CECE nivel I, CEC",
+    "responsible": ["CECE nivel I", "CEC"],
     "description": "Eliberarea legitimațiilor candidaților înregistrați",
     "regulations": [
       { "id": "r1", "title": "art. 68 alin. (8)", "link": "" }
@@ -457,7 +457,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Înregistrarea concurenților electorali",
     "deadline": "07/04/2026",
-    "responsible": "Partide, blocuri, independenți",
+    "responsible": ["Partide", "Blocuri", "Independenți"],
     "description": "Depunerea documentelor pentru înregistrarea concurenților electorali",
     "regulations": [
       { "id": "r1", "title": "art. 68 alin. (1)", "link": "" }
@@ -469,7 +469,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Publicarea listei candidaților",
     "deadline": "14/04/2026",
-    "responsible": "CECE nivel I",
+    "responsible": ["CECE nivel I"],
     "description": "Publicarea listei candidaților înregistrați și transmiterea către BESV",
     "regulations": [
       { "id": "r1", "title": "art. 68 alin. (9)", "link": "" }
@@ -481,7 +481,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Transmiterea datelor către SIAS",
     "deadline": "08/04/2026",
-    "responsible": "CECE nivel I, CEC",
+    "responsible": ["CECE nivel I", "CEC"],
     "description": "Transmiterea hotărârilor pentru introducerea datelor în SIAS „Alegeri”",
     "regulations": [
       { "id": "r1", "title": "art. 37 alin. (1) lit. g)", "link": "" }
@@ -493,7 +493,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Modificarea listelor de candidați",
     "deadline": "16/04/2026 - 07/05/2026",
-    "responsible": "Concurenți electorali",
+    "responsible": ["Concurenți electorali"],
     "description": "Solicitarea modificării sau retragerii candidaților din liste",
     "regulations": [
       { "id": "r1", "title": "art. 72 alin. (3)", "link": "" }
@@ -505,7 +505,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Confirmarea reprezentanților",
     "deadline": "14/05/2026",
-    "responsible": "CEC, CECE",
+    "responsible":[ "CEC, CECE"],
     "description": "Confirmarea reprezentanților concurenților electorali și eliberarea legitimațiilor",
     "regulations": [
       { "id": "r1", "title": "art. 69 Cod electoral", "link": "" }
@@ -517,7 +517,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Stabilirea persoanelor de încredere",
     "deadline": "16/04/2026",
-    "responsible": "CECE nivel I",
+    "responsible": ["CECE nivel I"],
     "description": "Stabilirea numărului de persoane de încredere ale concurenților electorali",
     "regulations": [
       { "id": "r1", "title": "art. 71 alin. (2)", "link": "" }
@@ -529,7 +529,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Înregistrarea persoanelor de încredere",
     "deadline": "10/05/2026",
-    "responsible": "Concurenți electorali, CECE",
+    "responsible": ["Concurenți electorali", "CECE"],
     "description": "Selectarea și înregistrarea persoanelor de încredere",
     "regulations": [
       { "id": "r1", "title": "art. 71 alin. (3)-(5)", "link": "" }
@@ -541,7 +541,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Stabilirea procedurii pentru referendum",
     "deadline": "30/03/2026",
-    "responsible": "CECE nivel I",
+    "responsible": ["CECE nivel I"],
     "description": "Stabilirea locului și timpului pentru depunerea documentelor participanților la referendum",
     "regulations": [
       { "id": "r1", "title": "art. 231 alin. (1)", "link": "" }
@@ -553,7 +553,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Depunerea documentelor referendum",
     "deadline": "07/04/2026",
-    "responsible": "Partide politice, CECE",
+    "responsible": ["Partide politice", "CECE"],
     "description": "Depunerea documentelor pentru înregistrarea participanților la referendum",
     "regulations": [
       { "id": "r1", "title": "art. 231 alin. (1-2)", "link": "" }
@@ -565,7 +565,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Înregistrarea participanților referendum",
     "deadline": "În termen de 3 zile",
-    "responsible": "CECE nivel I",
+    "responsible": ["CECE nivel I"],
     "description": "Înregistrarea sau refuzul participanților la referendum",
     "regulations": [
       { "id": "r1", "title": "art. 231 alin. (4)", "link": "" }
@@ -577,7 +577,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Confirmarea reprezentanților referendum",
     "deadline": "14/05/2026",
-    "responsible": "CECE nivel I",
+    "responsible": ["CECE nivel I"],
     "description": "Confirmarea reprezentanților participanților la referendum",
     "regulations": [
       { "id": "r1", "title": "art. 69 Cod electoral", "link": "" }
@@ -589,7 +589,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Persoane de încredere referendum",
     "deadline": "10/05/2026",
-    "responsible": "Participanți referendum, CECE",
+    "responsible": ["Participanți referendum", "CECE"],
     "description": "Înregistrarea persoanelor de încredere ale participanților la referendum",
     "regulations": [
       { "id": "r1", "title": "art. 70 alin. (3)", "link": "" }
@@ -601,7 +601,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Declarații publicitate electorală",
     "deadline": "23/02/2026",
-    "responsible": "Furnizori publicitate",
+    "responsible": ["Furnizori publicitate"],
     "description": "Prezentarea declarațiilor privind condițiile de publicitate electorală",
     "regulations": [
       { "id": "r1", "title": "art. 54 alin. (10)", "link": "" }
@@ -613,7 +613,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Începerea campaniei electorale",
     "deadline": "17/04/2026 - 10/05/2026",
-    "responsible": "Concurenți, participanți referendum",
+    "responsible": ["Concurenți", "Participanți referendum"],
     "description": "Începerea campaniei electorale",
     "regulations": [
       { "id": "r1", "title": "art. 70 Cod electoral", "link": "" }
@@ -625,7 +625,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Stabilirea locurilor de afișaj",
     "deadline": "14/04/2026",
-    "responsible": "APL",
+    "responsible":[ "APL"],
     "description": "Stabilirea locurilor pentru afișaj electoral și întâlniri cu alegătorii",
     "regulations": [
       { "id": "r1", "title": "art. 70 alin. (10)", "link": "" }
@@ -637,7 +637,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Raportarea publicității electorale",
     "deadline": "Săptămânal, în ziua de luni",
-    "responsible": "Difuzori de publicitate",
+    "responsible": ["Difuzori de publicitate"],
     "description": "Prezentarea informațiilor despre spațiile de publicitate electorală și sumele încasate",
     "regulations": [
       { "id": "r1", "title": "pct. 61 Regulament publicitate nr. 1155/2023", "link": "" }
@@ -649,7 +649,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Prezentarea informațiilor către CEC",
     "deadline": "În termen de 48 de ore de la solicitare",
-    "responsible": "CEC, agenții publicitate, APL",
+    "responsible": ["CEC", "Agenții publicitate", "APL"],
     "description": "Prezentarea informațiilor despre contractele de publicitate electorală",
     "regulations": [
       { "id": "r1", "title": "pct. 53 Regulament publicitate nr. 1155/2023", "link": "" }
@@ -661,7 +661,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Finalizarea campaniei electorale",
     "deadline": "15/05/2026",
-    "responsible": "Concurenți, participanți referendum",
+    "responsible": ["Concurenți", "Participanți referendum"],
     "description": "Încheierea campaniei electorale",
     "regulations": [
       { "id": "r1", "title": "art. 70 Cod electoral", "link": "" }
@@ -673,7 +673,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Înlăturarea materialelor electorale",
     "deadline": "16/05/2026",
-    "responsible": "Difuzori publicitate, APL",
+    "responsible": ["Difuzori publicitate", "APL"],
     "description": "Înlăturarea afișajului electoral și materialelor publicitare",
     "regulations": [
       { "id": "r1", "title": "pct. 120 Regulament publicitate", "link": "" }
@@ -685,7 +685,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Plafon financiar grupuri inițiativă",
     "deadline": "28/03/2026",
-    "responsible": "CEC",
+    "responsible": ["CEC"],
     "description": "Stabilirea plafonului mijloacelor financiare pentru grupuri de inițiativă",
     "regulations": [
       { "id": "r1", "title": "art. 53 alin. (2)", "link": "" }
@@ -697,7 +697,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Confirmarea trezorierului",
     "deadline": "La înregistrare",
-    "responsible": "CECE, grupuri inițiativă",
+    "responsible": ["CECE", "Grupuri inițiativă"],
     "description": "Confirmarea persoanei responsabile de finanțele grupului",
     "regulations": [
       { "id": "r1", "title": "art. 55 alin. (1)", "link": "" }
@@ -709,7 +709,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Cod fiscal provizoriu",
     "deadline": "După înregistrare",
-    "responsible": "Grupuri inițiativă, Fisc",
+    "responsible": ["Grupuri inițiativă", "Fisc"],
     "description": "Depunerea cererii pentru cod fiscal provizoriu",
     "regulations": [
       { "id": "r1", "title": "Regulament finanțare nr. 1185/2023", "link": "" }
@@ -721,7 +721,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Informare cont inițiativă",
     "deadline": "În 24 ore",
-    "responsible": "Grupuri inițiativă",
+    "responsible": ["Grupuri inițiativă"],
     "description": "Informarea despre deschiderea contului financiar",
     "regulations": [
       { "id": "r1", "title": "art. 56 alin. (4)", "link": "" }
@@ -733,7 +733,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Informare fără cont",
     "deadline": "În 3 zile și săptămânal",
-    "responsible": "Grupuri inițiativă",
+    "responsible": ["Grupuri inițiativă"],
     "description": "Informarea despre nedeschiderea contului financiar",
     "regulations": [
       { "id": "r1", "title": "art. 56 alin. (5)", "link": "" }
@@ -745,7 +745,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Raport financiar inițiativă",
     "deadline": "Săptămânal și final",
-    "responsible": "Grupuri inițiativă",
+    "responsible": ["Grupuri inițiativă"],
     "description": "Prezentarea rapoartelor financiare",
     "regulations": [
       { "id": "r1", "title": "art. 58 alin. (4)", "link": "" }
@@ -757,7 +757,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Publicare cont inițiativă",
     "deadline": "În 24 ore",
-    "responsible": "CEC, CECE",
+    "responsible": ["CEC, CECE"],
     "description": "Publicarea informațiilor despre conturi",
     "regulations": [
       { "id": "r1", "title": "art. 58 alin. (8)", "link": "" }
@@ -769,7 +769,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Închiderea cont inițiativă",
     "deadline": "În 3 zile după finalizare",
-    "responsible": "Grupuri inițiativă",
+    "responsible": ["Grupuri inițiativă"],
     "description": "Informarea despre sold sau închiderea contului",
     "regulations": [
       { "id": "r1", "title": "art. 56 alin. (12)", "link": "" }
@@ -781,7 +781,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Raport media inițiativă",
     "deadline": "Săptămânal",
-    "responsible": "Furnizori media",
+    "responsible": ["Furnizori media"],
     "description": "Raportarea veniturilor din publicitate",
     "regulations": [
       { "id": "r1", "title": "art. 54 alin. (9)", "link": "" }
@@ -793,7 +793,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Raport difuzori publicitate",
     "deadline": "Săptămânal",
-    "responsible": "Difuzori publicitate",
+    "responsible": ["Difuzori publicitate"],
     "description": "Raportarea veniturilor din publicitate",
     "regulations": [
       { "id": "r1", "title": "art. 54 alin. (10)", "link": "" }
@@ -805,7 +805,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Raport bancar inițiativă",
     "deadline": "Săptămânal",
-    "responsible": "Instituții bancare",
+    "responsible": ["Instituții bancare"],
     "description": "Informarea despre rulajul mijloacelor financiare",
     "regulations": [
       { "id": "r1", "title": "art. 56 alin. (11)", "link": "" }
@@ -817,7 +817,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Plafon fond electoral",
     "deadline": "28/03/2026",
-    "responsible": "CEC",
+    "responsible": ["CEC"],
     "description": "Stabilirea plafonului pentru fond electoral",
     "regulations": [
       { "id": "r1", "title": "art. 53 alin. (2)", "link": "" }
@@ -829,7 +829,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Plafon referendum",
     "deadline": "28/03/2026",
-    "responsible": "CEC",
+    "responsible": ["CEC"],
     "description": "Plafon pentru participanții la referendum",
     "regulations": [
       { "id": "r1", "title": "art. 53 alin. (2)", "link": "" }
@@ -841,7 +841,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Credit fără dobândă",
     "deadline": "28/03/2026",
-    "responsible": "CEC",
+    "responsible": ["CEC"],
     "description": "Stabilirea creditului pentru concurenți",
     "regulations": [
       { "id": "r1", "title": "art. 51 alin. (1)", "link": "" }
@@ -853,7 +853,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Mandatari financiari",
     "deadline": "După înregistrare",
-    "responsible": "Concurenți, Ministerul Finanțelor",
+    "responsible": ["Concurenți", "Ministerul Finanțelor"],
     "description": "Desemnarea mandatarilor financiari",
     "regulations": [
       { "id": "r1", "title": "art. 51 alin. (5)", "link": "" }
@@ -865,7 +865,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Raport financiar partide",
     "deadline": "17/02/2026 - 17/04/2026",
-    "responsible": "Partide politice",
+    "responsible": ["Partide politice"],
     "description": "Raport privind soldul mijloacelor financiare",
     "regulations": [
       { "id": "r1", "title": "art. 51 alin. (10)", "link": "" }
@@ -877,7 +877,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Confirmare trezorieri",
     "deadline": "La înregistrare",
-    "responsible": "CEC, CECE",
+    "responsible": ["CEC", "CECE"],
     "description": "Confirmarea persoanelor responsabile de finanțe",
     "regulations": [
       { "id": "r1", "title": "art. 55 alin. (1)", "link": "" }
@@ -889,7 +889,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Cod fiscal concurenți",
     "deadline": "După înregistrare",
-    "responsible": "Concurenți, Fisc",
+    "responsible": ["Concurenți", "Fisc"],
     "description": "Obținerea codului fiscal provizoriu",
     "regulations": [
       { "id": "r1", "title": "Regulament nr. 1185/2023", "link": "" }
@@ -901,7 +901,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Informare cont electoral",
     "deadline": "În 24 ore",
-    "responsible": "Concurenți",
+    "responsible": ["Concurenți"],
     "description": "Informarea despre deschiderea contului electoral",
     "regulations": [
       { "id": "r1", "title": "art. 56 alin. (4)", "link": "" }
@@ -913,7 +913,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Informare fără cont electoral",
     "deadline": "În 3 zile și săptămânal",
-    "responsible": "Concurenți",
+    "responsible": ["Concurenți"],
     "description": "Informarea despre nedeschiderea contului",
     "regulations": [
       { "id": "r1", "title": "art. 56 alin. (5)", "link": "" }
@@ -925,7 +925,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Raport financiar campanie",
     "deadline": "Săptămânal și final",
-    "responsible": "Concurenți",
+    "responsible": ["Concurenți"],
     "description": "Raportarea finanțării campaniei electorale",
     "regulations": [
       { "id": "r1", "title": "art. 58 alin. (3)", "link": "" }
@@ -937,7 +937,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Raport referendum",
     "deadline": "Săptămânal și final",
-    "responsible": "Participanți referendum",
+    "responsible": ["Participanți referendum"],
     "description": "Raportarea finanțării referendumului",
     "regulations": [
       { "id": "r1", "title": "art. 233 Cod electoral", "link": "" }
@@ -949,7 +949,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Publicare conturi electorale",
     "deadline": "În 24 ore",
-    "responsible": "CEC",
+    "responsible": ["CEC"],
     "description": "Publicarea informațiilor despre conturi",
     "regulations": [
       { "id": "r1", "title": "art. 58 alin. (8)", "link": "" }
@@ -961,7 +961,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Închiderea conturilor",
     "deadline": "În 3 zile după final",
-    "responsible": "Concurenți",
+    "responsible": ["Concurenți"],
     "description": "Informarea despre solduri și închiderea conturilor",
     "regulations": [
       { "id": "r1", "title": "art. 56 alin. (15)", "link": "" }
@@ -973,7 +973,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Raport media electoral",
     "deadline": "Săptămânal",
-    "responsible": "Furnizori media",
+    "responsible": ["Furnizori media"],
     "description": "Raportarea veniturilor din publicitate electorală",
     "regulations": [
       { "id": "r1", "title": "art. 54 alin. (9)", "link": "" }
@@ -985,7 +985,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Raport bancar electoral",
     "deadline": "Săptămânal",
-    "responsible": "Bănci",
+    "responsible": ["Bănci"],
     "description": "Raportarea rulajului conturilor electorale",
     "regulations": [
       { "id": "r1", "title": "art. 56 alin. (11)", "link": "" }
@@ -997,7 +997,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Restituirea creditelor (retragere)",
     "deadline": "În 2 luni",
-    "responsible": "Concurenți, Ministerul Finanțelor",
+    "responsible": ["Concurenți", "Ministerul Finanțelor"],
     "description": "Restituirea creditelor după retragere",
     "regulations": [
       { "id": "r1", "title": "art. 51 alin. (7)", "link": "" }
@@ -1009,7 +1009,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Restituirea creditelor finale",
     "deadline": "În 3 luni",
-    "responsible": "Concurenți, Ministerul Finanțelor",
+    "responsible": ["Concurenți", "Ministerul Finanțelor"],
     "description": "Restituirea creditelor după alegeri",
     "regulations": [
       { "id": "r1", "title": "art. 51 alin. (8)", "link": "" }
@@ -1021,7 +1021,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Transmiterea listelor electorale",
     "deadline": "25/04/2026",
-    "responsible": "CEC, BESV",
+    "responsible": ["CEC", "BESV"],
     "description": "Transmiterea listelor electorale către secții",
     "regulations": [
       { "id": "r1", "title": "art. 61 alin. (9)", "link": "" }
@@ -1033,7 +1033,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Publicarea listelor electorale",
     "deadline": "27/04/2026 - 10/05/2026",
-    "responsible": "BESV, CEC",
+    "responsible": ["BESV", "CEC"],
     "description": "Punerea la dispoziția publicului a listelor electorale",
     "regulations": [
       { "id": "r1", "title": "art. 62 alin. (1)", "link": "" }
@@ -1045,7 +1045,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Actualizarea listelor electorale",
     "deadline": "10/05/2026",
-    "responsible": "Alegători, BESV, APL",
+    "responsible": ["Alegători", "BESV", "APL"],
     "description": "Verificarea și actualizarea listelor electorale",
     "regulations": [
       { "id": "r1", "title": "art. 61 alin. (10)", "link": "" }
@@ -1057,7 +1057,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Tipărirea listelor actualizate",
     "deadline": "10/05/2026",
-    "responsible": "CEC, APL, BESV",
+    "responsible": ["CEC", "APL", "BESV"],
     "description": "Tipărirea și transmiterea listelor actualizate",
     "regulations": [
       { "id": "r1", "title": "art. 167 Cod electoral", "link": "" }
@@ -1069,7 +1069,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Informarea alegătorilor",
     "deadline": "07/05/2026",
-    "responsible": "BESV, CEC",
+    "responsible": ["BESV", "CEC"],
     "description": "Informarea alegătorilor despre locul și timpul votării",
     "regulations": [
       { "id": "r1", "title": "art. 75 Cod electoral", "link": "" }
@@ -1081,7 +1081,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Cereri vot la domiciliu",
     "deadline": "03/05/2026 - 16/05/2026",
-    "responsible": "BESV",
+    "responsible": ["BESV"],
     "description": "Primirea cererilor pentru vot la locul aflării",
     "regulations": [
       { "id": "r1", "title": "art. 80 alin. (4)", "link": "" }
@@ -1093,7 +1093,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Aprobarea materialelor electorale",
     "deadline": "16/02/2026 - 10/05/2026",
-    "responsible": "CEC",
+    "responsible": ["CEC"],
     "description": "Aprobarea modelelor documentelor electorale",
     "regulations": [
       { "id": "r1", "title": "art. 27 lit. k)", "link": "" }
@@ -1105,7 +1105,7 @@
     "group":["political", "political_organ", "public"],
     "title": "Acreditarea observatorilor",
     "deadline": "10/05/2026",
-    "responsible": "CEC",
+    "responsible": ["CEC"],
     "description": "Acreditarea observatorilor și monitorizarea alegerilor",
     "regulations": [
       { "id": "r1", "title": "art. 88 Cod electoral", "link": "" }
@@ -1124,7 +1124,7 @@
         "group":["political"],
         "title": "Stabilirea alegerilor locale noi1231231231",
         "deadline": "08/03/2026-09/04/2026",
-        "responsible": "CEC (DMA)",
+        "responsible": ["CEC (DMA)"],
         "description": "Adoptarea hotărârilor privind stabilirea alegerilor locale noi pentru data de 17 mai 2026",
         "regulations": [
           {
@@ -1140,7 +1140,7 @@
         "group":[ "political"],
         "title": "Începutul perioadei electorale -11111",
         "deadline": "06/03/2026",
-        "responsible": "CEC (DMA)",
+        "responsible": ["CEC (DMA)"],
         "description": "Începutul perioadei electorale",
         "regulations": [
           {
@@ -1156,7 +1156,7 @@
         "group":[ "public"],
         "title": "Începutul perioadei electoralec2222222222222",
         "deadline": "06/04/2026",
-        "responsible": "CEC",
+        "responsible": ["CEC"],
         "description": "Începutul perioadei electorale",
         "regulations": [
           {
@@ -1172,7 +1172,7 @@
         "group":[ "public"],
         "title": "Începutul perioadei electorale3333333333333",
         "deadline": "06/04/2026",
-        "responsible": "CEC",
+        "responsible": ["CEC"],
         "description": "Începutul perioadei electorale",
         "regulations": [
           {

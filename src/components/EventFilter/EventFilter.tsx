@@ -34,6 +34,15 @@ function EventFilter({
   calendarSlot,
   searchSlot,
 }: EventFilterProps) {
+
+
+
+
+
+
+  const uniqueValues = [...new Set(responsibleOptions.flatMap(str => str.split(',').map(s => s.trim())))];
+
+
   return (
     <div className="event-filter-panel border rounded p-2">
       <h3 className="event-filter-title">Filtrează</h3>
@@ -117,7 +126,7 @@ function EventFilter({
             aria-label="Filtrează după responsabil"
           >
             <option value="">Toți</option>
-            {responsibleOptions.map((responsible) => (
+            {uniqueValues.map((responsible) => (
               <option key={responsible} value={responsible}>
                 {responsible}
               </option>
