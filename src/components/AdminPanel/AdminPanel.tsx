@@ -1,112 +1,675 @@
-import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {Sidebar, HeaderBar, DashboardCards} from './components/index';
+import { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Sidebar, HeaderBar, DashboardCards } from './components/index';
 import EventsTable from './components/Table/EventsTable';
-import type { AdminEventItem, EventTypeFilter } from './components/Table/EventsTable.interface';
+import type { AdminEventItem } from './components/Table/EventsTable.interface';
+import Users from './pages/Users/Users';
 import { logoutAdmin } from '../../utils/adminAuth';
+import { ApiError, apiRequest } from '../../utils/api';
 import './components/AdminPanel.css';
 import type { AdminMenuItem } from './components/Sidebar/AdminSidebar.interface';
-import type { MockEvent } from './AdminPanel.interface';
 
-const MOCK_EVENTS: MockEvent[] = [
-  { id: '1', title: 'Depunere documente', deadline: '2026-03-27', type: 'Alegeri Locale', responsible: 'Partide' },
-  { id: '2', title: 'Notificarea CEC', deadline: '2026-03-20', type: 'Referendum', responsible: 'CEC' },
-  { id: '3', title: 'Notificarea CEC', deadline: '2026-03-10', type: 'Referendum', responsible: 'CEC' },
-  { id: '4', title: 'Notificarea CEC', deadline: '2026-03-10', type: 'Alegeri Locale', responsible: 'CEC' },
-  { id: '5', title: 'Înregistrare participanți', deadline: '2026-04-02', type: 'Alegeri Locale', responsible: 'Comisii locale' },
-  { id: '6', title: 'Publicare rezultate preliminare', deadline: '2026-04-06', type: 'Referendum', responsible: 'CEC' },
-];
-
-const USERS_COUNT = 3;
 const PAGE_SIZE = 5;
+const SCRUTINY_TYPES = [
+  'Alegeri parlamentare',
+  'Alegeri parlamentare noi',
+  'Alegeri prezidențiale',
+  'Referendum',
+  'Alegeri locale generale',
+  'Alegeri locale noi',
+  'Alegeri regionale',
+] as const;
+
+type ApiElection = {
+  id: string;
+  title: string;
+  isActive: boolean;
+  eday: string;
+};
+
+type ApiUser = {
+  id: string;
+  email: string;
+  role: string;
+  isActive: boolean;
+  createdAtUtc: string;
+};
+
+type ScrutinyForm = {
+  id?: string;
+  title: string;
+  electionDay: string;
+  isActive: boolean;
+};
+
+type UserForm = {
+  email: string;
+  password: string;
+  role: 'SuperAdmin' | 'Editor' | 'Viewer';
+  isActive: boolean;
+};
+
+function getMenuFromPath(pathname: string): AdminMenuItem {
+  return pathname.startsWith('/admin/users') ? 'Utilizatori' : 'Evenimente';
+}
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
   return date.toLocaleDateString('ro-RO', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-function computeStatus(dateStr: string): 'În desfășurare' | 'Expirat' {
-  const target = new Date(dateStr);
-  target.setHours(0, 0, 0, 0);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return target >= today ? 'În desfășurare' : 'Expirat';
-}
-
 function AdminPanel() {
   const navigate = useNavigate();
-  const [activeMenuItem, setActiveMenuItem] = useState<AdminMenuItem>('Evenimente');
+  const location = useLocation();
+  const activeMenuItem = getMenuFromPath(location.pathname);
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState<EventTypeFilter>('Toate');
   const [page, setPage] = useState(1);
+  const [elections, setElections] = useState<ApiElection[]>([]);
+  const [users, setUsers] = useState<ApiUser[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [formError, setFormError] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [isCreatingUser, setIsCreatingUser] = useState(false);
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [isDeleteUserModalOpen, setIsDeleteUserModalOpen] = useState(false);
+  const [pendingDeleteUserId, setPendingDeleteUserId] = useState<string | null>(null);
+  const [isDeletingUser, setIsDeletingUser] = useState(false);
+  const [userFormError, setUserFormError] = useState('');
+  const [userForm, setUserForm] = useState<UserForm>({
+    email: '',
+    password: '',
+    role: 'Viewer',
+    isActive: true,
+  });
+  const [scrutinyForm, setScrutinyForm] = useState<ScrutinyForm>({
+    title: SCRUTINY_TYPES[0],
+    electionDay: '',
+    isActive: true,
+  });
 
-  const enrichedEvents = useMemo<AdminEventItem[]>(
+  const loadAdminData = async () => {
+    setLoadError('');
+    const loadedElections = await apiRequest<ApiElection[]>('/elections');
+    let loadedUsers: ApiUser[] = [];
+    try {
+      loadedUsers = await apiRequest<ApiUser[]>('/users');
+    } catch (error) {
+      if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
+        loadedUsers = [];
+      } else {
+        throw error;
+      }
+    }
+    setElections(loadedElections);
+    setUsers(loadedUsers);
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      try {
+        if (!cancelled) await loadAdminData();
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 401) {
+          logoutAdmin();
+          navigate('/login', { replace: true });
+        } else {
+          setLoadError('Nu am putut incarca scrutinele. Verifica backend-ul.');
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [navigate]);
+
+  useEffect(() => {
+    setSearch('');
+    setPage(1);
+  }, [activeMenuItem]);
+
+  const scrutinyRows = useMemo<AdminEventItem[]>(
     () =>
-      MOCK_EVENTS.map((event) => ({
-        id: event.id,
-        title: event.title,
-        date: formatDate(event.deadline),
-        type: event.type,
-        responsible: event.responsible,
-        status: computeStatus(event.deadline),
+      elections.map((election) => ({
+        id: election.id,
+        title: election.title,
+        date: formatDate(election.eday),
+        status: election.isActive ? 'Activ' : 'Inactiv',
       })),
-    []
+    [elections]
   );
 
-  const filteredEvents = useMemo(() => {
+  const filteredRows = useMemo(() => {
     const query = search.trim().toLowerCase();
-    return enrichedEvents.filter((event) => {
-      const matchesFilter = filter === 'Toate' ? true : event.type === filter;
-      const matchesSearch = query
-        ? [event.title, event.date, event.type, event.responsible, event.status]
-            .join(' ')
-            .toLowerCase()
-            .includes(query)
-        : true;
-      return matchesFilter && matchesSearch;
-    });
-  }, [enrichedEvents, filter, search]);
+    if (!query) return scrutinyRows;
+    return scrutinyRows.filter((row) => [row.title, row.date, row.status].join(' ').toLowerCase().includes(query));
+  }, [scrutinyRows, search]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredEvents.length / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
-  const pagedEvents = filteredEvents.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const pagedRows = filteredRows.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
-  const total = enrichedEvents.length;
-  const active = enrichedEvents.filter((e) => e.status === 'În desfășurare').length;
-  const expired = enrichedEvents.filter((e) => e.status === 'Expirat').length;
+  const total = scrutinyRows.length;
+  const active = scrutinyRows.filter((x) => x.status === 'Activ').length;
+  const inactive = scrutinyRows.filter((x) => x.status === 'Inactiv').length;
+
+  const usersRows = useMemo(
+    () =>
+      users.map((user) => ({
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        status: user.isActive ? 'Activ' : 'Inactiv',
+        createdAt: formatDate(user.createdAtUtc),
+      })),
+    [users]
+  );
+
+  const filteredUsers = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return usersRows;
+    return usersRows.filter((user) => [user.email, user.role, user.status, user.createdAt].join(' ').toLowerCase().includes(query));
+  }, [usersRows, search]);
 
   const handleLogout = () => {
     logoutAdmin();
     navigate('/login', { replace: true });
   };
 
+  const handleMenuChange = (item: AdminMenuItem) => {
+    if (item === 'Utilizatori') {
+      navigate('/admin/users');
+      return;
+    }
+    navigate('/admin/events');
+  };
+
+  const openCreateModal = () => {
+    setFormError('');
+    setScrutinyForm({ title: SCRUTINY_TYPES[0], electionDay: '', isActive: true });
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (id: string) => {
+    const election = elections.find((x) => x.id === id);
+    if (!election) return;
+    setFormError('');
+    setScrutinyForm({
+      id: election.id,
+      title: election.title,
+      electionDay: election.eday,
+      isActive: election.isActive,
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleSaveScrutiny = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setFormError('');
+    if (!scrutinyForm.title.trim() || !scrutinyForm.electionDay) {
+      setFormError('Completeaza tipul scrutinului si data scrutinului.');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const payload = {
+        title: scrutinyForm.title.trim(),
+        isActive: scrutinyForm.isActive,
+        eday: scrutinyForm.electionDay,
+      };
+
+      if (scrutinyForm.id) {
+        await apiRequest(`/elections/${scrutinyForm.id}`, { method: 'PUT', body: JSON.stringify(payload) });
+      } else {
+        await apiRequest('/elections', { method: 'POST', body: JSON.stringify(payload) });
+      }
+
+      await loadAdminData();
+      setIsModalOpen(false);
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        logoutAdmin();
+        navigate('/login', { replace: true });
+      } else {
+        setFormError('Nu am putut salva scrutinul.');
+      }
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteScrutiny = (id: string) => {
+    setPendingDeleteId(id);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDeleteScrutiny = async () => {
+    if (!pendingDeleteId) return;
+    setIsDeleting(true);
+    try {
+      await apiRequest(`/elections/${pendingDeleteId}`, { method: 'DELETE' });
+      await loadAdminData();
+      setIsDeleteModalOpen(false);
+      setPendingDeleteId(null);
+    } catch {
+      setLoadError('Nu am putut sterge scrutinul.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const openCreateUserModal = () => {
+    setUserFormError('');
+    setEditingUserId(null);
+    setUserForm({
+      email: '',
+      password: '',
+      role: 'Viewer',
+      isActive: true,
+    });
+    setIsUserModalOpen(true);
+  };
+
+  const handleCreateUser = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setUserFormError('');
+
+    if (!userForm.email.trim() || (!editingUserId && !userForm.password.trim())) {
+      setUserFormError(editingUserId ? 'Completeaza email.' : 'Completeaza email si parola.');
+      return;
+    }
+
+    setIsCreatingUser(true);
+    try {
+      if (editingUserId) {
+        await apiRequest(`/users/${editingUserId}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            email: userForm.email.trim().toLowerCase(),
+            password: userForm.password.trim() || undefined,
+            role: userForm.role,
+            isActive: userForm.isActive,
+          }),
+        });
+      } else {
+        await apiRequest('/users', {
+          method: 'POST',
+          body: JSON.stringify({
+            email: userForm.email.trim().toLowerCase(),
+            password: userForm.password,
+            role: userForm.role,
+            isActive: userForm.isActive,
+          }),
+        });
+      }
+      await loadAdminData();
+      setIsUserModalOpen(false);
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        logoutAdmin();
+        navigate('/login', { replace: true });
+      } else if (error instanceof ApiError && error.status === 403) {
+        setUserFormError('Nu ai dreptul sa creezi utilizatori.');
+      } else {
+        setUserFormError(editingUserId ? 'Nu am putut modifica utilizatorul.' : 'Nu am putut crea utilizatorul.');
+      }
+    } finally {
+      setIsCreatingUser(false);
+    }
+  };
+
+  const openEditUserModal = (id: string) => {
+    const user = users.find((x) => x.id === id);
+    if (!user) return;
+    setEditingUserId(id);
+    setUserFormError('');
+    setUserForm({
+      email: user.email,
+      password: '',
+      role: user.role as UserForm['role'],
+      isActive: user.isActive,
+    });
+    setIsUserModalOpen(true);
+  };
+
+  const requestDeleteUser = (id: string) => {
+    setPendingDeleteUserId(id);
+    setIsDeleteUserModalOpen(true);
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!pendingDeleteUserId) return;
+    setIsDeletingUser(true);
+    setUserFormError('');
+    try {
+      await apiRequest(`/users/${pendingDeleteUserId}`, { method: 'DELETE' });
+      await loadAdminData();
+      setIsDeleteUserModalOpen(false);
+      setPendingDeleteUserId(null);
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        logoutAdmin();
+        navigate('/login', { replace: true });
+      } else if (error instanceof ApiError && error.status === 403) {
+        setUserFormError('Nu ai dreptul sa stergi utilizatori.');
+      } else {
+        setUserFormError('Nu am putut sterge utilizatorul.');
+      }
+    } finally {
+      setIsDeletingUser(false);
+    }
+  };
+
   return (
     <div className="admin-layout bg-body-tertiary">
-      <Sidebar activeItem={activeMenuItem} onChange={setActiveMenuItem} />
+      <Sidebar activeItem={activeMenuItem} onChange={handleMenuChange} />
 
       <main className="admin-layout__content p-3 p-md-4">
-        <HeaderBar title="Admin Dashboard" onLogout={handleLogout} />
+        <HeaderBar title={activeMenuItem === 'Utilizatori' ? 'Administrare Utilizatori' : 'Administrare Scrutine'} onLogout={handleLogout} />
+        <DashboardCards total={total} active={active} expired={inactive} users={users.length} />
 
-        <DashboardCards total={total} active={active} expired={expired} users={USERS_COUNT} />
+        {loading ? <div className="alert alert-info">Se incarca datele...</div> : null}
+        {loadError ? <div className="alert alert-warning">{loadError}</div> : null}
 
-        <EventsTable
-          events={pagedEvents}
-          search={search}
-          onSearch={(value) => {
-            setSearch(value);
-            setPage(1);
-          }}
-          filter={filter}
-          onFilterChange={(value) => {
-            setFilter(value);
-            setPage(1);
-          }}
-          page={safePage}
-          totalPages={totalPages}
-          onPageChange={setPage}
-          totalCount={filteredEvents.length}
-        />
+        {activeMenuItem === 'Utilizatori' ? (
+          <Users
+            users={filteredUsers}
+            search={search}
+            onSearch={(value) => {
+              setSearch(value);
+            }}
+            onCreateUserClick={openCreateUserModal}
+            onEditUserClick={openEditUserModal}
+            onDeleteUserClick={requestDeleteUser}
+          />
+        ) : (
+          <EventsTable
+            events={pagedRows}
+            search={search}
+            onSearch={(value) => {
+              setSearch(value);
+              setPage(1);
+            }}
+            onAddEventClick={openCreateModal}
+            onManageEvents={(id) => navigate(`/admin/scrutiny/${id}/events`)}
+            onEdit={openEditModal}
+            onDelete={handleDeleteScrutiny}
+            page={safePage}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            totalCount={filteredRows.length}
+          />
+        )}
       </main>
+
+      {activeMenuItem !== 'Utilizatori' && isModalOpen ? (
+        <div className="modal fade show d-block" tabIndex={-1} role="dialog">
+          <div className="modal-dialog modal-dialog-centered admin-confirm-modal" role="document">
+            <div className="modal-content admin-confirm-modal__content">
+              <div className="modal-header">
+                <h5 className="modal-title">{scrutinyForm.id ? 'Modifică Scrutin' : 'Adaugă Scrutin'}</h5>
+                <button type="button" className="btn-close" onClick={() => setIsModalOpen(false)} />
+              </div>
+
+              <form onSubmit={handleSaveScrutiny}>
+                <div className="modal-body">
+                  <div className="mb-3">
+                    <label className="form-label">Tip scrutin</label>
+                    <select
+                      className="form-select"
+                      value={scrutinyForm.title}
+                      onChange={(e) => setScrutinyForm((prev) => ({ ...prev, title: e.target.value }))}
+                    >
+                      {SCRUTINY_TYPES.map((item) => (
+                        <option key={item} value={item}>
+                          {item}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label">Data scrutinului</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={scrutinyForm.electionDay}
+                      onChange={(e) => setScrutinyForm((prev) => ({ ...prev, electionDay: e.target.value }))}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label d-block">Status</label>
+                    <div className="form-check form-check-inline">
+                      <input
+                        id="statusActive"
+                        type="radio"
+                        className="form-check-input"
+                        checked={scrutinyForm.isActive}
+                        onChange={() => setScrutinyForm((prev) => ({ ...prev, isActive: true }))}
+                      />
+                      <label className="form-check-label" htmlFor="statusActive">Activ</label>
+                    </div>
+                    <div className="form-check form-check-inline">
+                      <input
+                        id="statusInactive"
+                        type="radio"
+                        className="form-check-input"
+                        checked={!scrutinyForm.isActive}
+                        onChange={() => setScrutinyForm((prev) => ({ ...prev, isActive: false }))}
+                      />
+                      <label className="form-check-label" htmlFor="statusInactive">Inactiv</label>
+                    </div>
+                  </div>
+
+                  {formError ? <div className="alert alert-danger mt-3 mb-0 py-2">{formError}</div> : null}
+                </div>
+
+                <div className="modal-footer">
+                  <button type="submit" className="btn btn-success" disabled={isSaving}>
+                    {isSaving ? 'Se salvează...' : 'Salvează'}
+                  </button>
+                  <button type="button" className="btn btn-danger" onClick={() => setIsModalOpen(false)}>
+                    Anulează
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      ) : null}
+      {activeMenuItem !== 'Utilizatori' && isModalOpen ? <div className="modal-backdrop fade show" /> : null}
+
+      {activeMenuItem !== 'Utilizatori' && isDeleteModalOpen ? (
+        <div className="modal fade show d-block" tabIndex={-1} role="dialog">
+          <div className="modal-dialog modal-dialog-centered admin-confirm-modal" role="document">
+            <div className="modal-content admin-confirm-modal__content">
+              <div className="modal-header admin-confirm-modal__header">
+                <div className="d-flex align-items-center gap-3">
+                  <h5 className="modal-title mb-0">Confirmare ștergere</h5>
+                </div>
+                <button
+                  type="button"
+                  className="btn-close admin-confirm-modal__close"
+                  onClick={() => {
+                    setIsDeleteModalOpen(false);
+                    setPendingDeleteId(null);
+                  }}
+                />
+              </div>
+              <div className="modal-body admin-confirm-modal__body">
+                Ești sigur că vrei să ștergi acest scrutin?
+              </div>
+              <div className="modal-footer admin-confirm-modal__footer">
+                <button
+                  type="button"
+                  className="btn admin-confirm-modal__btn admin-confirm-modal__btn--cancel"
+                  onClick={() => {
+                    setIsDeleteModalOpen(false);
+                    setPendingDeleteId(null);
+                  }}
+                  disabled={isDeleting}
+                >
+                  Renunță
+                </button>
+                <button
+                  type="button"
+                  className="btn admin-confirm-modal__btn admin-confirm-modal__btn--delete"
+                  onClick={confirmDeleteScrutiny}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? 'Se șterge...' : 'Șterge'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+      {activeMenuItem !== 'Utilizatori' && isDeleteModalOpen ? <div className="modal-backdrop fade show" /> : null}
+
+      {activeMenuItem === 'Utilizatori' && isUserModalOpen ? (
+        <div className="modal fade show d-block" tabIndex={-1} role="dialog">
+          <div className="modal-dialog modal-dialog-centered admin-confirm-modal" role="document">
+            <div className="modal-content admin-confirm-modal__content">
+              <div className="modal-header">
+                <h5 className="modal-title">{editingUserId ? 'Modifica utilizator' : 'Creaza utilizator'}</h5>
+                <button type="button" className="btn-close" onClick={() => setIsUserModalOpen(false)} />
+              </div>
+
+              <form onSubmit={handleCreateUser}>
+                <div className="modal-body">
+                  <div className="mb-3">
+                    <label className="form-label">Email</label>
+                    <input
+                      type="email"
+                      className="form-control"
+                      value={userForm.email}
+                      onChange={(e) => setUserForm((prev) => ({ ...prev, email: e.target.value }))}
+                    />
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label">Parola</label>
+                    <input
+                      type="password"
+                      className="form-control"
+                      value={userForm.password}
+                      onChange={(e) => setUserForm((prev) => ({ ...prev, password: e.target.value }))}
+                      placeholder={editingUserId ? 'Lasa gol pentru a pastra parola curenta' : ''}
+                    />
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label">Rol</label>
+                    <select
+                      className="form-select"
+                      value={userForm.role}
+                      onChange={(e) =>
+                        setUserForm((prev) => ({ ...prev, role: e.target.value as UserForm['role'] }))
+                      }
+                    >
+                      <option value="Viewer">Viewer</option>
+                      <option value="Editor">Editor</option>
+                      <option value="SuperAdmin">SuperAdmin</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="form-label d-block">Status</label>
+                    <div className="form-check form-check-inline">
+                      <input
+                        id="userStatusActive"
+                        type="radio"
+                        className="form-check-input"
+                        checked={userForm.isActive}
+                        onChange={() => setUserForm((prev) => ({ ...prev, isActive: true }))}
+                      />
+                      <label className="form-check-label" htmlFor="userStatusActive">Activ</label>
+                    </div>
+                    <div className="form-check form-check-inline">
+                      <input
+                        id="userStatusInactive"
+                        type="radio"
+                        className="form-check-input"
+                        checked={!userForm.isActive}
+                        onChange={() => setUserForm((prev) => ({ ...prev, isActive: false }))}
+                      />
+                      <label className="form-check-label" htmlFor="userStatusInactive">Inactiv</label>
+                    </div>
+                  </div>
+
+                  {userFormError ? <div className="alert alert-danger mt-3 mb-0 py-2">{userFormError}</div> : null}
+                </div>
+
+                <div className="modal-footer">
+                  <button type="submit" className="btn btn-success" disabled={isCreatingUser}>
+                    {isCreatingUser ? 'Se salveaza...' : editingUserId ? 'Salveaza' : 'Creaza'}
+                  </button>
+                  <button type="button" className="btn btn-danger" onClick={() => setIsUserModalOpen(false)}>
+                    Anuleaza
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      ) : null}
+      {activeMenuItem === 'Utilizatori' && isUserModalOpen ? <div className="modal-backdrop fade show" /> : null}
+
+      {activeMenuItem === 'Utilizatori' && isDeleteUserModalOpen ? (
+        <div className="modal fade show d-block" tabIndex={-1} role="dialog">
+          <div className="modal-dialog modal-dialog-centered admin-confirm-modal" role="document">
+            <div className="modal-content admin-confirm-modal__content">
+              <div className="modal-header admin-confirm-modal__header">
+                <h5 className="modal-title mb-0">Confirmare ștergere</h5>
+                <button
+                  type="button"
+                  className="btn-close admin-confirm-modal__close"
+                  onClick={() => {
+                    setIsDeleteUserModalOpen(false);
+                    setPendingDeleteUserId(null);
+                  }}
+                />
+              </div>
+              <div className="modal-body admin-confirm-modal__body">
+                Ești sigur că vrei să ștergi acest utilizator?
+              </div>
+              <div className="modal-footer admin-confirm-modal__footer">
+                <button
+                  type="button"
+                  className="btn admin-confirm-modal__btn admin-confirm-modal__btn--cancel"
+                  onClick={() => {
+                    setIsDeleteUserModalOpen(false);
+                    setPendingDeleteUserId(null);
+                  }}
+                  disabled={isDeletingUser}
+                >
+                  Renunță
+                </button>
+                <button
+                  type="button"
+                  className="btn admin-confirm-modal__btn admin-confirm-modal__btn--delete"
+                  onClick={confirmDeleteUser}
+                  disabled={isDeletingUser}
+                >
+                  {isDeletingUser ? 'Se șterge...' : 'Șterge'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+      {activeMenuItem === 'Utilizatori' && isDeleteUserModalOpen ? <div className="modal-backdrop fade show" /> : null}
     </div>
   );
 }

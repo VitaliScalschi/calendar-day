@@ -1,4 +1,4 @@
-export type AdminMenuItem = 'Dashboard' | 'Evenimente' | 'Categorii' | 'Utilizatori';
+export type AdminMenuItem = 'Evenimente' | 'Utilizatori';
 
 export interface SidebarProps {
   activeItem: AdminMenuItem;

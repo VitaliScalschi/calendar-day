@@ -8,6 +8,7 @@ function LoginPage() {
   const [email, setEmail] = useState(ADMIN_DEFAULT_EMAIL);
   const [password, setPassword] = useState('admin123');
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (isAdminLoggedIn()) {
     return <Navigate to="/admin" replace />;
@@ -15,9 +16,18 @@ function LoginPage() {
 
   const from = (location.state as { from?: string } | null)?.from || '/admin';
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const ok = loginAdmin(email, password);
+    setIsSubmitting(true);
+    let ok = false;
+
+    try {
+      ok = await loginAdmin(email, password);
+    } catch {
+      ok = false;
+    } finally {
+      setIsSubmitting(false);
+    }
 
     if (!ok) {
       setError('Date de autentificare invalide. Încearcă din nou.');
@@ -62,7 +72,9 @@ function LoginPage() {
 
             {error && <div className="alert alert-danger py-2 mb-0">{error}</div>}
 
-            <button type="submit" className="btn btn-primary w-100">Login</button>
+            <button type="submit" className="btn btn-primary w-100" disabled={isSubmitting}>
+              {isSubmitting ? 'Se autentifica...' : 'Login'}
+            </button>
           </form>
 
           <div className="mt-3 small text-secondary">

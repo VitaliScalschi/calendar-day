@@ -29,18 +29,16 @@
 }
 
 .modal-header {
-  background: var(--color-primary);
-  color: var(--color-text-light);
-  border-bottom: 0;
+  color: black;
 }
 
-.modal-header-icon {
+/* .modal-header-icon {
   font-size: 1.35rem;
-}
+} */
 
 .modal-title {
   margin: 0;
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 600;
 }
 
