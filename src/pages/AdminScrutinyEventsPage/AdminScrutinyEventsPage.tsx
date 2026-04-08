@@ -47,7 +47,6 @@ const parseApiErrorMessage = (message: string) => {
 function AdminScrutinyEventsPage() {
   const { scrutinyId } = useParams();
   const navigate = useNavigate();
-  const [activeMenuItem, setActiveMenuItem] = useState<AdminMenuItem>('Evenimente');
   const [election, setElection] = useState<ApiElection | null>(null);
   const [events, setEvents] = useState<ApiDeadline[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -73,6 +72,13 @@ function AdminScrutinyEventsPage() {
     description: '',
     additionalInfo: '',
   });
+
+  const toSqlDateLocal = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
   const loadData = async () => {
     if (!scrutinyId) return;
@@ -143,7 +149,8 @@ function AdminScrutinyEventsPage() {
       const payload = {
         electionId: scrutinyId,
         title: form.title.trim(),
-        deadline: deadlineDate.toISOString().slice(0, 10),
+        // Keep selected calendar day exactly as local date (no timezone shift).
+        deadline: toSqlDateLocal(deadlineDate),
         description: form.description.trim(),
         additionalInfo: form.additionalInfo.trim() || undefined,
         responsible: cleanedResponsibles,
@@ -322,9 +329,17 @@ function AdminScrutinyEventsPage() {
     setSelectedGroups((prev) => (prev.includes(group) ? prev.filter((g) => g !== group) : [...prev, group]));
   };
 
+  const handleAdminMenuChange = (item: AdminMenuItem) => {
+    if (item === 'Utilizatori') {
+      navigate('/admin/users');
+      return;
+    }
+    navigate('/admin/events');
+  };
+
   return (
     <div className="admin-layout bg-body-tertiary">
-      <Sidebar activeItem={activeMenuItem} onChange={setActiveMenuItem} />
+      <Sidebar activeItem="Evenimente" onChange={handleAdminMenuChange} />
       <main className="admin-layout__content p-3 p-md-4">
         <header className="admin-events-topbar bg-white border rounded-3 px-3 px-md-4 py-3 mb-3 d-flex justify-content-between align-items-center">
           <button

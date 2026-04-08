@@ -27,10 +27,6 @@ function EventFilter({
   responsibleOptions,
   selectedResponsible,
   onResponsibleChange,
-  hasActiveFilters,
-  canApplyFilters,
-  onResetFilters,
-  onApplyFilters,
   calendarSlot,
   searchSlot,
 }: EventFilterProps) {
@@ -96,7 +92,7 @@ function EventFilter({
 
       <div className="event-filter-section">
         <label className="responsible-filter__label mb-0" htmlFor="responsible-filter-select">
-            Tip acțiune:
+            Perioada evenimentului:
           </label>
         <select
           className="form-select form-select-sm responsible-filter__select"
@@ -144,28 +140,6 @@ function EventFilter({
           <div className="event-filter-calendar-slot">{calendarSlot}</div>
         </>
       ) : null}
-      <div className="event-filter-divider" />
-      <div className="event-filter-actions d-flex flex-column align-items-center justify-content-end gap-2">
-        <button
-        type="button"
-        className="btn btn-sm btn-primary event-filter-apply-btn mt-3"
-        onClick={onApplyFilters}
-        disabled={!canApplyFilters}
-      >
-        Aplică filtru
-      </button>
-        <button
-          type="button" 
-          className="btn btn-sm btn-link event-filter-reset-btn py-1"
-          onClick={onResetFilters}
-          disabled={!hasActiveFilters}
-          aria-label="Resetează toate filtrele"
-        >
-          <i className="fa-solid fa-rotate-left" aria-hidden="true"></i>
-          Reset filtre
-        </button>
-        
-      </div>
     </div>
   )
 }

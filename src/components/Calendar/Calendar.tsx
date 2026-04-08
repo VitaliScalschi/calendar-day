@@ -144,8 +144,7 @@ function Calendar({ eday, deadlines = [], selectedDateKey: selectedDateKeyProp =
     }
 
     setSelectedDateKey((prev) => {
-      const next = prev && deadlinesByDateKey.has(prev) ? prev : deadlineRange.first;
-      return next;
+      return prev && deadlinesByDateKey.has(prev) ? prev : null;
     });
   }, [deadlineRange, deadlinesByDateKey, onSelectDateKey]);
 
@@ -228,8 +227,9 @@ function Calendar({ eday, deadlines = [], selectedDateKey: selectedDateKeyProp =
           aria-disabled={isDisabled}
           onClick={() => {
             if (isDisabled) return;
-            setSelectedDateKey(cellKey);
-            onSelectDateKey?.(cellKey);
+            const nextSelected = selectedDateKey === cellKey ? null : cellKey;
+            setSelectedDateKey(nextSelected);
+            onSelectDateKey?.(nextSelected);
           }}
         >
           {day}
