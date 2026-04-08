@@ -5,11 +5,77 @@ using CalendarDay.Application.Contracts.Regulations;
 using CalendarDay.Domain.Entities;
 using CalendarDay.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace CalendarDay.Infrastructure.Services;
 
 public class DeadlinesService(CalendarDayDbContext db) : IDeadlinesService
 {
+    private const string RangeMetaPrefix = "[[RANGE:";
+
+    private static bool IsRangeDeadline(string deadline) => deadline.Contains(" - ", StringComparison.Ordinal);
+
+    private static string MergeAdditionalInfoWithRange(string? additionalInfo, string deadline)
+    {
+        var cleaned = RemoveRangeMeta(additionalInfo);
+        if (!IsRangeDeadline(deadline)) return cleaned;
+        var meta = $"{RangeMetaPrefix}{deadline.Trim()}]]";
+        return string.IsNullOrWhiteSpace(cleaned) ? meta : $"{cleaned} {meta}";
+    }
+
+    private static string RemoveRangeMeta(string? additionalInfo)
+    {
+        if (string.IsNullOrWhiteSpace(additionalInfo)) return string.Empty;
+        var value = additionalInfo.Trim();
+        var start = value.IndexOf(RangeMetaPrefix, StringComparison.Ordinal);
+        if (start < 0) return value;
+        var end = value.IndexOf("]]", start, StringComparison.Ordinal);
+        if (end < 0) return value;
+        return (value.Remove(start, (end + 2) - start)).Trim();
+    }
+
+    private static string ResolveDeadlineDisplay(DateOnly deadlineDate, string? additionalInfo)
+    {
+        if (!string.IsNullOrWhiteSpace(additionalInfo))
+        {
+            var start = additionalInfo.IndexOf(RangeMetaPrefix, StringComparison.Ordinal);
+            if (start >= 0)
+            {
+                var end = additionalInfo.IndexOf("]]", start, StringComparison.Ordinal);
+                if (end > start)
+                {
+                    var rangeValue = additionalInfo.Substring(start + RangeMetaPrefix.Length, end - (start + RangeMetaPrefix.Length)).Trim();
+                    if (!string.IsNullOrWhiteSpace(rangeValue))
+                        return rangeValue;
+                }
+            }
+        }
+
+        return deadlineDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+    }
+
+    private static DateOnly ParseDeadlineDate(string deadline)
+    {
+        var raw = (deadline ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(raw))
+            throw new ArgumentException("Deadline is required.");
+
+        // Supports "YYYY-MM-DD - YYYY-MM-DD" and stores interval end.
+        var parts = raw.Split(" - ", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        var candidate = parts.Length > 1 ? parts[^1] : parts[0];
+
+        if (DateOnly.TryParseExact(candidate, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedRo))
+            return parsedRo;
+
+        if (DateOnly.TryParseExact(candidate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedIso))
+            return parsedIso;
+
+        if (DateOnly.TryParse(candidate, out var parsed))
+            return parsed;
+
+        throw new ArgumentException("Deadline format is invalid. Use DD/MM/YYYY or DD/MM/YYYY - DD/MM/YYYY.");
+    }
+
     public async Task<PagedResult<DeadlineDto>> GetAsync(DeadlineQuery query, CancellationToken ct)
     {
         var q = db.Deadlines
@@ -61,8 +127,8 @@ public class DeadlinesService(CalendarDayDbContext db) : IDeadlinesService
             Id = Guid.NewGuid(),
             ElectionId = dto.ElectionId,
             Title = dto.Title.Trim(),
-            AdditionalInfo = dto.AdditionalInfo,
-            DeadlineDate = dto.Deadline,
+            AdditionalInfo = MergeAdditionalInfoWithRange(dto.AdditionalInfo, dto.Deadline),
+            DeadlineDate = ParseDeadlineDate(dto.Deadline),
             Description = dto.Description.Trim(),
             Responsibles = dto.Responsible.Select(x => new DeadlineResponsible { Id = Guid.NewGuid(), Value = x.Trim() }).ToList(),
             Groups = dto.Group.Select(x => new DeadlineGroup { Id = Guid.NewGuid(), Value = x.Trim() }).ToList(),
@@ -86,8 +152,8 @@ public class DeadlinesService(CalendarDayDbContext db) : IDeadlinesService
 
         entity.ElectionId = dto.ElectionId;
         entity.Title = dto.Title.Trim();
-        entity.AdditionalInfo = dto.AdditionalInfo;
-        entity.DeadlineDate = dto.Deadline;
+        entity.AdditionalInfo = MergeAdditionalInfoWithRange(dto.AdditionalInfo, dto.Deadline);
+        entity.DeadlineDate = ParseDeadlineDate(dto.Deadline);
         entity.Description = dto.Description.Trim();
         entity.UpdatedAtUtc = DateTime.UtcNow;
 
@@ -145,8 +211,8 @@ public class DeadlinesService(CalendarDayDbContext db) : IDeadlinesService
                     e.Id,
                     e.Title,
                     d.Title,
-                    d.AdditionalInfo,
-                    d.DeadlineDate,
+                    RemoveRangeMeta(d.AdditionalInfo),
+                    ResolveDeadlineDisplay(d.DeadlineDate, d.AdditionalInfo),
                     d.Description,
                     d.Responsibles.Select(x => x.Value).ToList(),
                     d.Groups.Select(x => x.Value).ToList(),
@@ -190,8 +256,8 @@ public class DeadlinesService(CalendarDayDbContext db) : IDeadlinesService
             d.ElectionId,
             d.Election.Title,
             d.Title,
-            d.AdditionalInfo,
-            d.DeadlineDate,
+            RemoveRangeMeta(d.AdditionalInfo),
+            ResolveDeadlineDisplay(d.DeadlineDate, d.AdditionalInfo),
             d.Description,
             d.Responsibles.Select(x => x.Value).ToList(),
             d.Groups.Select(x => x.Value).ToList(),

@@ -21,18 +21,18 @@ function TimelineEvent({
     if (!value) return null;
     const v = value.trim();
 
-    const fullRangeMatch = v.match(/^(\d{1,2}\/\d{1,2}\/\d{4})\s*-\s*(\d{1,2}\/\d{1,2}\/\d{4})$/);
+    const fullRangeMatch = v.match(/^(\d{1,2}[/.]\d{1,2}[/.]\d{4})\s*-\s*(\d{1,2}[/.]\d{1,2}[/.]\d{4})$/);
     if (fullRangeMatch) {
       const [, start, end] = fullRangeMatch;
-      return { start: formatDateTime(start), end: formatDateTime(end) };
+      return { start, end };
     }
 
-    const shortRangeMatch = v.match(/^(\d{1,2})\s*-\s*(\d{1,2}\/\d{1,2}\/\d{4})$/);
+    const shortRangeMatch = v.match(/^(\d{1,2})\s*-\s*(\d{1,2}[/.]\d{1,2}[/.]\d{4})$/);
     if (shortRangeMatch) {
       const [, startDay, end] = shortRangeMatch;
-      const [, endMonth, endYear] = end.split('/');
+      const [, endMonth, endYear] = end.split(/[/.]/);
       const start = `${startDay.padStart(2, '0')}/${endMonth}/${endYear}`;
-      return { start: formatDateTime(start), end: formatDateTime(end) };
+      return { start, end };
     }
 
     return null;
@@ -43,7 +43,7 @@ function TimelineEvent({
 
   const formatDeadlineDisplay = (value?: string): string => {
     if (!value) return '';
-    if (normalizedRange) return `${normalizedRange.start} - ${normalizedRange.end}`;
+    if (normalizedRange) return `${formatDateTime(normalizedRange.start)} - ${formatDateTime(normalizedRange.end)}`;
 
     return formatDateTime(value.trim());
   };
@@ -67,8 +67,8 @@ function TimelineEvent({
         date = new Date(dateStr);
       } else if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
         date = new Date(dateStr);
-      } else if (/^\d{2}\/\d{2}\/\d{4}/.test(dateStr)) {
-        const [day, month, year] = dateStr.split('/').map(Number);
+      } else if (/^\d{2}[/.]\d{2}[/.]\d{4}/.test(dateStr)) {
+        const [day, month, year] = dateStr.split(/[/.]/).map(Number);
         date = new Date(year, month - 1, day);
       } else {
         return { dayMonth: dateStr, year: '' };

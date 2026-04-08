@@ -1,0 +1,10 @@
+.git
+.gitignore
+node_modules
+dist
+coverage
+.cursor
+backend-csharp/**/bin
+backend-csharp/**/obj
+**/.DS_Store
+**/Thumbs.db

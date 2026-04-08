@@ -1,10 +1,12 @@
 using CalendarDay.Application.Validation;
 using CalendarDay.Infrastructure.Auth;
 using CalendarDay.Infrastructure;
+using CalendarDay.Infrastructure.Persistence;
 using CalendarDay.Infrastructure.Seed;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -38,12 +40,16 @@ builder.Services
     });
 
 builder.Services.AddAuthorization();
+var configuredOrigins = builder.Configuration.GetValue<string>("Cors:AllowedOrigins");
+var allowedOrigins = string.IsNullOrWhiteSpace(configuredOrigins)
+    ? ["http://localhost:5173", "http://localhost:5174"]
+    : configuredOrigins.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("frontend", policy =>
     {
         policy
-            .WithOrigins("http://localhost:5173", "http://localhost:5174")
+            .WithOrigins(allowedOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -56,6 +62,9 @@ using (var scope = app.Services.CreateScope())
     var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Startup");
     try
     {
+        var dbContext = scope.ServiceProvider.GetRequiredService<CalendarDayDbContext>();
+        await dbContext.Database.MigrateAsync();
+
         var defaultUsersSeed = scope.ServiceProvider.GetRequiredService<DefaultUsersSeedService>();
         await defaultUsersSeed.EnsureDefaultUsersAsync();
     }
