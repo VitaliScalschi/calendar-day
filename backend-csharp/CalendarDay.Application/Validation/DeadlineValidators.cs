@@ -11,6 +11,7 @@ public class CreateDeadlineDtoValidator : AbstractValidator<CreateDeadlineDto>
     {
         RuleFor(x => x.ElectionId).NotEmpty();
         RuleFor(x => x.Title).NotEmpty().MaximumLength(350);
+        RuleFor(x => x.Deadline).NotEmpty();
         RuleFor(x => x.Description).NotEmpty();
         RuleForEach(x => x.Responsible).NotEmpty();
         RuleForEach(x => x.Group)

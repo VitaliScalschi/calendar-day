@@ -8,7 +8,7 @@ public record DeadlineDto(
     string ElectionTitle,
     string Title,
     string? AdditionalInfo,
-    DateOnly Deadline,
+    string Deadline,
     string Description,
     IReadOnlyList<string> Responsible,
     IReadOnlyList<string> Group,
@@ -20,7 +20,7 @@ public class CreateDeadlineDto
     public Guid ElectionId { get; set; }
     public string Title { get; set; } = string.Empty;
     public string? AdditionalInfo { get; set; }
-    public DateOnly Deadline { get; set; }
+    public string Deadline { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public List<string> Responsible { get; set; } = [];
     public List<string> Group { get; set; } = [];

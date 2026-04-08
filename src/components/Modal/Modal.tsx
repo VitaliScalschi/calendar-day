@@ -43,9 +43,9 @@ function Modal({ isOpen, onClose, deadline }: ModalProps) {
       <div className="modal-content card border-0 shadow-lg bg-white w-100" onClick={(e) => e.stopPropagation()}>
         <div className="card-header modal-header d-flex justify-content-between align-items-center px-4 py-2">
           <div className="d-flex align-items-center gap-2">
-            <span className="modal-header-icon" aria-hidden="true">
+            {/* <span className="modal-header-icon" aria-hidden="true">
               <i className="fa-solid fa-calendar-days fa-lg"></i>
-            </span>
+            </span> */}
             <h3 className="modal-title mb-0">{TITLE_CARD}</h3>
           </div>
           <button type="button" className="btn-close modal-close-btn" onClick={onClose} aria-label="Close"></button>

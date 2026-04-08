@@ -34,6 +34,7 @@ const AVAILABLE_GROUPS = [
   { key: 'public', label: 'Public Larg' },
 ] as const;
 const ALLOWED_GROUP_KEYS = AVAILABLE_GROUPS.map((group) => group.key);
+const RANGE_META_REGEX = /\[\[RANGE:(\d{4}-\d{2}-\d{2})\|(\d{4}-\d{2}-\d{2})\]\]/;
 
 const parseApiErrorMessage = (message: string) => {
   try {
@@ -80,6 +81,45 @@ function AdminScrutinyEventsPage() {
     return `${year}-${month}-${day}`;
   };
 
+  const toRoDateLocal = (date: Date): string => {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  const extractRangeMeta = (additionalInfo?: string | null): { start: string; end: string; cleanInfo: string } | null => {
+    if (!additionalInfo) return null;
+    const match = additionalInfo.match(RANGE_META_REGEX);
+    if (!match) return null;
+    const [, start, end] = match;
+    const cleanInfo = additionalInfo.replace(RANGE_META_REGEX, '').trim();
+    return { start, end, cleanInfo };
+  };
+
+  const withRangeMeta = (additionalInfo: string | undefined, start: string, end: string): string => {
+    const base = (additionalInfo || '').replace(RANGE_META_REGEX, '').trim();
+    const rangeMeta = `[[RANGE:${start}|${end}]]`;
+    return base ? `${base} ${rangeMeta}` : rangeMeta;
+  };
+
+  const normalizeDateLabel = (value: string): string => {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      const [year, month, day] = value.split('-');
+      return `${day}.${month}.${year}`;
+    }
+    return value.replace(/\//g, '.');
+  };
+
+  const formatDeadlineLabel = (deadlineValue: string): string => {
+    const rangeMatch = deadlineValue.match(/^(\d{4}-\d{2}-\d{2}|\d{2}\/\d{2}\/\d{4})\s*-\s*(\d{4}-\d{2}-\d{2}|\d{2}\/\d{2}\/\d{4})$/);
+    if (rangeMatch) {
+      const [, start, end] = rangeMatch;
+      return `${normalizeDateLabel(start)} - ${normalizeDateLabel(end)}`;
+    }
+    return normalizeDateLabel(deadlineValue);
+  };
+
   const loadData = async () => {
     if (!scrutinyId) return;
     const [elections, deadlines] = await Promise.all([
@@ -87,7 +127,16 @@ function AdminScrutinyEventsPage() {
       apiRequest<PagedResult<ApiDeadline>>(`/deadlines?electionId=${scrutinyId}&page=1&pageSize=200`),
     ]);
     setElection(elections.find((x) => x.id === scrutinyId) || null);
-    setEvents(deadlines.items || []);
+    const normalizedEvents = (deadlines.items || []).map((item) => {
+      const rangeMeta = extractRangeMeta(item.additionalInfo);
+      if (!rangeMeta) return item;
+      return {
+        ...item,
+        deadline: `${rangeMeta.start} - ${rangeMeta.end}`,
+        additionalInfo: rangeMeta.cleanInfo || undefined,
+      };
+    });
+    setEvents(normalizedEvents);
   };
 
   useEffect(() => {
@@ -110,7 +159,7 @@ function AdminScrutinyEventsPage() {
     () =>
       events.map((event) => ({
         ...event,
-        deadlineLabel: new Date(event.deadline).toLocaleDateString('ro-RO'),
+        deadlineLabel: formatDeadlineLabel(event.deadline),
       })),
     [events]
   );
@@ -124,6 +173,7 @@ function AdminScrutinyEventsPage() {
     e.preventDefault();
     setError('');
     if (!scrutinyId) return;
+    const rangeStartDate = dateRange[0]?.startDate ?? null;
     const rangeDeadlineDate = dateRange[0]?.endDate ?? dateRange[0]?.startDate;
     const singleDeadline = singleDeadlineDate ? new Date(`${singleDeadlineDate}T00:00:00`) : null;
     const deadlineDate = useDateInterval ? rangeDeadlineDate : singleDeadline;
@@ -146,13 +196,18 @@ function AdminScrutinyEventsPage() {
     try {
       const cleanedResponsibles = responsibles.map((x) => x.trim()).filter(Boolean);
       const cleanedGroups = selectedGroups.filter((group) => ALLOWED_GROUP_KEYS.includes(group as (typeof ALLOWED_GROUP_KEYS)[number]));
+      const singleAdditionalInfo = form.additionalInfo.trim() || undefined;
+      const intervalAdditionalInfo = singleAdditionalInfo;
+      const deadlineValue =
+        useDateInterval && rangeStartDate && rangeDeadlineDate
+          ? `${toRoDateLocal(rangeStartDate)} - ${toRoDateLocal(rangeDeadlineDate)}`
+          : toRoDateLocal(deadlineDate);
       const payload = {
         electionId: scrutinyId,
         title: form.title.trim(),
-        // Keep selected calendar day exactly as local date (no timezone shift).
-        deadline: toSqlDateLocal(deadlineDate),
+        deadline: deadlineValue,
         description: form.description.trim(),
-        additionalInfo: form.additionalInfo.trim() || undefined,
+        additionalInfo: intervalAdditionalInfo,
         responsible: cleanedResponsibles,
         group: cleanedGroups,
       };
@@ -269,7 +324,16 @@ function AdminScrutinyEventsPage() {
   };
 
   const editEvent = (event: ApiDeadline) => {
-    const baseDate = new Date(event.deadline);
+    const rangeMatch = event.deadline.match(/^(\d{4}-\d{2}-\d{2}|\d{2}\/\d{2}\/\d{4})\s*-\s*(\d{4}-\d{2}-\d{2}|\d{2}\/\d{2}\/\d{4})$/);
+    const parseFlexibleDate = (value: string): Date => {
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
+        const [day, month, year] = value.split('/').map(Number);
+        return new Date(year, month - 1, day);
+      }
+      return new Date(value);
+    };
+    const baseDate = parseFlexibleDate(rangeMatch ? rangeMatch[1] : event.deadline);
+    const endDate = parseFlexibleDate(rangeMatch ? rangeMatch[2] : event.deadline);
     setEditingEventId(event.id);
     setForm({
       title: event.title || '',
@@ -278,9 +342,9 @@ function AdminScrutinyEventsPage() {
     });
     setResponsibles((event.responsible || []).map((x) => x.trim()).filter(Boolean));
     setSelectedGroups((event.group || []).filter((group) => ALLOWED_GROUP_KEYS.includes(group as (typeof ALLOWED_GROUP_KEYS)[number])));
-    setDateRange([{ startDate: baseDate, endDate: baseDate, key: 'selection' }]);
-    setUseDateInterval(false);
-    setSingleDeadlineDate(baseDate.toISOString().slice(0, 10));
+    setDateRange([{ startDate: baseDate, endDate: endDate, key: 'selection' }]);
+    setUseDateInterval(Boolean(rangeMatch));
+    setSingleDeadlineDate((rangeMatch ? endDate : baseDate).toISOString().slice(0, 10));
     setRegulations((event.regulations || []).map((r) => ({ title: r.title, link: r.link })));
     setRegulationTitle('');
     setRegulationLink('');

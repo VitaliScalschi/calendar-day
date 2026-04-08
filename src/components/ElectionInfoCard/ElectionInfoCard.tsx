@@ -20,6 +20,10 @@ function ElectionInfoCard({
   activeCurrentDay,
   currentDayLabel,
 }: ElectionInfoCardProps) {
+  const normalizedDisplayDate = /^\d{2}\/\d{2}\/\d{4}$/.test(displayDate)
+    ? displayDate.replace(/\//g, '.')
+    : displayDate;
+
   return (
     <aside className="col-12 col-xl-3">
         <div className="election-info-card card p-3 border rounded">
@@ -27,7 +31,7 @@ function ElectionInfoCard({
           <div className="bg-white border rounded p-3">
             <div className="election-info-card__date d-flex align-items-center gap-2 mb-2 pb-2">
               <span aria-hidden="true">🗓️</span>
-              <span>{displayDate}</span>
+              <span>{normalizedDisplayDate}</span>
             </div>
             <div className="election-info-card__row d-flex align-items-center gap-2 py-2">
               <span aria-hidden="true">📋</span>

@@ -29,7 +29,8 @@
 }
 
 .modal-header {
-  color: black;
+  background-color: var(--color-primary);
+  color: #ffffff;
 }
 
 /* .modal-header-icon {
