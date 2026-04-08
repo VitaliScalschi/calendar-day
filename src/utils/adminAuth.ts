@@ -1,20 +1,43 @@
+import { API_BASE_URL } from './api';
+
 const ADMIN_TOKEN_KEY = 'adminAuthToken';
 
 export const ADMIN_DEFAULT_EMAIL = 'admin@cec.md';
 export const ADMIN_DEFAULT_PASSWORD = 'admin123';
 
-export function isAdminLoggedIn(): boolean {
-  return Boolean(localStorage.getItem(ADMIN_TOKEN_KEY));
+export function getAdminToken(): string | null {
+  return localStorage.getItem(ADMIN_TOKEN_KEY);
 }
 
-export function loginAdmin(email: string, password: string): boolean {
-  const isValid =
-    email.trim().toLowerCase() === ADMIN_DEFAULT_EMAIL &&
-    password === ADMIN_DEFAULT_PASSWORD;
+export function isAdminLoggedIn(): boolean {
+  return Boolean(getAdminToken());
+}
 
-  if (!isValid) return false;
+type LoginResponse = {
+  accessToken: string;
+  user: {
+    id: string;
+    email: string;
+    role: string;
+  };
+};
 
-  localStorage.setItem(ADMIN_TOKEN_KEY, 'admin-session-token');
+export async function loginAdmin(email: string, password: string): Promise<boolean> {
+  const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email: email.trim().toLowerCase(),
+      password,
+    }),
+  });
+
+  if (!response.ok) return false;
+
+  const data = (await response.json()) as LoginResponse;
+  if (!data?.accessToken) return false;
+
+  localStorage.setItem(ADMIN_TOKEN_KEY, data.accessToken);
   return true;
 }
 

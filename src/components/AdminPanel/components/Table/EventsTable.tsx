@@ -1,29 +1,29 @@
-import type { EventTypeFilter, EventsTableProps } from './EventsTable.interface';
+import type { EventsTableProps } from './EventsTable.interface';
 
 function EventsTable({
   events,
   search,
   onSearch,
-  filter,
-  onFilterChange,
+  onEdit,
+  onDelete,
+  onManageEvents,
+  onAddEventClick,
   page,
   totalPages,
   onPageChange,
   totalCount,
 }: EventsTableProps) {
-  const filters: EventTypeFilter[] = ['Toate', 'Alegeri Locale', 'Referendum'];
-
   return (
     <section className="card border-0 shadow-sm">
       <div className="card-body p-3 p-md-4">
         <div className="d-flex justify-content-between align-items-center mb-3">
           <div>
-            <h2 className="h3 fw-semibold mb-1">Administrare Evenimente</h2>
-            <div className="text-secondary small">Dashboard / Evenimente</div>
+            <h2 className="h3 fw-semibold mb-1">Administrare Scrutine</h2>
+            <div className="text-secondary small">Dashboard / Scrutine</div>
           </div>
-          <button type="button" className="btn btn-primary">
+          <button type="button" className="btn btn-primary" onClick={onAddEventClick}>
             <i className="fa-solid fa-plus me-2" aria-hidden="true"></i>
-            Adaugă Eveniment
+            Adaugă Scrutin
           </button>
         </div>
 
@@ -35,22 +35,10 @@ function EventsTable({
             <input
               type="text"
               className="form-control"
-              placeholder="Caută eveniment..."
+              placeholder="Caută scrutin..."
               value={search}
               onChange={(e) => onSearch(e.target.value)}
             />
-          </div>
-          <div className="d-flex gap-2">
-            {filters.map((item) => (
-              <button
-                key={item}
-                type="button"
-                className={`btn btn-sm ${filter === item ? 'btn-primary' : 'btn-outline-secondary'}`}
-                onClick={() => onFilterChange(item)}
-              >
-                {item}
-              </button>
-            ))}
           </div>
         </div>
 
@@ -58,41 +46,32 @@ function EventsTable({
           <table className="table align-middle mb-0">
             <thead className="table-light">
               <tr>
-                <th scope="col" style={{ width: '40px' }}>
-                  <input type="checkbox" className="form-check-input" />
-                </th>
-                <th scope="col">Titlu</th>
+                <th scope="col">Titlu scrutin</th>
                 <th scope="col">Data</th>
-                <th scope="col">Tip</th>
                 <th scope="col">Status</th>
-                <th scope="col">Responsabil</th>
                 <th scope="col" className="text-end">Acțiuni</th>
               </tr>
             </thead>
             <tbody>
               {events.map((event) => (
                 <tr key={event.id}>
-                  <td>
-                    <input type="checkbox" className="form-check-input" />
-                  </td>
                   <td className="fw-semibold">{event.title}</td>
                   <td>{event.date}</td>
-                  <td>{event.type}</td>
                   <td>
-                    <span className={`badge ${event.status === 'În desfășurare' ? 'text-bg-success' : 'text-bg-danger'}`}>
+                    <span className={`badge ${event.status === 'Activ' ? 'text-bg-success' : 'text-bg-secondary'}`}>
                       {event.status}
                     </span>
                   </td>
-                  <td>{event.responsible}</td>
                   <td className="text-end">
                     <div className="d-inline-flex gap-2">
-                      <button type="button" className="btn btn-primary btn-sm">
-                        <i className="fa-solid fa-pen me-1" aria-hidden="true"></i>
-                        Edit
+                      <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => onManageEvents?.(event.id)}>
+                        Adaugă evenimente
                       </button>
-                      <button type="button" className="btn btn-danger btn-sm">
-                        <i className="fa-solid fa-trash-can me-1" aria-hidden="true"></i>
-                        Delete
+                      <button type="button" className="btn btn-primary btn-sm" onClick={() => onEdit?.(event.id)}>
+                        <i className="fa-solid fa-pen" aria-hidden="true"></i>
+                      </button>
+                      <button type="button" className="btn btn-danger btn-sm" onClick={() => onDelete?.(event.id)}>
+                        <i className="fa-solid fa-trash-can" aria-hidden="true"></i>
                       </button>
                     </div>
                   </td>
@@ -100,7 +79,7 @@ function EventsTable({
               ))}
               {events.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="text-center text-secondary py-4">
+                  <td colSpan={4} className="text-center text-secondary py-4">
                     Nu există rezultate pentru filtrele alese.
                   </td>
                 </tr>

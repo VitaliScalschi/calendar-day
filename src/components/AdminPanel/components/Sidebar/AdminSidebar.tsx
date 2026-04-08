@@ -1,7 +1,6 @@
 import type { AdminMenuItem, SidebarProps } from './AdminSidebar.interface';
 
 const MENU: Array<{ key: AdminMenuItem; icon: string }> = [
-  { key: 'Dashboard', icon: 'fa-solid fa-table-columns' },
   { key: 'Evenimente', icon: 'fa-solid fa-calendar-days' },
   { key: 'Utilizatori', icon: 'fa-solid fa-users' },
 ];

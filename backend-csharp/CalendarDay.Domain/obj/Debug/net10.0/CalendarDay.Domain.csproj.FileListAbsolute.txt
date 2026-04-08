@@ -1,0 +1,12 @@
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Domain\bin\Debug\net10.0\CalendarDay.Domain.deps.json
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Domain\bin\Debug\net10.0\CalendarDay.Domain.dll
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Domain\bin\Debug\net10.0\CalendarDay.Domain.pdb
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Domain\obj\Debug\net10.0\CalendarDay.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Domain\obj\Debug\net10.0\CalendarDay.Domain.AssemblyInfoInputs.cache
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Domain\obj\Debug\net10.0\CalendarDay.Domain.AssemblyInfo.cs
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Domain\obj\Debug\net10.0\CalendarDay.Domain.csproj.CoreCompileInputs.cache
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Domain\obj\Debug\net10.0\CalendarDay.Domain.sourcelink.json
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Domain\obj\Debug\net10.0\CalendarDay.Domain.dll
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Domain\obj\Debug\net10.0\refint\CalendarDay.Domain.dll
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Domain\obj\Debug\net10.0\CalendarDay.Domain.pdb
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Domain\obj\Debug\net10.0\ref\CalendarDay.Domain.dll

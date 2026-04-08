@@ -13,10 +13,6 @@ type MainFiltersColumnProps = {
   responsibleOptions: string[];
   draftSelectedResponsible: string;
   onResponsibleChange: (value: string) => void;
-  hasActiveFilters: boolean;
-  canApplyFilters: boolean;
-  onResetFilters: () => void;
-  onApplyFilters: () => void;
   selectedElection: ElectionItem | null;
   draftDateKey: string | null;
   onSelectDateKey: (key: string | null) => void;
@@ -34,10 +30,6 @@ function MainFiltersColumn({
   responsibleOptions,
   draftSelectedResponsible,
   onResponsibleChange,
-  hasActiveFilters,
-  canApplyFilters,
-  onResetFilters,
-  onApplyFilters,
   selectedElection,
   draftDateKey,
   onSelectDateKey,
@@ -57,10 +49,6 @@ function MainFiltersColumn({
           responsibleOptions={responsibleOptions}
           selectedResponsible={draftSelectedResponsible}
           onResponsibleChange={onResponsibleChange}
-          hasActiveFilters={hasActiveFilters}
-          canApplyFilters={canApplyFilters}
-          onResetFilters={onResetFilters}
-          onApplyFilters={onApplyFilters}
           calendarSlot={
             <Calendar
               eday={selectedElection?.eday}

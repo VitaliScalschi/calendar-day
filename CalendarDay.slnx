@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/backend-csharp/">
+    <Project Path="backend-csharp/CalendarDay.Api/CalendarDay.Api.csproj" />
+    <Project Path="backend-csharp/CalendarDay.Application/CalendarDay.Application.csproj" />
+    <Project Path="backend-csharp/CalendarDay.Domain/CalendarDay.Domain.csproj" />
+    <Project Path="backend-csharp/CalendarDay.Infrastructure/CalendarDay.Infrastructure.csproj" />
+  </Folder>
+</Solution>

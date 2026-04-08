@@ -1,0 +1,16 @@
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Application\bin\Debug\net10.0\CalendarDay.Application.deps.json
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Application\bin\Debug\net10.0\CalendarDay.Application.dll
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Application\bin\Debug\net10.0\CalendarDay.Application.pdb
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Application\bin\Debug\net10.0\CalendarDay.Domain.dll
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Application\bin\Debug\net10.0\CalendarDay.Domain.pdb
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Application\obj\Debug\net10.0\CalendarDay.Application.csproj.AssemblyReference.cache
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Application\obj\Debug\net10.0\CalendarDay.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Application\obj\Debug\net10.0\CalendarDay.Application.AssemblyInfoInputs.cache
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Application\obj\Debug\net10.0\CalendarDay.Application.AssemblyInfo.cs
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Application\obj\Debug\net10.0\CalendarDay.Application.csproj.CoreCompileInputs.cache
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Application\obj\Debug\net10.0\CalendarDay.Application.sourcelink.json
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Application\obj\Debug\net10.0\Calendar.5D051C17.Up2Date
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Application\obj\Debug\net10.0\CalendarDay.Application.dll
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Application\obj\Debug\net10.0\refint\CalendarDay.Application.dll
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Application\obj\Debug\net10.0\CalendarDay.Application.pdb
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Application\obj\Debug\net10.0\ref\CalendarDay.Application.dll

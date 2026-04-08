@@ -1,25 +1,25 @@
 /**
- * Convertește data din format DD/MM/YYYY la Date object
+ * Convertește data din format DD/MM/YYYY sau DD.MM.YYYY la Date object
  */
 export function parseDate(dateStr: string): Date {
-  const [day, month, year] = dateStr.split('/').map(Number);
+  const [day, month, year] = dateStr.split(/[/.]/).map(Number);
   return new Date(year, month - 1, day);
 }
 
 /**
- * Convertește data din format DD/MM/YYYY la format YYYY-MM-DD (pentru SQL)
+ * Convertește data din format DD/MM/YYYY sau DD.MM.YYYY la format YYYY-MM-DD (pentru SQL)
  */
 export function convertToSQLDate(dateStr: string): string {
-  const [day, month, year] = dateStr.split('/');
+  const [day, month, year] = dateStr.split(/[/.]/);
   return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
 }
 
 /**
- * Convertește data din format YYYY-MM-DD la format DD/MM/YYYY
+ * Convertește data din format YYYY-MM-DD la format DD.MM.YYYY
  */
 export function convertFromSQLDate(dateStr: string): string {
   const [year, month, day] = dateStr.split('-');
-  return `${day}/${month}/${year}`;
+  return `${day}.${month}.${year}`;
 }
 
 /**
@@ -38,12 +38,12 @@ export function formatDate(date: Date, format: 'short' | 'long' = 'short'): stri
     return `${day} ${monthNames[date.getMonth()].toUpperCase()} ${year}`;
   }
 
-  return `${day}/${month}/${year}`;
+  return `${day}.${month}.${year}`;
 }
 
 /**
  * Calculează zilele rămase până la o dată
- * Acceptă fie Date object, fie string în format DD/MM/YYYY sau ISO datetime (YYYY-MM-DDTHH:mm:ss)
+ * Acceptă fie Date object, fie string în format DD/MM/YYYY, DD.MM.YYYY sau ISO datetime (YYYY-MM-DDTHH:mm:ss)
  */
 export function calculateDaysRemaining(targetDate: Date | string): number {
   let date: Date;
@@ -51,9 +51,9 @@ export function calculateDaysRemaining(targetDate: Date | string): number {
   if (typeof targetDate === 'string') {
     const raw = targetDate.trim();
 
-    // Dacă string-ul conține un range (ex: "13/04/2026 - 17/04/2026" sau "01 - 14/04/2026"),
+    // Dacă string-ul conține un range (ex: "13/04/2026 - 17/04/2026", "13.04.2026 - 17.04.2026" sau "01 - 14/04/2026"),
     // calculăm zilele rămase până la "capătul" intervalului.
-    const ddmmDates = raw.match(/\d{1,2}\/\d{1,2}\/\d{4}/g);
+    const ddmmDates = raw.match(/\d{1,2}[/.]\d{1,2}[/.]\d{4}/g);
     const isoDates = raw.match(/\d{4}-\d{2}-\d{2}/g);
     const processed = (ddmmDates && ddmmDates.length >= 2)
       ? ddmmDates[ddmmDates.length - 1]
@@ -81,10 +81,10 @@ export function calculateDaysRemaining(targetDate: Date | string): number {
 }
 
 /**
- * Validează formatul datei DD/MM/YYYY
+ * Validează formatul datei DD/MM/YYYY sau DD.MM.YYYY
  */
 export function isValidDate(dateStr: string): boolean {
-  const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+  const regex = /^(\d{2})[/.](\d{2})[/.](\d{4})$/;
   const match = dateStr.match(regex);
   
   if (!match) return false;
@@ -100,16 +100,16 @@ export function isValidDate(dateStr: string): boolean {
 }
 
 /**
- * Formatează o dată ISO datetime într-un format lizibil (DD/MM/YYYY)
- * Acceptă și format DD/MM/YYYY și le returnează așa cum sunt
+ * Formatează o dată ISO datetime într-un format lizibil (DD.MM.YYYY)
+ * Acceptă și format DD/MM/YYYY sau DD.MM.YYYY
  * Nu afișează ora, doar data
  */
 export function formatDateTime(dateStr: string): string {
   if (!dateStr) return 'Data necunoscută';
   
-  // Dacă este deja în format DD/MM/YYYY, returnează-l așa
-  if (/^\d{2}\/\d{2}\/\d{4}/.test(dateStr)) {
-    return dateStr;
+  // Dacă este deja în format DD/MM/YYYY sau DD.MM.YYYY, normalizează la DD.MM.YYYY
+  if (/^\d{2}[/.]\d{2}[/.]\d{4}/.test(dateStr)) {
+    return dateStr.replace(/\//g, '.');
   }
   
   // Încearcă să parseze ca ISO datetime
@@ -123,7 +123,7 @@ export function formatDateTime(dateStr: string): string {
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const year = date.getFullYear();
     
-    return `${day}/${month}/${year}`;
+    return `${day}.${month}.${year}`;
   } catch {
     return dateStr;
   }

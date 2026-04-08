@@ -120,9 +120,9 @@
 } */
 
 .calendar-day.selected {
-  background: var(--color-primary) !important;
+  background: #7b1fa2 !important;
   color: #fff !important;
-  border-color: var(--color-primary) !important;
+  border-color: #7b1fa2 !important;
 }
 
 .calendar-day.today {

@@ -4,10 +4,15 @@ import { format } from 'date-fns';
 import { SelectionRange } from '../../interface';
 import './DateRangePicker.css';
 
-export default function DateRangeDropdown() {
+type DateRangeDropdownProps = {
+  value?: SelectionRange[];
+  onChange?: (ranges: SelectionRange[]) => void;
+};
+
+export default function DateRangeDropdown({ value, onChange }: DateRangeDropdownProps) {
   const [show, setShow] = useState(false);
 
-  const [range, setRange] = useState<SelectionRange[]>([
+  const [internalRange, setInternalRange] = useState<SelectionRange[]>([
     {
       startDate: new Date(),
       endDate: new Date(),
@@ -23,7 +28,15 @@ export default function DateRangeDropdown() {
     key: selection?.key ?? 'selection',
   });
 
-  const formatted = `${format(range[0].startDate, 'dd/MM/yyyy')} - ${format(range[0].endDate, 'dd/MM/yyyy')}`;
+  const activeRange = value && value.length ? value : internalRange;
+  const formatted = `${format(activeRange[0].startDate, 'dd/MM/yyyy')} - ${format(activeRange[0].endDate, 'dd/MM/yyyy')}`;
+
+  const handleRangeChange = (next: SelectionRange[]) => {
+    if (!value) {
+      setInternalRange(next);
+    }
+    onChange?.(next);
+  };
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -52,8 +65,8 @@ export default function DateRangeDropdown() {
           style={{ zIndex: 1000 }}
         >
           <DateRange
-            ranges={range}
-            onChange={(item) => setRange([normalizeSelection(item.selection)])}
+            ranges={activeRange}
+            onChange={(item) => handleRangeChange([normalizeSelection(item.selection)])}
             moveRangeOnFirstSelection={false}
           />
         </div>

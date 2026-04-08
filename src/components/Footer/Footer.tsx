@@ -70,7 +70,7 @@ function Footer() {
           </div>
 
           <div className="col-12 col-lg-4">
-    <nav
+    {/* <nav
       className="d-flex flex-wrap justify-content-center justify-content-lg-end align-items-center gap-1" aria-label="Rețele sociale">
         {SOCIAL_LINKS.map((item) => (
           <a
@@ -84,7 +84,7 @@ function Footer() {
             <i className={`fa-brands ${item.icon}`} aria-hidden="true" />
         </a>
       ))}
-    </nav>
+    </nav> */}
     </div>
         </div>
       </div>

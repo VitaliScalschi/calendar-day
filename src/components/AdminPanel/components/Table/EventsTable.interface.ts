@@ -4,17 +4,17 @@ export interface AdminEventItem {
   id: string;
   title: string;
   date: string;
-  type: 'Alegeri Locale' | 'Referendum';
-  responsible: string;
-  status: 'În desfășurare' | 'Expirat';
+  status: 'Activ' | 'Inactiv';
 }
 
 export interface EventsTableProps {
   events: AdminEventItem[];
   search: string;
   onSearch: (value: string) => void;
-  filter: EventTypeFilter;
-  onFilterChange: (value: EventTypeFilter) => void;
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
+  onManageEvents?: (id: string) => void;
+  onAddEventClick?: () => void;
   page: number;
   totalPages: number;
   onPageChange: (value: number) => void;

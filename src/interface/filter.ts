@@ -19,10 +19,6 @@ export interface EventFilterProps {
   responsibleOptions: string[];
   selectedResponsible: string;
   onResponsibleChange: (responsible: string) => void;
-  hasActiveFilters: boolean;
-  canApplyFilters: boolean;
-  onResetFilters: () => void;
-  onApplyFilters: () => void;
   calendarSlot?: ReactNode;
   searchSlot?: ReactNode;
 }

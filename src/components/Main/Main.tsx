@@ -33,8 +33,6 @@ function Main({
   const [appliedTargetGroups, setAppliedTargetGroups] = useState<TargetGroupKey[]>(DEFAULT_TARGET_GROUPS);
   const [appliedDateKey, setAppliedDateKey] = useState<string | null>(null);
 
-  const [searchResetKey, setSearchResetKey] = useState(0);
-
   const activeElections = getActiveElections(data);
   const selectedElection =
     (selectedElectionId ? activeElections.find((election) => election.id === selectedElectionId) : null) ||
@@ -65,39 +63,6 @@ function Main({
       const groupKey = group as TargetGroupKey;
       return prev.includes(groupKey) ? prev.filter((g) => g !== groupKey) : [...prev, groupKey];
     });
-  };
-
-  const resetAllFilters = () => {
-    setDraftFilter(DEFAULT_FILTER);
-    setDraftSelectedResponsible(DEFAULT_RESPONSIBLE);
-    setDraftTargetGroups(DEFAULT_TARGET_GROUPS);
-    setDraftSearchQuery(DEFAULT_SEARCH);
-    setDraftDateKey(null);
-
-    // Apply reset immediately.
-    setAppliedFilter(DEFAULT_FILTER);
-    setAppliedSelectedResponsible(DEFAULT_RESPONSIBLE);
-    setAppliedTargetGroups(DEFAULT_TARGET_GROUPS);
-    setAppliedSearchQuery(DEFAULT_SEARCH);
-    setAppliedDateKey(null);
-    setAppliedElectionId(selectedElectionId);
-
-    setSearchResetKey((prev) => prev + 1);
-
-    if (selectedElectionId) {
-      onElectionChange(selectedElectionId);
-    }
-  };
-
-  const applyFilters = () => {
-    if (!selectedElectionId) return;
-    setAppliedElectionId(selectedElectionId);
-    setAppliedFilter(draftFilter);
-    setAppliedSelectedResponsible(draftSelectedResponsible);
-    setAppliedTargetGroups(draftTargetGroups);
-    setAppliedSearchQuery(draftSearchQuery);
-    setAppliedDateKey(draftDateKey);
-    onElectionChange(selectedElectionId);
   };
 
   const toDateKey = (value?: string): string | null => {
@@ -170,20 +135,6 @@ function Main({
         .filter((v): v is string => Boolean(v))
     )
   ).sort((a, b) => a.localeCompare(b));
-
-  const hasActiveFilters =
-    draftFilter !== 'in_progress' ||
-    draftSelectedResponsible !== '' ||
-    draftTargetGroups.length > 0 ||
-    draftSearchQuery.trim() !== '' ||
-    Boolean(draftDateKey);
-
-  const canApplyFilters =
-    draftFilter !== appliedFilter ||
-    draftSelectedResponsible !== appliedSelectedResponsible ||
-    draftTargetGroups.join('|') !== appliedTargetGroups.join('|') ||
-    draftSearchQuery !== appliedSearchQuery ||
-    draftDateKey !== appliedDateKey;
 
   const todayDateKey = (() => {
     const now = new Date();
@@ -258,6 +209,16 @@ function Main({
     }
   }, [activeElectionId, appliedElectionId, activeElections]);
 
+  useEffect(() => {
+    if (!selectedElectionId) return;
+    setAppliedElectionId(selectedElectionId);
+    setAppliedFilter(draftFilter);
+    setAppliedSelectedResponsible(draftSelectedResponsible);
+    setAppliedTargetGroups(draftTargetGroups);
+    setAppliedSearchQuery(draftSearchQuery);
+    setAppliedDateKey(draftDateKey);
+  }, [selectedElectionId, draftFilter, draftSelectedResponsible, draftTargetGroups, draftSearchQuery, draftDateKey]);
+
   return (
     <div className="main-layout row g-3 align-items-start">
       <MainFiltersColumn
@@ -272,17 +233,13 @@ function Main({
         responsibleOptions={responsibleOptions}
         draftSelectedResponsible={draftSelectedResponsible}
         onResponsibleChange={setDraftSelectedResponsible}
-        hasActiveFilters={hasActiveFilters}
-        canApplyFilters={canApplyFilters}
-        onResetFilters={resetAllFilters}
-        onApplyFilters={applyFilters}
         selectedElection={selectedElection}
         draftDateKey={draftDateKey}
         onSelectDateKey={setDraftDateKey}
       />
 
       <MainEventsColumn
-        searchResetKey={searchResetKey}
+        searchResetKey={0}
         onSearch={handleSearch}
         appliedElection={appliedElection}
         getFilteredDeadlines={getFilteredDeadlines}

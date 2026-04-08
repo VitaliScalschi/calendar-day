@@ -216,7 +216,7 @@ function EventDeadlines({data, searchQuery = '', activeFilter = 'all', selectedD
   return (
     <>
       <section className="event-deadlines">
-        <div className="timeline-container position-relative py-2 px-3 border rounded h-100">
+        <div className={`timeline-container position-relative py-2 px-3 border rounded h-100 ${displayedDeadlines && displayedDeadlines.length > 0 ? '' : 'no-timeline-line'}`}>
           {displayedDeadlines && displayedDeadlines.length > 0 ? (
             <>
               {displayedDeadlines.map((deadline: EventDeadlineProps) => (
