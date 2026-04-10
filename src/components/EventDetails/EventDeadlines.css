@@ -12,7 +12,7 @@
   position: absolute;
   left: 90px;
   top: 1.5rem;
-  bottom: 1.5rem;
+  bottom: 5rem;
   width: 1px;
   background-color: #777777;
   z-index: 0;
@@ -22,6 +22,18 @@
 
 .timeline-container.no-timeline-line::before {
   display: none;
+}
+
+@media (max-width: 576px) {
+  .timeline-container::before {
+    left: 70px;
+  }
+
+  .timeline-container {
+    padding-left: 0.3rem !important; 
+    padding-right: 0.3rem !important; 
+  }
+
 }
 
 

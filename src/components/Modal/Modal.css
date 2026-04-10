@@ -12,7 +12,6 @@
   max-width: 760px;
   width: 100%;
   max-height: 90vh;
-  overflow-y: auto;
   animation: modalSlideIn 0.3s ease-out;
   border-radius: 16px;
 }
@@ -37,9 +36,13 @@
   font-size: 1.35rem;
 } */
 
+.card-body {
+  overflow-y: auto;
+}
+
 .modal-title {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 600;
 }
 
@@ -62,15 +65,14 @@
 }
 
 .modal-main-date {
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 700;
   line-height: 1.2;
   color: #2b303b;
 }
 
 .modal-text {
-  font-size: 1.05rem;
-  font-weight: 500;
+  font-size: 1rem;
   color: #2b303b;
   line-height: 1.45;
 }
@@ -88,7 +90,7 @@
 .modal-time-badge {
   background: #f4ead6;
   color: #b97811;
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 600;
   padding: 0.55rem 1rem;
 }
@@ -101,9 +103,16 @@
 .modal-responsible-badge {
   background: #d9e7f7;
   color: #2b6cb0;
-  font-size: 1.15rem;
+  font-size: 0.875rem;
   font-weight: 500;
   padding: 0.55rem 1rem;
+  display: inline-block;
+  max-width: calc(100% - 1rem);
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.35;
+  text-align: left;
 }
 
 .modal-footer {
@@ -117,20 +126,24 @@
     border-radius: 12px;
   }
   
+  .modal-label,
+  .modal-main-date,
   .modal-title {
-    font-size: 1.35rem;
-  }
-
-  .modal-main-date {
-    font-size: 1.6rem;
-  }
-
-  .modal-label {
     font-size: 1rem;
   }
 
   .modal-time-badge,
   .modal-responsible-badge {
     font-size: 0.95rem;
+  }
+
+  .modal-responsible-badge,
+  .modal-regulation-item a,
+  .modal-time-badge {
+    font-size: 12px;
+  }
+
+  .card-body {
+    padding: 1rem !important;
   }
 }

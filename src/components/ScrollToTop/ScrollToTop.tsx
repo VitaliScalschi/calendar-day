@@ -3,20 +3,33 @@ import './ScrollToTop.css'
 
 function ScrollToTop() {
   const [isVisible, setIsVisible] = useState(false)
+  const [extraBottomOffset, setExtraBottomOffset] = useState(0)
+  const [isAboveFooter, setIsAboveFooter] = useState(false)
 
   useEffect(() => {
-    const toggleVisibility = () => {
-      if (window.pageYOffset > 800) {
-        setIsVisible(true)
-      } else {
-        setIsVisible(false)
+    const updateButtonState = () => {
+      setIsVisible(window.pageYOffset > 800)
+
+      const footer = document.querySelector('.footer-app') as HTMLElement | null
+      if (!footer) {
+        setExtraBottomOffset(0)
+        return
       }
+
+      const footerRect = footer.getBoundingClientRect()
+      const overlapWithViewportBottom = window.innerHeight - footerRect.top
+      const shouldLift = overlapWithViewportBottom > 0
+      setExtraBottomOffset(shouldLift ? overlapWithViewportBottom : 0)
+      setIsAboveFooter(shouldLift)
     }
 
-    window.addEventListener('scroll', toggleVisibility)
+    updateButtonState()
+    window.addEventListener('scroll', updateButtonState)
+    window.addEventListener('resize', updateButtonState)
 
     return () => {
-      window.removeEventListener('scroll', toggleVisibility)
+      window.removeEventListener('scroll', updateButtonState)
+      window.removeEventListener('resize', updateButtonState)
     }
   }, [])
 
@@ -32,9 +45,14 @@ function ScrollToTop() {
       {isVisible && (
         <button
           type="button"
-          className="scroll-to-top-btn"
+          className={`scroll-to-top-btn ${isAboveFooter ? 'is-above-footer' : ''}`}
           onClick={scrollToTop}
           aria-label="Scroll to top"
+          style={{
+            bottom: window.innerWidth <= 768
+              ? `${24 + extraBottomOffset}px`
+              : `${64 + extraBottomOffset}px`,
+          }}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

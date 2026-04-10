@@ -15,6 +15,7 @@
 
 .header-brand {
   min-width: 300px;
+  max-width: 100%;
 }
 
 .header-title {
@@ -65,6 +66,11 @@
 }
 
 @media (max-width: 768px) {
+  .header-brand {
+    width: 100%;
+    min-width: 0;
+  }
+
   .container {
     flex-direction: column;
     gap: 1rem;

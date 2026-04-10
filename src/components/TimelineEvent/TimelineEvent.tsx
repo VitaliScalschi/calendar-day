@@ -103,7 +103,7 @@ function TimelineEvent({
 
   return (
     <div className="timeline-event" onClick={onClick}>
-      <div className="timeline-date-section">
+      <div className="timeline-date-section text-center">
         <div className="timeline-date-day">{dateStartParts.dayMonth}</div>
         {dateEndParts ? <div className="timeline-date-day">- {dateEndParts.dayMonth}</div> : null}
         {(dateEndParts?.year || dateStartParts.year) && (
