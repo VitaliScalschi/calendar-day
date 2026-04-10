@@ -128,3 +128,45 @@ export function formatDateTime(dateStr: string): string {
     return dateStr;
   }
 }
+
+const ROMANIAN_MONTH_NAMES = [
+  'ianuarie',
+  'februarie',
+  'martie',
+  'aprilie',
+  'mai',
+  'iunie',
+  'iulie',
+  'august',
+  'septembrie',
+  'octombrie',
+  'noiembrie',
+  'decembrie',
+] as const;
+
+/**
+ * Data zilei alegerilor pentru footer (ex: "17 Mai 2026").
+ * Acceptă YYYY-MM-DD, ISO datetime, DD/MM/YYYY, DD.MM.YYYY.
+ */
+export function formatElectionDayFooterLabel(eday: string | undefined | null): string | null {
+  if (!eday?.trim()) return null;
+  const v = eday.trim();
+
+  let date: Date;
+  if (/^\d{4}-\d{2}-\d{2}/.test(v)) {
+    const [y, m, d] = v.slice(0, 10).split('-').map(Number);
+    date = new Date(y, m - 1, d);
+  } else if (/^\d{1,2}[/.]\d{1,2}[/.]\d{4}/.test(v)) {
+    const [day, month, year] = v.split(/[/.]/).map(Number);
+    date = new Date(year, month - 1, day);
+  } else {
+    date = new Date(v);
+  }
+
+  if (isNaN(date.getTime())) return null;
+
+  const day = date.getDate();
+  const monthName = ROMANIAN_MONTH_NAMES[date.getMonth()];
+  const monthLabel = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+  return `${day} ${monthLabel} ${date.getFullYear()}`;
+}

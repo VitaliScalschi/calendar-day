@@ -53,6 +53,13 @@
     width: 45px;
     height: 45px;
   }
+
+  .scroll-to-top-btn.is-above-footer {
+    background-color: #ffffff;
+    color: var(--color-primary);
+    border: 2px solid var(--color-primary);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
   
   .scroll-to-top-btn svg {
     width: 20px;

@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {Header, Footer, Main, ScrollToTop} from '../../components/index'
 import type { ElectionItem } from '../../interface/index'
 import { apiRequest } from '../../utils/api'
+import { formatElectionDayFooterLabel } from '../../utils/dateUtils'
 import data from '../../data.json'
 
 type ApiElection = {
@@ -100,6 +101,14 @@ function HomePage() {
     loadApiData();
   }, [])
 
+  const footerElectionDayLabel = useMemo(() => {
+    const election =
+      (activeElectionId ? elections.find((e) => e.id === activeElectionId) : null) ||
+      elections.find((e) => e.is_active) ||
+      elections[0];
+    return formatElectionDayFooterLabel(election?.eday);
+  }, [elections, activeElectionId])
+
   return (
     <div className="App d-flex flex-column min-vh-100">
       <Header />
@@ -123,7 +132,7 @@ function HomePage() {
           </div>
         </div>
       </main>
-      <Footer />
+      <Footer electionDayLabel={footerElectionDayLabel} />
       <ScrollToTop />
     </div>
   )

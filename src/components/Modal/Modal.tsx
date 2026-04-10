@@ -43,9 +43,6 @@ function Modal({ isOpen, onClose, deadline }: ModalProps) {
       <div className="modal-content card border-0 shadow-lg bg-white w-100" onClick={(e) => e.stopPropagation()}>
         <div className="card-header modal-header d-flex justify-content-between align-items-center px-4 py-2">
           <div className="d-flex align-items-center gap-2">
-            {/* <span className="modal-header-icon" aria-hidden="true">
-              <i className="fa-solid fa-calendar-days fa-lg"></i>
-            </span> */}
             <h3 className="modal-title mb-0">{TITLE_CARD}</h3>
           </div>
           <button type="button" className="btn-close modal-close-btn" onClick={onClose} aria-label="Close"></button>
@@ -55,16 +52,20 @@ function Modal({ isOpen, onClose, deadline }: ModalProps) {
           {deadline.title && (
             <div className="modal-card p-3">
               <h6 className="modal-label mb-2">Subiect eveniment:</h6>
-              <p className="modal-text mb-0">{deadline.title}</p>
-              <p className="mt-1 fs-6"><i>{deadline.additional_info}</i></p>
+              {deadline.title && (
+                <p className="modal-text fw-semibold mb-0 ms-3 fs-4">{deadline.title}</p>
+              )}
+              {deadline.additional_info && (
+                <p className="mt-1 fs-6 ms-3"><i>({deadline.additional_info})</i></p>
+              )}
             </div>
           )}
           <div className="modal-card p-3 mt-3">
             <h6 className="modal-label mb-2">Termen limită</h6>
-            <p className="modal-main-date mb-3">
+            <p className="modal-main-date mb-3 ms-3">
               {deadline.deadline ? formatDateTime(deadline.deadline) : 'Data necunoscută'}
             </p>
-            <span className={`badge rounded-pill modal-time-badge ${daysRemaining !== null && daysRemaining < 0 ? 'modal-time-badge--expired' : ''}`}>
+            <span className={`badge rounded-pill modal-time-badge ms-3 ${daysRemaining !== null && daysRemaining < 0 ? 'modal-time-badge--expired' : ''}`}>
               ⌛ {timeBadgeText}
             </span>
           </div>
@@ -73,9 +74,10 @@ function Modal({ isOpen, onClose, deadline }: ModalProps) {
             <div className="modal-card p-3">
               <h6 className="modal-label mb-2">Cadru normativ</h6>
               {deadline.regulations && deadline.regulations.length > 0 ? (
-                <div className="d-flex flex-column gap-1">
+                <ul className="d-flex flex-column gap-1">
                   {deadline.regulations.map((reg, index: number) => (
-                    <a
+                    <li key={index} className="modal-regulation-item">
+                      <a
                       key={reg.id || index}
                       href={reg.link}
                       target="_blank"
@@ -84,8 +86,9 @@ function Modal({ isOpen, onClose, deadline }: ModalProps) {
                     >
                       {reg.title}
                     </a>
+                    </li>
                   ))}
-                </div>
+                </ul>
               ) : (
                 <p className="modal-text mb-0">-</p>
               )}
@@ -93,15 +96,22 @@ function Modal({ isOpen, onClose, deadline }: ModalProps) {
 
             <div className="modal-card p-3">
               <h6 className="modal-label mb-2">Descriere</h6>
-              <p className="modal-text mb-0">{deadline.description || 'Nu există descriere disponibilă'}</p>
+              <p className="modal-text mb-0 ms-3">{deadline.description || 'Nu există descriere disponibilă'}</p>
             </div>
 
             {deadline.responsible && (
               <div className="modal-card p-3">
                 <h6 className="modal-label mb-2">Responsabili</h6>
-                <span className="badge rounded-pill modal-responsible-badge">
+                {
+                  deadline.responsible.map((resp: string, index: number) => (
+                    <span key={index} className="badge rounded-pill modal-responsible-badge m-1">
+                      {resp}
+                    </span>
+                  ))
+                }
+                {/* <span className="badge rounded-pill modal-responsible-badge ms-3">
                   {responsibleLabel}
-                </span>
+                </span> */}
               </div>
             )}
           </div>

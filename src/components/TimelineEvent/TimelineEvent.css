@@ -221,16 +221,76 @@
 }
 
 @media (max-width: 768px) {
-  .timeline-event {
-    padding-left: 2rem;
-  }
-  
   .timeline-header {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .timeline-content {
     padding: 0.875rem 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .timeline-event {
+    gap: 0.625rem;
+    padding-bottom: 1rem;
+  }
+
+  .timeline-date-section {
+    width: 72px;
+    padding-top: 0.25rem;
+    padding-right: 0.75rem;
+  }
+
+  .timeline-date-day {
+    font-size: 0.95rem;
+    line-height: 1.15;
+    white-space: nowrap;
+  }
+
+  .timeline-date-year {
+    font-size: 0.72rem;
+  }
+
+  .timeline-center-section {
+    left: 66px;
+    width: 22px;
+  }
+
+  .timeline-dot {
+    top: 0.25rem;
+    width: 14px;
+    height: 14px;
+  }
+
+  .timeline-content {
+    padding: 0.75rem;
+    border-radius: 10px;
+  }
+
+  .timeline-content > div {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .timeline-title {
+    font-size: 1.02rem;
+    line-height: 1.3;
+    margin-bottom: 0.5rem;
+  }
+
+  .timeline-deadline,
+  .timeline-responsible,
+  .days-text {
+    font-size: 0.82rem;
+    line-height: 1.35;
+  }
+
+  .timeline-details-btn {
+    min-width: 0;
+    width: 100%;
+    height: 32px;
+    margin-top: 0.55rem;
   }
 }
