@@ -44,7 +44,7 @@ export const SOCIAL_LINKS = [
 
 function Footer() {
   return (
-    <footer className="footer-app border-top d-flex flex-column align-items-center justify-content-center">
+    <footer className="footer-app border-top d-flex flex-column align-items-center justify-content-center flex-shrink-0">
       <div className="container py-2">
         <div className="row g-3 g-lg-4 align-items-center">
           <div className="col-12 col-md-6 col-lg-4">

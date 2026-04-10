@@ -103,7 +103,7 @@ function HomePage() {
   return (
     <div className="App d-flex flex-column min-vh-100">
       <Header />
-      <main className="main-content container-fluid mt-3">
+      <main className="main-content container-fluid mt-3 flex-grow-1">
         <div className="container">
           {errorElections ? (
             <div className="alert alert-warning" role="alert">

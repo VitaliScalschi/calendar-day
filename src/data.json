@@ -148,18 +148,18 @@
         ]
       },
       {
-    "id": "11",
-    "election_id": "1",
-    "title": "Propuneri pentru constituirea secțiilor de votare",
-    "deadline": "09/04/2026",
-    "responsible": ["APL", "CECE nivel I"],
-    "group":["political_organ", "public"],
-    "description": "Prezentarea propunerilor din partea primarilor privind constituirea secțiilor de votare",
-    "regulations": [
-      { "id": "r1", "title": "art. 37 alin. (1) lit. b)", "link": "" },
-      { "id": "r2", "title": "art. 38 alin. (2),(3)", "link": "" }
-    ]
-  },
+        "id": "11",
+        "election_id": "1",
+        "title": "Propuneri pentru constituirea secțiilor de votare",
+        "deadline": "09/04/2026",
+        "responsible": ["APL", "CECE nivel I"],
+        "group":["political_organ", "public"],
+        "description": "Prezentarea propunerilor din partea primarilor privind constituirea secțiilor de votare",
+        "regulations": [
+          { "id": "r1", "title": "art. 37 alin. (1) lit. b)", "link": "" },
+          { "id": "r2", "title": "art. 38 alin. (2),(3)", "link": "" }
+        ]
+      },
   {
     "id": "12",
     "election_id": "1",
