@@ -11,6 +11,7 @@ public class CalendarDayDbContext(DbContextOptions<CalendarDayDbContext> options
     public DbSet<Regulation> Regulations => Set<Regulation>();
     public DbSet<DeadlineResponsible> DeadlineResponsibles => Set<DeadlineResponsible>();
     public DbSet<DeadlineGroup> DeadlineGroups => Set<DeadlineGroup>();
+    public DbSet<ResponsibleOption> ResponsibleOptions => Set<ResponsibleOption>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -67,6 +68,13 @@ public class CalendarDayDbContext(DbContextOptions<CalendarDayDbContext> options
                 .WithMany(d => d.Groups)
                 .HasForeignKey(x => x.DeadlineId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ResponsibleOption>(r =>
+        {
+            r.HasKey(x => x.Id);
+            r.Property(x => x.Label).IsRequired().HasMaxLength(250);
+            r.HasIndex(x => x.Label).IsUnique();
         });
     }
 }

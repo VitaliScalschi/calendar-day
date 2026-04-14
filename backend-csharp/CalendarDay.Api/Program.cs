@@ -67,6 +67,9 @@ using (var scope = app.Services.CreateScope())
 
         var defaultUsersSeed = scope.ServiceProvider.GetRequiredService<DefaultUsersSeedService>();
         await defaultUsersSeed.EnsureDefaultUsersAsync();
+
+        var responsibleOptionsSeed = scope.ServiceProvider.GetRequiredService<ResponsibleOptionsSeedService>();
+        await responsibleOptionsSeed.EnsureDefaultResponsibleOptionsAsync();
     }
     catch (Exception ex)
     {
