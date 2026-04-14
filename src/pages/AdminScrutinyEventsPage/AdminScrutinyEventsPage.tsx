@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Sidebar } from '../../components/AdminPanel/components';
 import type { AdminMenuItem } from '../../components/AdminPanel/components/Sidebar/AdminSidebar.interface';
@@ -22,6 +22,11 @@ type ApiDeadline = {
   responsible: string[];
   group: string[];
   regulations?: Array<{ id: string; title: string; link: string }>;
+};
+
+type ApiResponsibleOption = {
+  id: string;
+  label: string;
 };
 
 type PagedResult<T> = {
@@ -65,8 +70,10 @@ function AdminScrutinyEventsPage() {
   const [regulationTitle, setRegulationTitle] = useState('');
   const [regulationLink, setRegulationLink] = useState('');
   const [regulations, setRegulations] = useState<Array<{ id?: string; title: string; link: string }>>([]);
-  const [responsibleInput, setResponsibleInput] = useState('');
   const [responsibles, setResponsibles] = useState<string[]>([]);
+  const [responsibleOptions, setResponsibleOptions] = useState<ApiResponsibleOption[]>([]);
+  const [isResponsibleDropdownOpen, setIsResponsibleDropdownOpen] = useState(false);
+  const responsibleDropdownRef = useRef<HTMLDivElement | null>(null);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [form, setForm] = useState({
     title: '',
@@ -122,11 +129,13 @@ function AdminScrutinyEventsPage() {
 
   const loadData = async () => {
     if (!scrutinyId) return;
-    const [elections, deadlines] = await Promise.all([
+    const [elections, deadlines, responsibleOptionsResponse] = await Promise.all([
       apiRequest<ApiElection[]>('/elections'),
       apiRequest<PagedResult<ApiDeadline>>(`/deadlines?electionId=${scrutinyId}&page=1&pageSize=200`),
+      apiRequest<ApiResponsibleOption[]>('/responsible-options'),
     ]);
     setElection(elections.find((x) => x.id === scrutinyId) || null);
+    setResponsibleOptions(responsibleOptionsResponse || []);
     const normalizedEvents = (deadlines.items || []).map((item) => {
       const rangeMeta = extractRangeMeta(item.additionalInfo);
       if (!rangeMeta) return item;
@@ -154,6 +163,39 @@ function AdminScrutinyEventsPage() {
     };
     run();
   }, [scrutinyId]);
+
+  useEffect(() => {
+    const shouldLockPageScroll = isModalOpen || isDeleteModalOpen;
+    const originalOverflow = document.body.style.overflow;
+    const originalTouchAction = document.body.style.touchAction;
+
+    if (shouldLockPageScroll) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+    }
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.body.style.touchAction = originalTouchAction;
+    };
+  }, [isModalOpen, isDeleteModalOpen]);
+
+  useEffect(() => {
+    if (!isResponsibleDropdownOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!responsibleDropdownRef.current) return;
+      const targetNode = event.target as Node | null;
+      if (targetNode && !responsibleDropdownRef.current.contains(targetNode)) {
+        setIsResponsibleDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isResponsibleDropdownOpen]);
 
   const rows = useMemo(
     () =>
@@ -284,7 +326,7 @@ function AdminScrutinyEventsPage() {
       setRegulations([]);
       setRegulationTitle('');
       setRegulationLink('');
-      setResponsibleInput('');
+      setIsResponsibleDropdownOpen(false);
       setResponsibles([]);
       setSelectedGroups([]);
       setEditingEventId(null);
@@ -312,15 +354,12 @@ function AdminScrutinyEventsPage() {
     setRegulations((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const addResponsible = () => {
-    const value = responsibleInput.trim();
-    if (!value) return;
-    setResponsibles((prev) => [...prev, value]);
-    setResponsibleInput('');
+  const toggleResponsible = (label: string) => {
+    setResponsibles((prev) => (prev.includes(label) ? prev.filter((value) => value !== label) : [...prev, label]));
   };
 
-  const removeResponsible = (index: number) => {
-    setResponsibles((prev) => prev.filter((_, i) => i !== index));
+  const removeResponsible = (label: string) => {
+    setResponsibles((prev) => prev.filter((value) => value !== label));
   };
 
   const editEvent = (event: ApiDeadline) => {
@@ -348,7 +387,7 @@ function AdminScrutinyEventsPage() {
     setRegulations((event.regulations || []).map((r) => ({ title: r.title, link: r.link })));
     setRegulationTitle('');
     setRegulationLink('');
-    setResponsibleInput('');
+    setIsResponsibleDropdownOpen(false);
     setError('');
     setIsModalOpen(true);
   };
@@ -362,7 +401,7 @@ function AdminScrutinyEventsPage() {
     setRegulations([]);
     setRegulationTitle('');
     setRegulationLink('');
-    setResponsibleInput('');
+    setIsResponsibleDropdownOpen(false);
     setResponsibles([]);
     setSelectedGroups([]);
     setError('');
@@ -531,19 +570,40 @@ function AdminScrutinyEventsPage() {
               </div>
               <div className="mb-3">
                 <label className="form-label fw-semibold">Responsabil:</label>
-                <div className="d-flex gap-2 mb-2">
-                  <input
-                    className="form-control"
-                    value={responsibleInput}
-                    onChange={(e) => setResponsibleInput(e.target.value)}
-                    placeholder="Ex: CEC (DMA)"
-                  />
-                  <button type="button" className="btn btn-primary" onClick={addResponsible}>Adaugă</button>
+                <div className="admin-responsible-dropdown mb-2" ref={responsibleDropdownRef}>
+                  <button
+                    type="button"
+                    className="btn btn-light border w-100 d-flex align-items-center justify-content-between"
+                    onClick={() => setIsResponsibleDropdownOpen((prev) => !prev)}
+                    aria-expanded={isResponsibleDropdownOpen}
+                  >
+                    <span>{responsibles.length > 0 ? `${responsibles.length} selectat(e)` : 'Selecteaza responsabili'}</span>
+                    <i className={`fa-solid ${isResponsibleDropdownOpen ? 'fa-chevron-up' : 'fa-chevron-down'}`} aria-hidden="true" />
+                  </button>
+                  {isResponsibleDropdownOpen ? (
+                    <div className="admin-responsible-dropdown__menu border rounded p-2 mt-2">
+                      {responsibleOptions.length === 0 ? (
+                        <div className="small text-secondary">Nomenclatorul nu este disponibil momentan.</div>
+                      ) : (
+                        responsibleOptions.map((option) => (
+                          <label key={option.id} className="form-check d-flex align-items-start gap-2 mb-2">
+                            <input
+                              type="checkbox"
+                              className="form-check-input mt-1"
+                              checked={responsibles.includes(option.label)}
+                              onChange={() => toggleResponsible(option.label)}
+                            />
+                            <span className="form-check-label">{option.label}</span>
+                          </label>
+                        ))
+                      )}
+                    </div>
+                  ) : null}
                 </div>
-                {responsibles.map((item, index) => (
-                  <div key={`${item}-${index}`} className="d-flex justify-content-between align-items-center small text-secondary border rounded px-2 py-1 mb-1">
+                {responsibles.map((item) => (
+                  <div key={item} className="d-flex justify-content-between align-items-center small text-secondary border rounded px-2 py-1 mb-1">
                     <span>{item}</span>
-                    <button type="button" className="btn btn-link p-0 text-danger text-decoration-none" onClick={() => removeResponsible(index)}>
+                    <button type="button" className="btn btn-link p-0 text-danger text-decoration-none" onClick={() => removeResponsible(item)}>
                       elimină
                     </button>
                   </div>

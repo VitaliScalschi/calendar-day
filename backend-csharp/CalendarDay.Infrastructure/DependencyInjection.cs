@@ -22,6 +22,7 @@ public static class DependencyInjection
         services.AddScoped<IUsersService, UsersService>();
         services.AddScoped<SeedFromJsonService>();
         services.AddScoped<DefaultUsersSeedService>();
+        services.AddScoped<ResponsibleOptionsSeedService>();
 
         return services;
     }
