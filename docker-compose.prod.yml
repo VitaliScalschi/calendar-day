@@ -45,6 +45,11 @@ services:
       - api
     ports:
       - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./cecmd2026-cert.pem:/etc/nginx/ssl/cecmd2026-cert.pem:ro
+      - ./cecmd2026-key.pem:/etc/nginx/ssl/cecmd2026-key.pem:ro
 
 volumes:
   calendar_day_pgdata:

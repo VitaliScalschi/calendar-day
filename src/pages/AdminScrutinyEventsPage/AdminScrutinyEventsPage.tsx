@@ -53,9 +53,13 @@ const parseApiErrorMessage = (message: string) => {
 function AdminScrutinyEventsPage() {
   const { scrutinyId } = useParams();
   const navigate = useNavigate();
+  const [allElections, setAllElections] = useState<ApiElection[]>([]);
   const [election, setElection] = useState<ApiElection | null>(null);
   const [events, setEvents] = useState<ApiDeadline[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const [selectedSourceElectionId, setSelectedSourceElectionId] = useState<string>('');
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [pendingDeleteEventId, setPendingDeleteEventId] = useState<string | null>(null);
@@ -134,6 +138,7 @@ function AdminScrutinyEventsPage() {
       apiRequest<PagedResult<ApiDeadline>>(`/deadlines?electionId=${scrutinyId}&page=1&pageSize=200`),
       apiRequest<ApiResponsibleOption[]>('/responsible-options'),
     ]);
+    setAllElections(elections);
     setElection(elections.find((x) => x.id === scrutinyId) || null);
     setResponsibleOptions(responsibleOptionsResponse || []);
     const normalizedEvents = (deadlines.items || []).map((item) => {
@@ -204,6 +209,11 @@ function AdminScrutinyEventsPage() {
         deadlineLabel: formatDeadlineLabel(event.deadline),
       })),
     [events]
+  );
+
+  const sourceElectionOptions = useMemo(
+    () => allElections.filter((item) => item.id !== scrutinyId),
+    [allElections, scrutinyId]
   );
 
   const onLogout = () => {
@@ -440,6 +450,85 @@ function AdminScrutinyEventsPage() {
     navigate('/admin/events');
   };
 
+  const fetchAllDeadlinesFromElection = async (electionId: string): Promise<ApiDeadline[]> => {
+    const pageSize = 100;
+    let page = 1;
+    let hasMore = true;
+    const merged: ApiDeadline[] = [];
+
+    while (hasMore) {
+      const response = await apiRequest<PagedResult<ApiDeadline>>(
+        `/deadlines?electionId=${electionId}&page=${page}&pageSize=${pageSize}`
+      );
+      const items = response.items || [];
+      merged.push(...items);
+      hasMore = items.length === pageSize;
+      page += 1;
+    }
+
+    return merged;
+  };
+
+  const importEventsFromSelectedElection = async () => {
+    if (!scrutinyId || !selectedSourceElectionId) return;
+
+    setError('');
+    setIsImporting(true);
+    try {
+      const sourceEvents = await fetchAllDeadlinesFromElection(selectedSourceElectionId);
+      if (sourceEvents.length === 0) {
+        setError('Scrutinul selectat nu are evenimente de copiat.');
+        setIsImportModalOpen(false);
+        return;
+      }
+
+      for (const sourceEvent of sourceEvents) {
+        const payload = {
+          electionId: scrutinyId,
+          title: sourceEvent.title,
+          additionalInfo: sourceEvent.additionalInfo || undefined,
+          deadline: sourceEvent.deadline,
+          description: sourceEvent.description,
+          responsible: sourceEvent.responsible || [],
+          group: sourceEvent.group || [],
+        };
+
+        const created = await apiRequest<{ id: string }>('/deadlines', {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
+
+        const sourceRegulations = sourceEvent.regulations || [];
+        if (sourceRegulations.length > 0) {
+          await Promise.all(
+            sourceRegulations.map((regulation) =>
+              apiRequest('/regulations', {
+                method: 'POST',
+                body: JSON.stringify({
+                  deadlineId: created.id,
+                  title: regulation.title,
+                  link: regulation.link,
+                }),
+              })
+            )
+          );
+        }
+      }
+
+      setIsImportModalOpen(false);
+      setSelectedSourceElectionId('');
+      await loadData();
+    } catch (e) {
+      if (e instanceof ApiError) {
+        setError(`Nu am putut prelua evenimentele: ${parseApiErrorMessage(e.message)} (${e.status})`);
+      } else {
+        setError('Nu am putut prelua evenimentele din scrutinul selectat.');
+      }
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
   return (
     <div className="admin-layout bg-body-tertiary">
       <Sidebar activeItem="Evenimente" onChange={handleAdminMenuChange} />
@@ -470,9 +559,21 @@ function AdminScrutinyEventsPage() {
           <div className="card-body p-3 p-md-4">
             <div className="d-flex justify-content-between align-items-center mb-3">
               <h2 className="h4 mb-0">Evenimente scrutin</h2>
-              <button type="button" className="btn btn-primary" onClick={openCreateEvent}>
-                Adaugă eveniment
-              </button>
+              <div className="d-flex align-items-center gap-2">
+                <button
+                  type="button"
+                  className="btn btn-outline-primary"
+                  onClick={() => {
+                    setSelectedSourceElectionId('');
+                    setIsImportModalOpen(true);
+                  }}
+                >
+                  Preia din alt scrutin
+                </button>
+                <button type="button" className="btn btn-primary" onClick={openCreateEvent}>
+                  Adaugă eveniment
+                </button>
+              </div>
             </div>
             {error ? <div className="alert alert-warning">{error}</div> : null}
             <div className="table-responsive border rounded-3">
@@ -671,6 +772,60 @@ function AdminScrutinyEventsPage() {
         </div>
       ) : null}
       {isModalOpen ? <div className="modal-backdrop fade show" /> : null}
+
+      {isImportModalOpen ? (
+        <div className="modal fade show d-block" tabIndex={-1} role="dialog" aria-modal="true">
+          <div className="modal-dialog modal-dialog-centered" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Preia evenimente din alt scrutin</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setIsImportModalOpen(false)}
+                  disabled={isImporting}
+                />
+              </div>
+              <div className="modal-body">
+                <label className="form-label fw-semibold" htmlFor="sourceScrutinySelect">
+                  Alege scrutinul sursă
+                </label>
+                <select
+                  id="sourceScrutinySelect"
+                  className="form-select"
+                  value={selectedSourceElectionId}
+                  onChange={(e) => setSelectedSourceElectionId(e.target.value)}
+                  disabled={isImporting}
+                >
+                  <option value="">Selectează scrutinul</option>
+                  {sourceElectionOptions.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.title}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-secondary small mt-2 mb-0">
+                  Vor fi copiate toate evenimentele (inclusiv responsabili, grupuri și reglementări) în scrutinul curent.
+                </p>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-light border" onClick={() => setIsImportModalOpen(false)} disabled={isImporting}>
+                  Renunță
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={importEventsFromSelectedElection}
+                  disabled={isImporting || !selectedSourceElectionId}
+                >
+                  {isImporting ? 'Se preia...' : 'Preia evenimente'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+      {isImportModalOpen ? <div className="modal-backdrop fade show" /> : null}
 
       {isDeleteModalOpen ? (
         <div className="modal fade show d-block" tabIndex={-1} role="dialog" aria-modal="true">
