@@ -50,6 +50,7 @@
 
 .calendar-day:hover:not(.empty):not(.disabled) {
   background-color: #f0f0f0;
+  color: var(--color-primary);
 }
 
 .calendar-day.empty {
@@ -126,7 +127,7 @@
 }
 
 .calendar-day.today {
-  background-color: #7b1fa2ba;
+  background-color:var(--color-primary);
   color: white;
   font-weight: 600;
 }
