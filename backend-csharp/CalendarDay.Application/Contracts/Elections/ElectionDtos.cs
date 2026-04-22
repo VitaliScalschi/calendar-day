@@ -4,7 +4,8 @@ public record ElectionDto(
     Guid Id,
     string Title,
     bool IsActive,
-    DateOnly Eday
+    DateOnly Eday,
+    bool HasDocument
 );
 
 public class CreateElectionDto

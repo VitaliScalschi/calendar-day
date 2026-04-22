@@ -3,6 +3,8 @@ import type { AdminMenuItem, SidebarProps } from './AdminSidebar.interface';
 const MENU: Array<{ key: AdminMenuItem; icon: string }> = [
   { key: 'Evenimente', icon: 'fa-solid fa-calendar-days' },
   { key: 'Utilizatori', icon: 'fa-solid fa-users' },
+  { key: 'Informații Utile', icon: 'fa-solid fa-circle-info' },
+  { key: 'Setări', icon: 'fa-solid fa-cog' }
 ];
 
 function Sidebar({ activeItem, onChange }: SidebarProps) {

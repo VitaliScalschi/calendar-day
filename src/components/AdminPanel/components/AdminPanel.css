@@ -277,6 +277,14 @@
   font-size: 1rem;
 }
 
+.admin-useful-info-row {
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-useful-info-row:hover {
+  background-color: #f8fbff;
+}
+
 .admin-responsible-dropdown__menu {
   max-height: 280px;
   overflow-y: auto;

@@ -29,6 +29,12 @@ type ApiResponsibleOption = {
   label: string;
 };
 
+type UploadDocumentResponse = {
+  url: string;
+  originalName: string;
+  title: string;
+};
+
 type PagedResult<T> = {
   items: T[];
 };
@@ -74,6 +80,7 @@ function AdminScrutinyEventsPage() {
   const [regulationTitle, setRegulationTitle] = useState('');
   const [regulationLink, setRegulationLink] = useState('');
   const [regulations, setRegulations] = useState<Array<{ id?: string; title: string; link: string }>>([]);
+  const [isUploadingRegulation, setIsUploadingRegulation] = useState(false);
   const [responsibles, setResponsibles] = useState<string[]>([]);
   const [responsibleOptions, setResponsibleOptions] = useState<ApiResponsibleOption[]>([]);
   const [isResponsibleDropdownOpen, setIsResponsibleDropdownOpen] = useState(false);
@@ -362,6 +369,41 @@ function AdminScrutinyEventsPage() {
 
   const removeRegulation = (index: number) => {
     setRegulations((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const uploadRegulationPdf = async (file: File | null) => {
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.pdf')) {
+      setError('Poți încărca doar fișiere PDF.');
+      return;
+    }
+
+    setError('');
+    setIsUploadingRegulation(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const uploaded = await apiRequest<UploadDocumentResponse>('/regulations/upload-document', {
+        method: 'POST',
+        body: formData,
+      });
+
+      setRegulations((prev) => [
+        ...prev,
+        {
+          title: uploaded.title || file.name.replace(/\.pdf$/i, ''),
+          link: uploaded.url,
+        },
+      ]);
+    } catch (e) {
+      if (e instanceof ApiError) {
+        setError(`Nu am putut încărca PDF-ul: ${parseApiErrorMessage(e.message)} (${e.status})`);
+      } else {
+        setError('Nu am putut încărca PDF-ul.');
+      }
+    } finally {
+      setIsUploadingRegulation(false);
+    }
   };
 
   const toggleResponsible = (label: string) => {
@@ -732,6 +774,21 @@ function AdminScrutinyEventsPage() {
                     placeholder="Link regulament (optional)"
                   />
                   <button type="button" className="btn btn-primary" onClick={addRegulation}>Adaugă</button>
+                </div>
+                <div className="d-flex flex-column gap-2 mb-2">
+                  <label className="form-label mb-0">Încarcă PDF</label>
+                  <input
+                    type="file"
+                    className="form-control"
+                    accept=".pdf,application/pdf"
+                    disabled={isUploadingRegulation}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0] || null;
+                      void uploadRegulationPdf(file);
+                      e.currentTarget.value = '';
+                    }}
+                  />
+                  {isUploadingRegulation ? <span className="small text-secondary">Se încarcă PDF-ul...</span> : null}
                 </div>
                 {regulations.map((regulation, index) => (
                   <div key={`${regulation.id || regulation.title}-${index}`} className="d-flex justify-content-between align-items-center small text-secondary border rounded px-2 py-1 mb-1">

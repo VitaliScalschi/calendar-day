@@ -114,6 +114,11 @@
   min-width: 0;
 }
 
+.responsible-filter__control {
+  position: relative;
+  width: 100%;
+}
+
 .responsible-filter__label {
   color: #6b7280;
   font-size: 0.8rem;
@@ -133,6 +138,20 @@
   color: #424b57;
   padding-top: 0.2rem;
   padding-bottom: 0.2rem;
+}
+
+.responsible-filter__clear-btn {
+  position: absolute;
+  top: 50%;
+  right: 2.3rem;
+  transform: translateY(-50%);
+  opacity: 0.55;
+  width: 0.4rem;
+  height: 0.4rem;
+}
+
+.responsible-filter__select.has-clear {
+  padding-right: 2rem;
 }
 
 .event-filter-search-slot {

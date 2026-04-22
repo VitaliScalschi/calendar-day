@@ -114,20 +114,31 @@ function EventFilter({
           <label className="responsible-filter__label mb-0" htmlFor="responsible-filter-select">
             Responsabil:
           </label>
-          <select
-            id="responsible-filter-select"
-            className="form-select form-select-sm responsible-filter__select"
-            value={selectedResponsible}
-            onChange={(e) => onResponsibleChange(e.target.value)}
-            aria-label="Filtrează după responsabil"
-          >
-            <option value="">Toți</option>
-            {uniqueValues.map((responsible) => (
-              <option key={responsible} value={responsible}>
-                {responsible}
-              </option>
-            ))}
-          </select>
+          <div className="responsible-filter__control">
+            <select
+              id="responsible-filter-select"
+              className={`form-select form-select-sm responsible-filter__select ${selectedResponsible ? 'has-clear' : ''}`}
+              value={selectedResponsible}
+              onChange={(e) => onResponsibleChange(e.target.value)}
+              aria-label="Filtrează după responsabil"
+            >
+              <option value="">Toți</option>
+              {uniqueValues.map((responsible) => (
+                <option key={responsible} value={responsible}>
+                  {responsible}
+                </option>
+              ))}
+            </select>
+            {selectedResponsible ? (
+              <button
+                type="button"
+                className="responsible-filter__clear-btn btn-close"
+                onClick={() => onResponsibleChange('')}
+                aria-label="Șterge filtrul responsabil"
+                title="Șterge filtrul"
+              />
+            ) : null}
+          </div>
         </div>
       </div>
       {searchSlot ? <div className="event-filter-search-slot">{searchSlot}</div> : null}

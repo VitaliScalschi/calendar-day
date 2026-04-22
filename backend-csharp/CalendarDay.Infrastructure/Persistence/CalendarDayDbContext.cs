@@ -12,6 +12,7 @@ public class CalendarDayDbContext(DbContextOptions<CalendarDayDbContext> options
     public DbSet<DeadlineResponsible> DeadlineResponsibles => Set<DeadlineResponsible>();
     public DbSet<DeadlineGroup> DeadlineGroups => Set<DeadlineGroup>();
     public DbSet<ResponsibleOption> ResponsibleOptions => Set<ResponsibleOption>();
+    public DbSet<UsefulInfo> UsefulInfos => Set<UsefulInfo>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -75,6 +76,16 @@ public class CalendarDayDbContext(DbContextOptions<CalendarDayDbContext> options
             r.HasKey(x => x.Id);
             r.Property(x => x.Label).IsRequired().HasMaxLength(250);
             r.HasIndex(x => x.Label).IsUnique();
+        });
+
+        modelBuilder.Entity<UsefulInfo>(u =>
+        {
+            u.HasKey(x => x.Id);
+            u.Property(x => x.Title).IsRequired().HasMaxLength(250);
+            u.Property(x => x.Slug).IsRequired().HasMaxLength(500);
+            u.Property(x => x.Type).IsRequired().HasMaxLength(50);
+            u.Property(x => x.Icon).HasMaxLength(120);
+            u.HasIndex(x => x.Order);
         });
     }
 }

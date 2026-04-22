@@ -25,6 +25,12 @@ type ApiElection = {
   title: string;
   isActive: boolean;
   eday: string;
+  hasDocument?: boolean;
+};
+
+type UploadDocumentResponse = {
+  url: string;
+  originalName: string;
 };
 
 type ApiUser = {
@@ -50,12 +56,22 @@ type UserForm = {
 };
 
 function getMenuFromPath(pathname: string): AdminMenuItem {
-  return pathname.startsWith('/admin/users') ? 'Utilizatori' : 'Evenimente';
+  if (pathname.startsWith('/admin/users')) return 'Utilizatori';
+  if (pathname.startsWith('/admin/useful-info')) return 'Informații Utile';
+  return 'Evenimente';
 }
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
   return date.toLocaleDateString('ro-RO', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function openNativeDatePicker(input: HTMLInputElement) {
+  if ('showPicker' in input && typeof input.showPicker === 'function') {
+    input.showPicker();
+  } else {
+    input.focus();
+  }
 }
 
 function AdminPanel() {
@@ -92,6 +108,7 @@ function AdminPanel() {
     electionDay: '',
     isActive: true,
   });
+  const [scrutinyDocumentFile, setScrutinyDocumentFile] = useState<File | null>(null);
 
   const loadAdminData = async () => {
     setLoadError('');
@@ -162,7 +179,7 @@ function AdminPanel() {
   const active = scrutinyRows.filter((x) => x.status === 'Activ').length;
   const inactive = scrutinyRows.filter((x) => x.status === 'Inactiv').length;
 
-  const usersRows = useMemo(
+  const usersRows = useMemo<Array<{ id: string; email: string; role: string; status: 'Activ' | 'Inactiv'; createdAt: string }>>(
     () =>
       users.map((user) => ({
         id: user.id,
@@ -190,12 +207,17 @@ function AdminPanel() {
       navigate('/admin/users');
       return;
     }
+    if (item === 'Informații Utile') {
+      navigate('/admin/useful-info');
+      return;
+    }
     navigate('/admin/events');
   };
 
   const openCreateModal = () => {
     setFormError('');
     setScrutinyForm({ title: SCRUTINY_TYPES[0], electionDay: '', isActive: true });
+    setScrutinyDocumentFile(null);
     setIsModalOpen(true);
   };
 
@@ -209,6 +231,7 @@ function AdminPanel() {
       electionDay: election.eday,
       isActive: election.isActive,
     });
+    setScrutinyDocumentFile(null);
     setIsModalOpen(true);
   };
 
@@ -217,6 +240,10 @@ function AdminPanel() {
     setFormError('');
     if (!scrutinyForm.title.trim() || !scrutinyForm.electionDay) {
       setFormError('Completeaza tipul scrutinului si data scrutinului.');
+      return;
+    }
+    if (scrutinyDocumentFile && !scrutinyDocumentFile.name.toLowerCase().endsWith('.pdf')) {
+      setFormError('Poți încărca doar fișiere PDF.');
       return;
     }
 
@@ -228,14 +255,28 @@ function AdminPanel() {
         eday: scrutinyForm.electionDay,
       };
 
+      let savedScrutiny: ApiElection;
       if (scrutinyForm.id) {
-        await apiRequest(`/elections/${scrutinyForm.id}`, { method: 'PUT', body: JSON.stringify(payload) });
+        savedScrutiny = await apiRequest<ApiElection>(`/elections/${scrutinyForm.id}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload),
+        });
       } else {
-        await apiRequest('/elections', { method: 'POST', body: JSON.stringify(payload) });
+        savedScrutiny = await apiRequest<ApiElection>('/elections', { method: 'POST', body: JSON.stringify(payload) });
+      }
+
+      if (scrutinyDocumentFile) {
+        const formData = new FormData();
+        formData.append('file', scrutinyDocumentFile);
+        await apiRequest<UploadDocumentResponse>(`/elections/${savedScrutiny.id}/upload-document`, {
+          method: 'POST',
+          body: formData,
+        });
       }
 
       await loadAdminData();
       setIsModalOpen(false);
+      setScrutinyDocumentFile(null);
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
         logoutAdmin();
@@ -418,7 +459,14 @@ function AdminPanel() {
             <div className="modal-content admin-confirm-modal__content">
               <div className="modal-header">
                 <h5 className="modal-title">{scrutinyForm.id ? 'Modifică Scrutin' : 'Adaugă Scrutin'}</h5>
-                <button type="button" className="btn-close" onClick={() => setIsModalOpen(false)} />
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    setScrutinyDocumentFile(null);
+                  }}
+                />
               </div>
 
               <form onSubmit={handleSaveScrutiny}>
@@ -444,8 +492,23 @@ function AdminPanel() {
                       type="date"
                       className="form-control"
                       value={scrutinyForm.electionDay}
+                      onClick={(e) => openNativeDatePicker(e.currentTarget)}
+                      onFocus={(e) => openNativeDatePicker(e.currentTarget)}
                       onChange={(e) => setScrutinyForm((prev) => ({ ...prev, electionDay: e.target.value }))}
                     />
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label">Document scrutin (PDF)</label>
+                    <input
+                      type="file"
+                      className="form-control"
+                      accept=".pdf,application/pdf"
+                      onChange={(e) => setScrutinyDocumentFile(e.target.files?.[0] || null)}
+                    />
+                    <div className="form-text">
+                      Fișierul va fi disponibil la descărcare după salvarea scrutinului.
+                    </div>
                   </div>
 
                   <div>
@@ -479,7 +542,14 @@ function AdminPanel() {
                   <button type="submit" className="btn btn-success" disabled={isSaving}>
                     {isSaving ? 'Se salvează...' : 'Salvează'}
                   </button>
-                  <button type="button" className="btn btn-danger" onClick={() => setIsModalOpen(false)}>
+                  <button
+                    type="button"
+                    className="btn btn-danger"
+                    onClick={() => {
+                      setIsModalOpen(false);
+                      setScrutinyDocumentFile(null);
+                    }}
+                  >
                     Anulează
                   </button>
                 </div>

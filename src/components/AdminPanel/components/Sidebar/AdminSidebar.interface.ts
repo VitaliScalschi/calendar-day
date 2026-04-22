@@ -1,4 +1,4 @@
-export type AdminMenuItem = 'Evenimente' | 'Utilizatori';
+export type AdminMenuItem = 'Evenimente' | 'Utilizatori' | 'Informații Utile' ;
 
 export interface SidebarProps {
   activeItem: AdminMenuItem;
