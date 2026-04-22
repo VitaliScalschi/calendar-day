@@ -1,6 +1,6 @@
 import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { HomePage, HistoryPage, Admin, LoginPage, AdminScrutinyEventsPage } from './pages/index'
+import { HomePage, HistoryPage, Admin, LoginPage, AdminScrutinyEventsPage, AdminUsefulInfoPage } from './pages/index'
 import { isAdminLoggedIn } from './utils/adminAuth'
 import './App.css'
 
@@ -24,6 +24,10 @@ function App() {
         <Route
           path="/admin/users"
           element={isAdminLoggedIn() ? <Admin /> : <Navigate to="/login" replace state={{ from: '/admin/users' }} />}
+        />
+        <Route
+          path="/admin/useful-info"
+          element={isAdminLoggedIn() ? <AdminUsefulInfoPage /> : <Navigate to="/login" replace state={{ from: '/admin/useful-info' }} />}
         />
         <Route
           path="/admin/scrutiny/:scrutinyId/events"

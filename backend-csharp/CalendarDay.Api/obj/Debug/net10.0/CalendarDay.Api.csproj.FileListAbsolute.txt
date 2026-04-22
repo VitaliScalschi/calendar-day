@@ -151,3 +151,4 @@ C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay
 C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Api\bin\Debug\net10.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.MSBuild.resources.dll
 C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Api\bin\Debug\net10.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.MSBuild.resources.dll
 C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Api\bin\Debug\net10.0\runtimes\win\lib\net9.0\System.Windows.Extensions.dll
+C:\Users\vitali.scalschi\Desktop\Project\calendar_day\backend-csharp\CalendarDay.Api\bin\Debug\net10.0\CalendarDay.Api.staticwebassets.runtime.json

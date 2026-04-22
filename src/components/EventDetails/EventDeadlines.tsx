@@ -89,6 +89,12 @@ function EventDeadlines({data, searchQuery = '', activeFilter = 'all', selectedD
   const filteredData = useMemo(() => {
     let result = data;
 
+    const normalizeForSearch = (value: string): string =>
+      value
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+
     const normalizeResponsible = (responsible?: string[] | string): string[] => {
       if (!responsible) return [];
       if (Array.isArray(responsible)) return responsible.map((r) => r.trim()).filter(Boolean);
@@ -175,16 +181,16 @@ function EventDeadlines({data, searchQuery = '', activeFilter = 'all', selectedD
     }
 
     // Aplică căutarea
-    const searchLower = searchQuery.toLowerCase();
-    if (searchLower) {
+    const normalizedSearch = normalizeForSearch(searchQuery);
+    if (normalizedSearch) {
       result = result.filter(deadline => {
-        const name = deadline.title?.toLowerCase() || '';
-        const description = deadline.description?.toLowerCase() || '';
-        const responsible = normalizeResponsible(deadline.responsible).join(' ').toLowerCase();
+        const name = normalizeForSearch(deadline.title || '');
+        const description = normalizeForSearch(deadline.description || '');
+        const responsible = normalizeForSearch(normalizeResponsible(deadline.responsible).join(' '));
         
-        return name.includes(searchLower) || 
-               description.includes(searchLower) || 
-               responsible.includes(searchLower);
+        return name.includes(normalizedSearch) || 
+               description.includes(normalizedSearch) || 
+               responsible.includes(normalizedSearch);
       });
     }
 

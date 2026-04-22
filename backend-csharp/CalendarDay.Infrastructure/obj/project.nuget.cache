@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "5pc834ONKqM=",
+  "dgSpecHash": "iRH5BhEttYc=",
   "success": true,
   "projectFilePath": "C:\\Users\\vitali.scalschi\\Desktop\\Project\\calendar_day\\backend-csharp\\CalendarDay.Infrastructure\\CalendarDay.Infrastructure.csproj",
   "expectedPackageFiles": [
@@ -82,6 +82,30 @@
       "warningLevel": 1,
       "filePath": "C:\\Users\\vitali.scalschi\\Desktop\\Project\\calendar_day\\backend-csharp\\CalendarDay.Infrastructure\\CalendarDay.Infrastructure.csproj",
       "libraryId": "Microsoft.Build.Utilities.Core",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "message": "Package 'System.Security.Cryptography.Xml' 9.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-37gx-xxp4-5rgx",
+      "projectPath": "C:\\Users\\vitali.scalschi\\Desktop\\Project\\calendar_day\\backend-csharp\\CalendarDay.Infrastructure\\CalendarDay.Infrastructure.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\vitali.scalschi\\Desktop\\Project\\calendar_day\\backend-csharp\\CalendarDay.Infrastructure\\CalendarDay.Infrastructure.csproj",
+      "libraryId": "System.Security.Cryptography.Xml",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "message": "Package 'System.Security.Cryptography.Xml' 9.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-w3x6-4m5h-cxqf",
+      "projectPath": "C:\\Users\\vitali.scalschi\\Desktop\\Project\\calendar_day\\backend-csharp\\CalendarDay.Infrastructure\\CalendarDay.Infrastructure.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\vitali.scalschi\\Desktop\\Project\\calendar_day\\backend-csharp\\CalendarDay.Infrastructure\\CalendarDay.Infrastructure.csproj",
+      "libraryId": "System.Security.Cryptography.Xml",
       "targetGraphs": [
         "net10.0"
       ]

@@ -20,6 +20,7 @@ public static class DependencyInjection
         services.AddScoped<IDeadlinesService, DeadlinesService>();
         services.AddScoped<IRegulationsService, RegulationsService>();
         services.AddScoped<IUsersService, UsersService>();
+        services.AddScoped<IUsefulInfosService, UsefulInfosService>();
         services.AddScoped<SeedFromJsonService>();
         services.AddScoped<DefaultUsersSeedService>();
         services.AddScoped<ResponsibleOptionsSeedService>();

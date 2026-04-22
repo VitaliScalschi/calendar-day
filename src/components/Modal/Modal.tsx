@@ -1,9 +1,11 @@
 import { useEffect } from 'react'
 import { calculateDaysRemaining, formatDateTime } from '../../utils/dateUtils'
 import type { ModalProps } from '../../interface/index'
+import { API_BASE_URL } from '../../utils/api'
 import './Modal.css'
 
 const TITLE_CARD = 'Detalii Eveniment'
+const API_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, '')
 
 function Modal({ isOpen, onClose, deadline }: ModalProps) {
 
@@ -24,10 +26,7 @@ function Modal({ isOpen, onClose, deadline }: ModalProps) {
 
   if (!isOpen || !deadline) return null
 
-  const responsibleLabel = Array.isArray(deadline.responsible)
-    ? deadline.responsible.join(', ')
-    : deadline.responsible;
-
+  const resolveRegulationLink = (link: string) => (link.startsWith('/') ? `${API_ORIGIN}${link}` : link);
   const daysRemaining = deadline.deadline ? calculateDaysRemaining(deadline.deadline) : null;
   const timeBadgeText =
     daysRemaining === null
@@ -78,14 +77,14 @@ function Modal({ isOpen, onClose, deadline }: ModalProps) {
                   {deadline.regulations.map((reg, index: number) => (
                     <li key={index} className="modal-regulation-item">
                       <a
-                      key={reg.id || index}
-                      href={reg.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="modal-link"
-                    >
-                      {reg.title}
-                    </a>
+                        key={reg.id || index}
+                        href={resolveRegulationLink(reg.link)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="modal-link"
+                      >
+                        {reg.title}
+                      </a>
                     </li>
                   ))}
                 </ul>
