@@ -39,8 +39,20 @@ public class SeedFromJsonService(CalendarDayDbContext db)
                     ElectionId = election.Id,
                     Title = deadlineSeed.Title,
                     AdditionalInfo = deadlineSeed.AdditionalInfo,
+                    Type = Deadline.TypeSingle,
                     DeadlineDate = ParseDateOnly(deadlineSeed.Deadline),
+                    StartDate = ParseDateOnly(deadlineSeed.Deadline),
+                    EndDate = ParseDateOnly(deadlineSeed.Deadline),
                     Description = deadlineSeed.Description ?? string.Empty,
+                };
+                deadline.Dates = new List<DeadlineDate>
+                {
+                    new()
+                    {
+                        Id = Guid.NewGuid(),
+                        DeadlineId = deadline.Id,
+                        EventDate = deadline.DeadlineDate
+                    }
                 };
 
                 deadline.Responsibles = deadlineSeed.Responsible

@@ -18,12 +18,12 @@ function EventsTable({
       <div className="card-body p-3 p-md-4">
         <div className="d-flex justify-content-between align-items-center mb-3">
           <div>
-            <h2 className="h3 fw-semibold mb-1">Administrare Scrutine</h2>
-            <div className="text-secondary small">Dashboard / Scrutine</div>
+            <h2 className="h3 fw-semibold mb-1">Administrare Programe Calendaristice</h2>
+            <div className="text-secondary small">Dashboard / Programe</div>
           </div>
           <button type="button" className="btn btn-primary" onClick={onAddEventClick}>
             <i className="fa-solid fa-plus me-2" aria-hidden="true"></i>
-            Adaugă Scrutin
+            Adaugă Program
           </button>
         </div>
 
@@ -35,7 +35,7 @@ function EventsTable({
             <input
               type="text"
               className="form-control"
-              placeholder="Caută scrutin..."
+              placeholder="Caută program..."
               value={search}
               onChange={(e) => onSearch(e.target.value)}
             />
@@ -46,9 +46,9 @@ function EventsTable({
           <table className="table align-middle mb-0">
             <thead className="table-light">
               <tr>
-                <th scope="col">Titlu scrutin</th>
+                <th scope="col">Titlu program</th>
                 <th scope="col">Data</th>
-                <th scope="col">Status</th>
+                <th scope="col">Starea programului</th>
                 <th scope="col" className="text-end">Acțiuni</th>
               </tr>
             </thead>
@@ -65,7 +65,7 @@ function EventsTable({
                   <td className="text-end">
                     <div className="d-inline-flex gap-2">
                       <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => onManageEvents?.(event.id)}>
-                        Adaugă evenimente
+                        Adaugă acțiuni în program
                       </button>
                       <button type="button" className="btn btn-primary btn-sm" onClick={() => onEdit?.(event.id)}>
                         <i className="fa-solid fa-pen" aria-hidden="true"></i>

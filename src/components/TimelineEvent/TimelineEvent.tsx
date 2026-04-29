@@ -7,7 +7,10 @@ import './TimelineEvent.css'
 const GroupLabel = new Map<string, string>([
   ['political', 'Partidele Politice'],
   ['political_organ', 'Organele Electorale'],
-  ['public', 'Publicul Larg']
+  ['public', 'Publicul Larg'],
+  ['independent_candidates', 'Candidații independați'],
+  ['observers', 'Observatori'],
+  ['public_authorities', 'Autorități publice'],
 ])
 
 function TimelineEvent({
@@ -21,7 +24,9 @@ function TimelineEvent({
     if (!value) return null;
     const v = value.trim();
 
-    const fullRangeMatch = v.match(/^(\d{1,2}[/.]\d{1,2}[/.]\d{4})\s*-\s*(\d{1,2}[/.]\d{1,2}[/.]\d{4})$/);
+    const fullRangeMatch = v.match(
+      /^(\d{1,2}[/.]\d{1,2}[/.]\d{4}|\d{4}-\d{2}-\d{2})\s*-\s*(\d{1,2}[/.]\d{1,2}[/.]\d{4}|\d{4}-\d{2}-\d{2})$/
+    );
     if (fullRangeMatch) {
       const [, start, end] = fullRangeMatch;
       return { start, end };

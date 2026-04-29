@@ -3,7 +3,7 @@
 }
 
 .icon {
-  color:var(--color-primary)
+  color: var(--color-primary);
 }
 
 .useful-info-card__title {
@@ -33,4 +33,3 @@
   color: var(--color-primary);
   cursor: pointer;
 }
-

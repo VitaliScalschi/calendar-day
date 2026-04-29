@@ -5,6 +5,7 @@ export interface ElectionItem {
   title: string;
   is_active?: boolean;
   eday: string;
+  hasDocument?: boolean;
   deadlines?: EventDeadlineProps[];
 }
 

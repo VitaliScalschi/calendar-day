@@ -10,12 +10,18 @@ type MainFiltersColumnProps = {
   onElectionChange: (value: string) => void;
   selectedTargetGroups: string[];
   onTargetGroupToggle: (group: string) => void;
+  onTargetGroupsClear: () => void;
   draftFilter: FilterType;
   onFilterChange: (filter: FilterType) => void;
   filterCounts: Record<FilterType, number>;
   responsibleOptions: string[];
-  draftSelectedResponsible: string;
-  onResponsibleChange: (value: string) => void;
+  draftSelectedResponsible: string[];
+  onResponsibleChange: (value: string[]) => void;
+  draftDateRangeStart: string;
+  draftDateRangeEnd: string;
+  onDateRangeStartChange: (value: string) => void;
+  onDateRangeEndChange: (value: string) => void;
+  onDateRangeReset: () => void;
   selectedElection: ElectionItem | null;
   draftDateKey: string | null;
   onSelectDateKey: (key: string | null) => void;
@@ -27,12 +33,18 @@ function MainFiltersColumn({
   onElectionChange,
   selectedTargetGroups,
   onTargetGroupToggle,
+  onTargetGroupsClear,
   draftFilter,
   onFilterChange,
   filterCounts,
   responsibleOptions,
   draftSelectedResponsible,
   onResponsibleChange,
+  draftDateRangeStart,
+  draftDateRangeEnd,
+  onDateRangeStartChange,
+  onDateRangeEndChange,
+  onDateRangeReset,
   selectedElection,
   draftDateKey,
   onSelectDateKey,
@@ -125,12 +137,18 @@ function MainFiltersColumn({
                   onElectionChange={onElectionChange}
                   selectedTargetGroups={selectedTargetGroups}
                   onTargetGroupToggle={onTargetGroupToggle}
+                  onTargetGroupsClear={onTargetGroupsClear}
                   activeFilter={draftFilter}
                   onFilterChange={onFilterChange}
                   filterCounts={filterCounts}
                   responsibleOptions={responsibleOptions}
                   selectedResponsible={draftSelectedResponsible}
                   onResponsibleChange={onResponsibleChange}
+                  dateRangeStart={draftDateRangeStart}
+                  dateRangeEnd={draftDateRangeEnd}
+                  onDateRangeStartChange={onDateRangeStartChange}
+                  onDateRangeEndChange={onDateRangeEndChange}
+                  onDateRangeReset={onDateRangeReset}
                   calendarSlot={
                     <Calendar
                       eday={selectedElection?.eday}
@@ -156,12 +174,18 @@ function MainFiltersColumn({
               onElectionChange={onElectionChange}
               selectedTargetGroups={selectedTargetGroups}
               onTargetGroupToggle={onTargetGroupToggle}
+              onTargetGroupsClear={onTargetGroupsClear}
               activeFilter={draftFilter}
               onFilterChange={onFilterChange}
               filterCounts={filterCounts}
               responsibleOptions={responsibleOptions}
               selectedResponsible={draftSelectedResponsible}
               onResponsibleChange={onResponsibleChange}
+              dateRangeStart={draftDateRangeStart}
+              dateRangeEnd={draftDateRangeEnd}
+              onDateRangeStartChange={onDateRangeStartChange}
+              onDateRangeEndChange={onDateRangeEndChange}
+              onDateRangeReset={onDateRangeReset}
               calendarSlot={
                 <Calendar
                   eday={selectedElection?.eday}

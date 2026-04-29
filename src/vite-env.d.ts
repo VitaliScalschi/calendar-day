@@ -4,7 +4,7 @@
  * Declarații de tipuri pentru modulele JSON
  */
 declare module '*.json' {
-  const value: any;
+  const value: unknown;
   export default value;
 }
 

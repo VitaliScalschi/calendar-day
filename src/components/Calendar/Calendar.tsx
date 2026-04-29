@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { MONTH_NAMES, WEEK_DAYS } from './constant'
 import { calculateDaysRemaining } from '../../utils/dateUtils'
 import type { CalendarProps, EventDeadlineProps } from '../../interface/index'
@@ -104,6 +104,17 @@ function Calendar({ eday, deadlines = [], selectedDateKey: selectedDateKeyProp =
   const deadlinesByDateKey = useMemo(() => {
     const map = new Map<string, EventDeadlineProps[]>();
     for (const d of deadlines) {
+      if (Array.isArray(d.deadlines) && d.deadlines.length > 0) {
+        for (const value of d.deadlines) {
+          const key = parseDateKey(value);
+          if (!key) continue;
+          const list = map.get(key) ?? [];
+          list.push(d);
+          map.set(key, list);
+        }
+        continue;
+      }
+
       const range = getDeadlineRange(d.deadline);
       if (range) {
         const keys = expandDateRange(range.start, range.end);
@@ -137,15 +148,7 @@ function Calendar({ eday, deadlines = [], selectedDateKey: selectedDateKeyProp =
   }, [deadlineDateKeysSorted]);
 
   useEffect(() => {
-    if (!deadlineRange) {
-      setSelectedDateKey(null);
-      onSelectDateKey?.(null);
-      return;
-    }
-
-    setSelectedDateKey((prev) => {
-      return prev && deadlinesByDateKey.has(prev) ? prev : null;
-    });
+    if (!deadlineRange) return;
   }, [deadlineRange, deadlinesByDateKey, onSelectDateKey]);
 
   useEffect(() => {
@@ -162,19 +165,26 @@ function Calendar({ eday, deadlines = [], selectedDateKey: selectedDateKeyProp =
   const startingDayOfWeek = firstDayOfMonth.getDay()
   const adjustedStartingDay = startingDayOfWeek === 0 ? 6 : startingDayOfWeek - 1
   
-  const goToPreviousMonth = () => {
+  const goToPreviousMonth = useCallback(() => {
     setCurrentDate(new Date(year, month - 1, 1))
-  }
+  }, [month, year])
   
-  const goToNextMonth = () => {
+  const goToNextMonth = useCallback(() => {
     setCurrentDate(new Date(year, month + 1, 1))
-  }
+  }, [month, year])
   
-  const goToToday = () => {
-    setCurrentDate(new Date())
-  }
+  const todayDate = new Date()
+  const todayKey = `${todayDate.getFullYear()}-${String(todayDate.getMonth() + 1).padStart(2, '0')}-${String(todayDate.getDate()).padStart(2, '0')}`
+
+  const goToToday = useCallback(() => {
+    const now = new Date()
+    const currentMonthDate = new Date(now.getFullYear(), now.getMonth(), 1)
+    setCurrentDate(currentMonthDate)
+    setSelectedDateKey(todayKey)
+    onSelectDateKey?.(todayKey)
+  }, [deadlineRange, deadlinesByDateKey, onSelectDateKey, todayKey])
   
-  const renderDays = () => {
+  const renderDays = useCallback(() => {
     const days = []
     
     // Empty cells for days before the first day of the month
@@ -185,9 +195,9 @@ function Calendar({ eday, deadlines = [], selectedDateKey: selectedDateKeyProp =
     // Days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       const isToday = 
-        day === new Date().getDate() &&
-        month === new Date().getMonth() &&
-        year === new Date().getFullYear()
+        day === todayDate.getDate() &&
+        month === todayDate.getMonth() &&
+        year === todayDate.getFullYear()
 
       const cellKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
@@ -239,7 +249,7 @@ function Calendar({ eday, deadlines = [], selectedDateKey: selectedDateKeyProp =
     }
     
     return days
-  }
+  }, [adjustedStartingDay, daysInMonth, deadlineRange, deadlinesByDateKey, electionDate, month, onSelectDateKey, selectedDateKey, todayDate, year])
   
   return (
     <div className="card shadow-sm mb-4 border rounded calendar-card--compact overflow-hidden">

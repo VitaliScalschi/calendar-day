@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { isAdminLoggedIn, loginAdmin, ADMIN_DEFAULT_EMAIL } from '../../utils/adminAuth';
+import { isAdminLoggedIn, loginAdmin } from '../../shared/auth/adminAuth';
 
 function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [email, setEmail] = useState(ADMIN_DEFAULT_EMAIL);
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -54,6 +54,7 @@ function LoginPage() {
                 className="form-control"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                autoComplete="username"
                 required
               />
             </div>
@@ -66,6 +67,7 @@ function LoginPage() {
                 className="form-control"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
                 required
               />
             </div>
@@ -77,9 +79,6 @@ function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-3 small text-secondary">
-            Demo: <strong>{ADMIN_DEFAULT_EMAIL}</strong> / <strong>admin123</strong>
-          </div>
         </div>
       </div>
     </main>

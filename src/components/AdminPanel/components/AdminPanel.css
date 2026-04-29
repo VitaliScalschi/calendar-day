@@ -263,6 +263,79 @@
 .admin-offcanvas .offcanvas-body {
   overflow-y: auto;
   max-height: calc(100vh - 70px);
+  background: #f8fafc;
+}
+
+.admin-event-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-event-form__section {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.admin-event-form__section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 10px;
+}
+
+.admin-event-form__section-title i {
+  color: #0d6efd;
+}
+
+.admin-event-form__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.admin-event-form__groups {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+}
+
+.admin-event-form__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 0 2px;
+  background: linear-gradient(to top, #f8fafc 70%, rgba(248, 250, 252, 0));
+}
+
+.admin-event-form__single-date-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.admin-event-form__single-date-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.6rem;
+}
+
+.admin-event-form__single-date-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #d7dce5;
+  border-radius: 8px;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.85rem;
+  color: #374151;
+  background: #fff;
 }
 
 .admin-events-topbar__back {
@@ -404,5 +477,10 @@
 
   .description-cell {
     max-width: 150px;
+  }
+
+  .admin-event-form__grid,
+  .admin-event-form__groups {
+    grid-template-columns: 1fr;
   }
 }

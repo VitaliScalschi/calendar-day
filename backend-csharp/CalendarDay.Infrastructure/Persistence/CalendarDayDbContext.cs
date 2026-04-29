@@ -8,6 +8,7 @@ public class CalendarDayDbContext(DbContextOptions<CalendarDayDbContext> options
     public DbSet<Election> Elections => Set<Election>();
     public DbSet<User> Users => Set<User>();
     public DbSet<Deadline> Deadlines => Set<Deadline>();
+    public DbSet<DeadlineDate> DeadlineDates => Set<DeadlineDate>();
     public DbSet<Regulation> Regulations => Set<Regulation>();
     public DbSet<DeadlineResponsible> DeadlineResponsibles => Set<DeadlineResponsible>();
     public DbSet<DeadlineGroup> DeadlineGroups => Set<DeadlineGroup>();
@@ -35,9 +36,23 @@ public class CalendarDayDbContext(DbContextOptions<CalendarDayDbContext> options
             d.HasKey(x => x.Id);
             d.Property(x => x.Title).IsRequired().HasMaxLength(350);
             d.Property(x => x.Description).IsRequired();
+            d.Property(x => x.Type).IsRequired().HasMaxLength(20);
             d.HasOne(x => x.Election)
                 .WithMany(e => e.Deadlines)
                 .HasForeignKey(x => x.ElectionId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<DeadlineDate>(d =>
+        {
+            d.ToTable("deadline_dates");
+            d.HasKey(x => x.Id);
+            d.Property(x => x.EventDate).IsRequired();
+            d.Property(x => x.CreatedAtUtc).HasColumnName("created_at");
+            d.HasIndex(x => new { x.DeadlineId, x.EventDate }).IsUnique();
+            d.HasOne(x => x.Deadline)
+                .WithMany(deadline => deadline.Dates)
+                .HasForeignKey(x => x.DeadlineId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 

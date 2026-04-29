@@ -1,46 +1,22 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Sidebar, HeaderBar, DashboardCards } from './components/index';
 import EventsTable from './components/Table/EventsTable';
 import type { AdminEventItem } from './components/Table/EventsTable.interface';
-import Users from './pages/Users/Users';
-import { logoutAdmin } from '../../utils/adminAuth';
-import { ApiError, apiRequest } from '../../utils/api';
+import Users from './components/Users/Users';
+import { logoutAdmin } from '../../shared/auth/adminAuth';
+import { ApiError } from '../../shared/services/apiClient';
+import {
+  useAdminPanelQuery,
+  useDeleteElectionMutation,
+  useDeleteUserMutation,
+  useUpsertElectionMutation,
+  useUpsertUserMutation,
+} from '../../features/admin/hooks/useAdminPanelQueries';
 import './components/AdminPanel.css';
 import type { AdminMenuItem } from './components/Sidebar/AdminSidebar.interface';
 
 const PAGE_SIZE = 5;
-const SCRUTINY_TYPES = [
-  'Alegeri parlamentare',
-  'Alegeri parlamentare noi',
-  'Alegeri prezidențiale',
-  'Referendum',
-  'Alegeri locale generale',
-  'Alegeri locale noi',
-  'Alegeri regionale',
-] as const;
-
-type ApiElection = {
-  id: string;
-  title: string;
-  isActive: boolean;
-  eday: string;
-  hasDocument?: boolean;
-};
-
-type UploadDocumentResponse = {
-  url: string;
-  originalName: string;
-};
-
-type ApiUser = {
-  id: string;
-  email: string;
-  role: string;
-  isActive: boolean;
-  createdAtUtc: string;
-};
-
 type ScrutinyForm = {
   id?: string;
   title: string;
@@ -58,7 +34,7 @@ type UserForm = {
 function getMenuFromPath(pathname: string): AdminMenuItem {
   if (pathname.startsWith('/admin/users')) return 'Utilizatori';
   if (pathname.startsWith('/admin/useful-info')) return 'Informații Utile';
-  return 'Evenimente';
+  return 'Programe';
 }
 
 function formatDate(dateStr: string): string {
@@ -80,9 +56,6 @@ function AdminPanel() {
   const activeMenuItem = getMenuFromPath(location.pathname);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const [elections, setElections] = useState<ApiElection[]>([]);
-  const [users, setUsers] = useState<ApiUser[]>([]);
-  const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [formError, setFormError] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -104,50 +77,32 @@ function AdminPanel() {
     isActive: true,
   });
   const [scrutinyForm, setScrutinyForm] = useState<ScrutinyForm>({
-    title: SCRUTINY_TYPES[0],
+    title: '',
     electionDay: '',
     isActive: true,
   });
   const [scrutinyDocumentFile, setScrutinyDocumentFile] = useState<File | null>(null);
-
-  const loadAdminData = async () => {
-    setLoadError('');
-    const loadedElections = await apiRequest<ApiElection[]>('/elections');
-    let loadedUsers: ApiUser[] = [];
-    try {
-      loadedUsers = await apiRequest<ApiUser[]>('/users');
-    } catch (error) {
-      if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
-        loadedUsers = [];
-      } else {
-        throw error;
-      }
-    }
-    setElections(loadedElections);
-    setUsers(loadedUsers);
-  };
+  const adminPanelQuery = useAdminPanelQuery();
+  const upsertElectionMutation = useUpsertElectionMutation();
+  const deleteElectionMutation = useDeleteElectionMutation();
+  const upsertUserMutation = useUpsertUserMutation();
+  const deleteUserMutation = useDeleteUserMutation();
+  const elections = adminPanelQuery.data?.elections ?? [];
+  const users = adminPanelQuery.data?.users ?? [];
+  const loading = adminPanelQuery.isLoading || adminPanelQuery.isFetching;
 
   useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      try {
-        if (!cancelled) await loadAdminData();
-      } catch (error) {
-        if (error instanceof ApiError && error.status === 401) {
-          logoutAdmin();
-          navigate('/login', { replace: true });
-        } else {
-          setLoadError('Nu am putut incarca scrutinele. Verifica backend-ul.');
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, [navigate]);
+    const error = adminPanelQuery.error;
+    if (!(error instanceof ApiError)) {
+      return;
+    }
+    if (error.status === 401) {
+      logoutAdmin();
+      navigate('/login', { replace: true });
+      return;
+    }
+    setLoadError('Nu am putut incarca scrutinele. Verifica backend-ul.');
+  }, [adminPanelQuery.error, navigate]);
 
   useEffect(() => {
     setSearch('');
@@ -175,9 +130,12 @@ function AdminPanel() {
   const safePage = Math.min(page, totalPages);
   const pagedRows = filteredRows.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
-  const total = scrutinyRows.length;
-  const active = scrutinyRows.filter((x) => x.status === 'Activ').length;
-  const inactive = scrutinyRows.filter((x) => x.status === 'Inactiv').length;
+  const stats = useMemo(() => {
+    const total = scrutinyRows.length;
+    const active = scrutinyRows.filter((x) => x.status === 'Activ').length;
+    const inactive = total - active;
+    return { total, active, inactive };
+  }, [scrutinyRows]);
 
   const usersRows = useMemo<Array<{ id: string; email: string; role: string; status: 'Activ' | 'Inactiv'; createdAt: string }>>(
     () =>
@@ -197,12 +155,12 @@ function AdminPanel() {
     return usersRows.filter((user) => [user.email, user.role, user.status, user.createdAt].join(' ').toLowerCase().includes(query));
   }, [usersRows, search]);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     logoutAdmin();
     navigate('/login', { replace: true });
-  };
+  }, [navigate]);
 
-  const handleMenuChange = (item: AdminMenuItem) => {
+  const handleMenuChange = useCallback((item: AdminMenuItem) => {
     if (item === 'Utilizatori') {
       navigate('/admin/users');
       return;
@@ -212,11 +170,11 @@ function AdminPanel() {
       return;
     }
     navigate('/admin/events');
-  };
+  }, [navigate]);
 
   const openCreateModal = () => {
     setFormError('');
-    setScrutinyForm({ title: SCRUTINY_TYPES[0], electionDay: '', isActive: true });
+    setScrutinyForm({ title: '', electionDay: '', isActive: true });
     setScrutinyDocumentFile(null);
     setIsModalOpen(true);
   };
@@ -255,26 +213,11 @@ function AdminPanel() {
         eday: scrutinyForm.electionDay,
       };
 
-      let savedScrutiny: ApiElection;
-      if (scrutinyForm.id) {
-        savedScrutiny = await apiRequest<ApiElection>(`/elections/${scrutinyForm.id}`, {
-          method: 'PUT',
-          body: JSON.stringify(payload),
-        });
-      } else {
-        savedScrutiny = await apiRequest<ApiElection>('/elections', { method: 'POST', body: JSON.stringify(payload) });
-      }
-
-      if (scrutinyDocumentFile) {
-        const formData = new FormData();
-        formData.append('file', scrutinyDocumentFile);
-        await apiRequest<UploadDocumentResponse>(`/elections/${savedScrutiny.id}/upload-document`, {
-          method: 'POST',
-          body: formData,
-        });
-      }
-
-      await loadAdminData();
+      await upsertElectionMutation.mutateAsync({
+        payload,
+        electionId: scrutinyForm.id,
+        document: scrutinyDocumentFile,
+      });
       setIsModalOpen(false);
       setScrutinyDocumentFile(null);
     } catch (error) {
@@ -298,8 +241,7 @@ function AdminPanel() {
     if (!pendingDeleteId) return;
     setIsDeleting(true);
     try {
-      await apiRequest(`/elections/${pendingDeleteId}`, { method: 'DELETE' });
-      await loadAdminData();
+      await deleteElectionMutation.mutateAsync(pendingDeleteId);
       setIsDeleteModalOpen(false);
       setPendingDeleteId(null);
     } catch {
@@ -333,27 +275,25 @@ function AdminPanel() {
     setIsCreatingUser(true);
     try {
       if (editingUserId) {
-        await apiRequest(`/users/${editingUserId}`, {
-          method: 'PUT',
-          body: JSON.stringify({
+        await upsertUserMutation.mutateAsync({
+          userId: editingUserId,
+          payload: {
             email: userForm.email.trim().toLowerCase(),
             password: userForm.password.trim() || undefined,
             role: userForm.role,
             isActive: userForm.isActive,
-          }),
+          },
         });
       } else {
-        await apiRequest('/users', {
-          method: 'POST',
-          body: JSON.stringify({
+        await upsertUserMutation.mutateAsync({
+          payload: {
             email: userForm.email.trim().toLowerCase(),
             password: userForm.password,
             role: userForm.role,
             isActive: userForm.isActive,
-          }),
+          },
         });
       }
-      await loadAdminData();
       setIsUserModalOpen(false);
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
@@ -393,8 +333,7 @@ function AdminPanel() {
     setIsDeletingUser(true);
     setUserFormError('');
     try {
-      await apiRequest(`/users/${pendingDeleteUserId}`, { method: 'DELETE' });
-      await loadAdminData();
+      await deleteUserMutation.mutateAsync(pendingDeleteUserId);
       setIsDeleteUserModalOpen(false);
       setPendingDeleteUserId(null);
     } catch (error) {
@@ -416,8 +355,8 @@ function AdminPanel() {
       <Sidebar activeItem={activeMenuItem} onChange={handleMenuChange} />
 
       <main className="admin-layout__content p-3 p-md-4">
-        <HeaderBar title={activeMenuItem === 'Utilizatori' ? 'Administrare Utilizatori' : 'Administrare Scrutine'} onLogout={handleLogout} />
-        <DashboardCards total={total} active={active} expired={inactive} users={users.length} />
+        <HeaderBar title={activeMenuItem === 'Utilizatori' ? 'Administrare Utilizatori' : 'Administrare Programului Calendaristic'} onLogout={handleLogout} />
+        <DashboardCards total={stats.total} active={stats.active} expired={stats.inactive} users={users.length} />
 
         {loading ? <div className="alert alert-info">Se incarca datele...</div> : null}
         {loadError ? <div className="alert alert-warning">{loadError}</div> : null}
@@ -458,7 +397,7 @@ function AdminPanel() {
           <div className="modal-dialog modal-dialog-centered admin-confirm-modal" role="document">
             <div className="modal-content admin-confirm-modal__content">
               <div className="modal-header">
-                <h5 className="modal-title">{scrutinyForm.id ? 'Modifică Scrutin' : 'Adaugă Scrutin'}</h5>
+                <h5 className="modal-title">{scrutinyForm.id ? 'Modifică Programul Calendaristic' : 'Adaugă Programul Calendaristic'}</h5>
                 <button
                   type="button"
                   className="btn-close"
@@ -473,17 +412,13 @@ function AdminPanel() {
                 <div className="modal-body">
                   <div className="mb-3">
                     <label className="form-label">Tip scrutin</label>
-                    <select
-                      className="form-select"
+                    <input
+                      type="text"
+                      className="form-control"
                       value={scrutinyForm.title}
+                      placeholder="Introduceți denumirea scrutinului"
                       onChange={(e) => setScrutinyForm((prev) => ({ ...prev, title: e.target.value }))}
-                    >
-                      {SCRUTINY_TYPES.map((item) => (
-                        <option key={item} value={item}>
-                          {item}
-                        </option>
-                      ))}
-                    </select>
+                    />
                   </div>
 
                   <div className="mb-3">
@@ -499,7 +434,7 @@ function AdminPanel() {
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label">Document scrutin (PDF)</label>
+                    <label className="form-label">Programul calendaristic (PDF/word)</label>
                     <input
                       type="file"
                       className="form-control"
@@ -578,7 +513,7 @@ function AdminPanel() {
                 />
               </div>
               <div className="modal-body admin-confirm-modal__body">
-                Ești sigur că vrei să ștergi acest scrutin?
+                Ești sigur că vrei să ștergi acest program calendaristic?
               </div>
               <div className="modal-footer admin-confirm-modal__footer">
                 <button

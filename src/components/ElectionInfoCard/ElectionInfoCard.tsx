@@ -1,4 +1,4 @@
-import  {UseInfo}  from '../index';
+import { UsefulInfoCard } from '../index';
 import './ElectionInfoCard.css';
 
 type ElectionInfoCardProps = {
@@ -56,7 +56,7 @@ function ElectionInfoCard({
           </div>
       </div>
 
-      <UseInfo/>
+      <UsefulInfoCard />
     </aside>
   );
 }
