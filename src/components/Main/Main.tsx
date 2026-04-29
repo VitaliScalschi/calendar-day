@@ -9,9 +9,11 @@ import MainEventsColumn from './components/MainEventsColumn';
 import './Main.css';
 
 const DEFAULT_FILTER: FilterType = 'today';
-const DEFAULT_RESPONSIBLE = '';
+const DEFAULT_RESPONSIBLE: string[] = [];
 const DEFAULT_SEARCH = '';
 const DEFAULT_TARGET_GROUPS: TargetGroupKey[] = [];
+const DEFAULT_DATE_RANGE_START = '';
+const DEFAULT_DATE_RANGE_END = '';
 
 function Main({
   data,
@@ -23,15 +25,19 @@ function Main({
 
   const [draftSearchQuery, setDraftSearchQuery] = useState(DEFAULT_SEARCH);
   const [draftFilter, setDraftFilter] = useState<FilterType>(DEFAULT_FILTER);
-  const [draftSelectedResponsible, setDraftSelectedResponsible] = useState(DEFAULT_RESPONSIBLE);
+  const [draftSelectedResponsible, setDraftSelectedResponsible] = useState<string[]>(DEFAULT_RESPONSIBLE);
   const [draftTargetGroups, setDraftTargetGroups] = useState<TargetGroupKey[]>(DEFAULT_TARGET_GROUPS);
   const [draftDateKey, setDraftDateKey] = useState<string | null>(null);
+  const [draftDateRangeStart, setDraftDateRangeStart] = useState(DEFAULT_DATE_RANGE_START);
+  const [draftDateRangeEnd, setDraftDateRangeEnd] = useState(DEFAULT_DATE_RANGE_END);
 
   const [appliedSearchQuery, setAppliedSearchQuery] = useState(DEFAULT_SEARCH);
   const [appliedFilter, setAppliedFilter] = useState<FilterType>(DEFAULT_FILTER);
-  const [appliedSelectedResponsible, setAppliedSelectedResponsible] = useState(DEFAULT_RESPONSIBLE);
+  const [appliedSelectedResponsible, setAppliedSelectedResponsible] = useState<string[]>(DEFAULT_RESPONSIBLE);
   const [appliedTargetGroups, setAppliedTargetGroups] = useState<TargetGroupKey[]>(DEFAULT_TARGET_GROUPS);
   const [appliedDateKey, setAppliedDateKey] = useState<string | null>(null);
+  const [appliedDateRangeStart, setAppliedDateRangeStart] = useState(DEFAULT_DATE_RANGE_START);
+  const [appliedDateRangeEnd, setAppliedDateRangeEnd] = useState(DEFAULT_DATE_RANGE_END);
 
   const activeElections = getActiveElections(data);
   const selectedElection =
@@ -102,7 +108,10 @@ function Main({
     return null;
   };
 
-  const isDateInDeadline = (value: string | undefined, selectedKey: string): boolean => {
+  const isDateInDeadline = (value: string | undefined, selectedKey: string, values?: string[]): boolean => {
+    if (Array.isArray(values) && values.length > 0) {
+      return values.some((entry) => toDateKey(entry) === selectedKey);
+    }
     const range = getDeadlineRange(value);
     if (range) {
       return selectedKey >= range.start && selectedKey <= range.end;
@@ -120,9 +129,34 @@ function Main({
 
   const getFilteredDeadlines = (deadlines?: ElectionItem['deadlines'], selectedGroups: string[] = []) => {
     if (!deadlines || !Array.isArray(deadlines)) return [];
-    const byTargetGroups = filterDeadlinesByTargetGroups(deadlines, selectedGroups);
-    if (!appliedDateKey) return byTargetGroups;
-    return byTargetGroups.filter((d) => isDateInDeadline(d.deadline, appliedDateKey));
+    let result = filterDeadlinesByTargetGroups(deadlines, selectedGroups);
+
+    if (appliedDateKey) {
+      result = result.filter((d) => isDateInDeadline(d.deadline, appliedDateKey, d.deadlines));
+    }
+
+    if (appliedDateRangeStart || appliedDateRangeEnd) {
+      const startKey = appliedDateRangeStart || '0000-01-01';
+      const endKey = appliedDateRangeEnd || '9999-12-31';
+      result = result.filter((deadline) => {
+        const range = getDeadlineRange(deadline.deadline);
+        if (range) {
+          return range.end >= startKey && range.start <= endKey;
+        }
+        if (Array.isArray(deadline.deadlines) && deadline.deadlines.length > 0) {
+          return deadline.deadlines.some((entry) => {
+            const dateKey = toDateKey(entry);
+            if (!dateKey) return false;
+            return dateKey >= startKey && dateKey <= endKey;
+          });
+        }
+        const dateKey = toDateKey(deadline.deadline);
+        if (!dateKey) return false;
+        return dateKey >= startKey && dateKey <= endKey;
+      });
+    }
+
+    return result;
   };
 
   const currentElectionDeadlines = selectedElection?.deadlines ?? [];
@@ -146,7 +180,7 @@ function Main({
       const statusDate = getStatusDateValue(deadline.deadline);
       const daysRemaining = statusDate ? calculateDaysRemaining(statusDate) : null;
       const isExpired = daysRemaining !== null && daysRemaining < 0;
-      const isToday = isDateInDeadline(deadline.deadline, todayDateKey);
+      const isToday = isDateInDeadline(deadline.deadline, todayDateKey, deadline.deadlines);
 
       acc.all += 1;
       if (isExpired) {
@@ -161,7 +195,11 @@ function Main({
     { all: 0, in_progress: 0, today: 0, expired: 0 } as Record<FilterType, number>
   );
 
-  const electionOptions = activeElections.map((election) => ({ id: election.id, label: election.title }));
+  const electionOptions = activeElections.map((election) => ({
+    id: election.id,
+    label: election.title,
+    hasDocument: election.hasDocument,
+  }));
 
   const selectedElectionDeadlines = selectedElection?.deadlines ?? [];
   const selectedElectionTotalActions = selectedElectionDeadlines.length;
@@ -172,7 +210,7 @@ function Main({
   }).length;
   const selectedElectionRemainingStages = Math.max(selectedElectionTotalActions - selectedElectionCompletedStages, 0);
   const currentDayKey = draftDateKey ?? todayDateKey;
-  const selectedElectionActiveOnCurrentDay = selectedElectionDeadlines.filter((d) => isDateInDeadline(d.deadline, currentDayKey)).length;
+  const selectedElectionActiveOnCurrentDay = selectedElectionDeadlines.filter((d) => isDateInDeadline(d.deadline, currentDayKey, d.deadlines)).length;
   const currentDayLabel = draftDateKey ? 'ziua selectata' : 'azi';
   const selectedElectionDisplayDate = selectedElection?.eday
     ? (/^\d{4}-\d{2}-\d{2}/.test(selectedElection.eday) ? convertFromSQLDate(selectedElection.eday) : selectedElection.eday)
@@ -217,7 +255,9 @@ function Main({
     setAppliedTargetGroups(draftTargetGroups);
     setAppliedSearchQuery(draftSearchQuery);
     setAppliedDateKey(draftDateKey);
-  }, [selectedElectionId, draftFilter, draftSelectedResponsible, draftTargetGroups, draftSearchQuery, draftDateKey]);
+    setAppliedDateRangeStart(draftDateRangeStart);
+    setAppliedDateRangeEnd(draftDateRangeEnd);
+  }, [selectedElectionId, draftFilter, draftSelectedResponsible, draftTargetGroups, draftSearchQuery, draftDateKey, draftDateRangeStart, draftDateRangeEnd]);
 
   return (
     <div className="main-layout row g-3 align-items-start">
@@ -227,12 +267,21 @@ function Main({
         onElectionChange={handleElectionChange}
         selectedTargetGroups={draftTargetGroups}
         onTargetGroupToggle={handleTargetGroupToggle}
+        onTargetGroupsClear={() => setDraftTargetGroups([])}
         draftFilter={draftFilter}
         onFilterChange={handleFilterChange}
         filterCounts={filterCounts}
         responsibleOptions={responsibleOptions}
         draftSelectedResponsible={draftSelectedResponsible}
         onResponsibleChange={setDraftSelectedResponsible}
+        draftDateRangeStart={draftDateRangeStart}
+        draftDateRangeEnd={draftDateRangeEnd}
+        onDateRangeStartChange={setDraftDateRangeStart}
+        onDateRangeEndChange={setDraftDateRangeEnd}
+        onDateRangeReset={() => {
+          setDraftDateRangeStart(DEFAULT_DATE_RANGE_START);
+          setDraftDateRangeEnd(DEFAULT_DATE_RANGE_END);
+        }}
         selectedElection={selectedElection}
         draftDateKey={draftDateKey}
         onSelectDateKey={setDraftDateKey}

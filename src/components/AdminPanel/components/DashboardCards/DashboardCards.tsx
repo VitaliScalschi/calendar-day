@@ -2,9 +2,9 @@ import type { DashboardCardsProps } from './DashboardCards.interface';
 
 function DashboardCards({ total, active, expired, users }: DashboardCardsProps) {
   const cards = [
-    { label: 'Evenimente totale', value: total, icon: 'fa-regular fa-calendar-check', color: 'primary' },
-    { label: 'Evenimente active', value: active, icon: 'fa-regular fa-clock', color: 'success' },
-    { label: 'Evenimente expirate', value: expired, icon: 'fa-regular fa-circle-xmark', color: 'danger' },
+    { label: 'Programe totale', value: total, icon: 'fa-regular fa-calendar-check', color: 'primary' },
+    { label: 'Programe active', value: active, icon: 'fa-regular fa-clock', color: 'success' },
+    { label: 'Programe expirate', value: expired, icon: 'fa-regular fa-circle-xmark', color: 'danger' },
     { label: 'Utilizatori', value: users, icon: 'fa-regular fa-user', color: 'warning' },
   ] as const;
 

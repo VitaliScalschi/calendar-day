@@ -11,6 +11,7 @@ export interface EventDeadlineProps {
   election_id: string;
   title?: string;
   deadline?: string;
+  deadlines?: string[];
   responsible?: string[];
   description?: string;
   regulations?: Regulation[];
@@ -24,5 +25,5 @@ export interface EventDeadlinesProps {
   searchQuery?: string;
   activeFilter?: FilterType;
   selectedDateKey?: string | null;
-  selectedResponsible?: string;
+  selectedResponsible?: string[];
 }

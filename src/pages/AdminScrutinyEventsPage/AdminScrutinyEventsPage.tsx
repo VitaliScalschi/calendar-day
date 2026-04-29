@@ -1,11 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Sidebar } from '../../components/AdminPanel/components';
 import type { AdminMenuItem } from '../../components/AdminPanel/components/Sidebar/AdminSidebar.interface';
-import { logoutAdmin } from '../../utils/adminAuth';
-import { ApiError, apiRequest } from '../../utils/api';
+import { logoutAdmin } from '../../shared/auth/adminAuth';
+import { ApiError, apiRequest } from '../../shared/services/apiClient';
 import DateRangePicker from '../../components/DateRangePicker/DateRangePicker';
 import type { SelectionRange } from '../../interface';
+import { formatDeadlineLabel, toLegacyDeadlineValue, toRoDateLocal } from '../../shared/utils/deadlineDate';
+import { useScrutinyEventsQuery } from '../../features/admin/hooks/useScrutinyEventsQuery';
 import '../../components/AdminPanel/components/AdminPanel.css';
 
 type ApiElection = {
@@ -16,7 +18,11 @@ type ApiElection = {
 type ApiDeadline = {
   id: string;
   title: string;
+  type?: 'RANGE' | 'MULTIPLE' | 'SINGLE';
+  startDate?: string | null;
+  endDate?: string | null;
   deadline: string;
+  deadlines?: string[];
   additionalInfo?: string | null;
   description: string;
   responsible: string[];
@@ -43,9 +49,11 @@ const AVAILABLE_GROUPS = [
   { key: 'political', label: 'Partidele Politice' },
   { key: 'political_organ', label: 'Organele Electorale' },
   { key: 'public', label: 'Public Larg' },
+  { key: 'independent_candidates', label: 'Candidații independați' },
+  { key: 'observers', label: 'Observatori' },
+  { key: 'public_authorities', label: 'Autorități publice' },
 ] as const;
 const ALLOWED_GROUP_KEYS = AVAILABLE_GROUPS.map((group) => group.key);
-const RANGE_META_REGEX = /\[\[RANGE:(\d{4}-\d{2}-\d{2})\|(\d{4}-\d{2}-\d{2})\]\]/;
 
 const parseApiErrorMessage = (message: string) => {
   try {
@@ -76,7 +84,8 @@ function AdminScrutinyEventsPage() {
     { startDate: new Date(), endDate: new Date(), key: 'selection' },
   ]);
   const [useDateInterval, setUseDateInterval] = useState(false);
-  const [singleDeadlineDate, setSingleDeadlineDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [singleDeadlineDateInput, setSingleDeadlineDateInput] = useState('');
+  const [singleDeadlineDates, setSingleDeadlineDates] = useState<string[]>([]);
   const [regulationTitle, setRegulationTitle] = useState('');
   const [regulationLink, setRegulationLink] = useState('');
   const [regulations, setRegulations] = useState<Array<{ id?: string; title: string; link: string }>>([]);
@@ -84,7 +93,9 @@ function AdminScrutinyEventsPage() {
   const [responsibles, setResponsibles] = useState<string[]>([]);
   const [responsibleOptions, setResponsibleOptions] = useState<ApiResponsibleOption[]>([]);
   const [isResponsibleDropdownOpen, setIsResponsibleDropdownOpen] = useState(false);
+  const [isGroupsDropdownOpen, setIsGroupsDropdownOpen] = useState(false);
   const responsibleDropdownRef = useRef<HTMLDivElement | null>(null);
+  const groupsDropdownRef = useRef<HTMLDivElement | null>(null);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [form, setForm] = useState({
     title: '',
@@ -99,82 +110,31 @@ function AdminScrutinyEventsPage() {
     return `${year}-${month}-${day}`;
   };
 
-  const toRoDateLocal = (date: Date): string => {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  };
+  const normalizeUniqueSingleDates = (values: string[]) =>
+    Array.from(new Set(values.map((value) => value.trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b));
 
-  const extractRangeMeta = (additionalInfo?: string | null): { start: string; end: string; cleanInfo: string } | null => {
-    if (!additionalInfo) return null;
-    const match = additionalInfo.match(RANGE_META_REGEX);
-    if (!match) return null;
-    const [, start, end] = match;
-    const cleanInfo = additionalInfo.replace(RANGE_META_REGEX, '').trim();
-    return { start, end, cleanInfo };
-  };
-
-  const withRangeMeta = (additionalInfo: string | undefined, start: string, end: string): string => {
-    const base = (additionalInfo || '').replace(RANGE_META_REGEX, '').trim();
-    const rangeMeta = `[[RANGE:${start}|${end}]]`;
-    return base ? `${base} ${rangeMeta}` : rangeMeta;
-  };
-
-  const normalizeDateLabel = (value: string): string => {
-    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-      const [year, month, day] = value.split('-');
-      return `${day}.${month}.${year}`;
-    }
-    return value.replace(/\//g, '.');
-  };
-
-  const formatDeadlineLabel = (deadlineValue: string): string => {
-    const rangeMatch = deadlineValue.match(/^(\d{4}-\d{2}-\d{2}|\d{2}\/\d{2}\/\d{4})\s*-\s*(\d{4}-\d{2}-\d{2}|\d{2}\/\d{2}\/\d{4})$/);
-    if (rangeMatch) {
-      const [, start, end] = rangeMatch;
-      return `${normalizeDateLabel(start)} - ${normalizeDateLabel(end)}`;
-    }
-    return normalizeDateLabel(deadlineValue);
-  };
-
-  const loadData = async () => {
-    if (!scrutinyId) return;
-    const [elections, deadlines, responsibleOptionsResponse] = await Promise.all([
-      apiRequest<ApiElection[]>('/elections'),
-      apiRequest<PagedResult<ApiDeadline>>(`/deadlines?electionId=${scrutinyId}&page=1&pageSize=200`),
-      apiRequest<ApiResponsibleOption[]>('/responsible-options'),
-    ]);
-    setAllElections(elections);
-    setElection(elections.find((x) => x.id === scrutinyId) || null);
-    setResponsibleOptions(responsibleOptionsResponse || []);
-    const normalizedEvents = (deadlines.items || []).map((item) => {
-      const rangeMeta = extractRangeMeta(item.additionalInfo);
-      if (!rangeMeta) return item;
-      return {
-        ...item,
-        deadline: `${rangeMeta.start} - ${rangeMeta.end}`,
-        additionalInfo: rangeMeta.cleanInfo || undefined,
-      };
-    });
-    setEvents(normalizedEvents);
-  };
+  const scrutinyQuery = useScrutinyEventsQuery(scrutinyId);
+  const loadData = useCallback(async () => {
+    await scrutinyQuery.refetch();
+  }, [scrutinyQuery]);
 
   useEffect(() => {
-    const run = async () => {
-      try {
-        await loadData();
-      } catch (e) {
-        if (e instanceof ApiError && e.status === 401) {
-          logoutAdmin();
-          navigate('/login', { replace: true });
-          return;
-        }
-        setError('Nu am putut incarca evenimentele scrutinului.');
-      }
-    };
-    run();
-  }, [scrutinyId]);
+    if (scrutinyQuery.data) {
+      setAllElections(scrutinyQuery.data.elections as ApiElection[]);
+      setElection(scrutinyQuery.data.election as ApiElection | null);
+      setResponsibleOptions(scrutinyQuery.data.responsibleOptions as ApiResponsibleOption[]);
+      setEvents(scrutinyQuery.data.events as ApiDeadline[]);
+      return;
+    }
+    if (scrutinyQuery.error instanceof ApiError && scrutinyQuery.error.status === 401) {
+      logoutAdmin();
+      navigate('/login', { replace: true });
+      return;
+    }
+    if (scrutinyQuery.isError) {
+      setError('Nu am putut incarca evenimentele scrutinului.');
+    }
+  }, [navigate, scrutinyQuery.data, scrutinyQuery.error, scrutinyQuery.isError]);
 
   useEffect(() => {
     const shouldLockPageScroll = isModalOpen || isDeleteModalOpen;
@@ -209,6 +169,23 @@ function AdminScrutinyEventsPage() {
     };
   }, [isResponsibleDropdownOpen]);
 
+  useEffect(() => {
+    if (!isGroupsDropdownOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!groupsDropdownRef.current) return;
+      const targetNode = event.target as Node | null;
+      if (targetNode && !groupsDropdownRef.current.contains(targetNode)) {
+        setIsGroupsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isGroupsDropdownOpen]);
+
   const rows = useMemo(
     () =>
       events.map((event) => ({
@@ -223,10 +200,10 @@ function AdminScrutinyEventsPage() {
     [allElections, scrutinyId]
   );
 
-  const onLogout = () => {
+  const onLogout = useCallback(() => {
     logoutAdmin();
     navigate('/login', { replace: true });
-  };
+  }, [navigate]);
 
   const saveEvent = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -234,8 +211,13 @@ function AdminScrutinyEventsPage() {
     if (!scrutinyId) return;
     const rangeStartDate = dateRange[0]?.startDate ?? null;
     const rangeDeadlineDate = dateRange[0]?.endDate ?? dateRange[0]?.startDate;
-    const singleDeadline = singleDeadlineDate ? new Date(`${singleDeadlineDate}T00:00:00`) : null;
+    const normalizedSingleDates = normalizeUniqueSingleDates(singleDeadlineDates.length > 0 ? singleDeadlineDates : [singleDeadlineDateInput]);
+    const singleDeadline = normalizedSingleDates[0] ? new Date(`${normalizedSingleDates[0]}T00:00:00`) : null;
     const deadlineDate = useDateInterval ? rangeDeadlineDate : singleDeadline;
+    if (!useDateInterval && normalizedSingleDates.length === 0) {
+      setError('Adaugă cel puțin o dată de realizare.');
+      return;
+    }
     if (!form.title.trim() || !deadlineDate || !form.description.trim()) {
       setError('Completeaza titlu, termen limita si descriere.');
       return;
@@ -265,6 +247,7 @@ function AdminScrutinyEventsPage() {
         electionId: scrutinyId,
         title: form.title.trim(),
         deadline: deadlineValue,
+        deadlines: useDateInterval ? [] : normalizedSingleDates,
         description: form.description.trim(),
         additionalInfo: intervalAdditionalInfo,
         responsible: cleanedResponsibles,
@@ -339,11 +322,13 @@ function AdminScrutinyEventsPage() {
       setForm({ title: '', description: '', additionalInfo: '' });
       setDateRange([{ startDate: new Date(), endDate: new Date(), key: 'selection' }]);
       setUseDateInterval(false);
-      setSingleDeadlineDate(new Date().toISOString().slice(0, 10));
+      setSingleDeadlineDateInput('');
+      setSingleDeadlineDates([]);
       setRegulations([]);
       setRegulationTitle('');
       setRegulationLink('');
       setIsResponsibleDropdownOpen(false);
+      setIsGroupsDropdownOpen(false);
       setResponsibles([]);
       setSelectedGroups([]);
       setEditingEventId(null);
@@ -435,11 +420,18 @@ function AdminScrutinyEventsPage() {
     setSelectedGroups((event.group || []).filter((group) => ALLOWED_GROUP_KEYS.includes(group as (typeof ALLOWED_GROUP_KEYS)[number])));
     setDateRange([{ startDate: baseDate, endDate: endDate, key: 'selection' }]);
     setUseDateInterval(Boolean(rangeMatch));
-    setSingleDeadlineDate((rangeMatch ? endDate : baseDate).toISOString().slice(0, 10));
+    const eventSingleDates = normalizeUniqueSingleDates(
+      Array.isArray(event.deadlines) && event.deadlines.length > 0
+        ? event.deadlines
+        : [toSqlDateLocal(baseDate)]
+    );
+    setSingleDeadlineDates(eventSingleDates);
+    setSingleDeadlineDateInput(eventSingleDates[0] || toSqlDateLocal(baseDate));
     setRegulations((event.regulations || []).map((r) => ({ title: r.title, link: r.link })));
     setRegulationTitle('');
     setRegulationLink('');
     setIsResponsibleDropdownOpen(false);
+    setIsGroupsDropdownOpen(false);
     setError('');
     setIsModalOpen(true);
   };
@@ -449,11 +441,13 @@ function AdminScrutinyEventsPage() {
     setForm({ title: '', description: '', additionalInfo: '' });
     setDateRange([{ startDate: new Date(), endDate: new Date(), key: 'selection' }]);
     setUseDateInterval(false);
-    setSingleDeadlineDate(new Date().toISOString().slice(0, 10));
+    setSingleDeadlineDateInput('');
+    setSingleDeadlineDates([]);
     setRegulations([]);
     setRegulationTitle('');
     setRegulationLink('');
     setIsResponsibleDropdownOpen(false);
+    setIsGroupsDropdownOpen(false);
     setResponsibles([]);
     setSelectedGroups([]);
     setError('');
@@ -484,6 +478,15 @@ function AdminScrutinyEventsPage() {
     setSelectedGroups((prev) => (prev.includes(group) ? prev.filter((g) => g !== group) : [...prev, group]));
   };
 
+  const handleUseDateIntervalChange = (checked: boolean) => {
+    setUseDateInterval(checked);
+    if (checked) {
+      // Interval mode must keep only interval data.
+      setSingleDeadlineDates([]);
+      setSingleDeadlineDateInput('');
+    }
+  };
+
   const handleAdminMenuChange = (item: AdminMenuItem) => {
     if (item === 'Utilizatori') {
       navigate('/admin/users');
@@ -502,7 +505,15 @@ function AdminScrutinyEventsPage() {
       const response = await apiRequest<PagedResult<ApiDeadline>>(
         `/deadlines?electionId=${electionId}&page=${page}&pageSize=${pageSize}`
       );
-      const items = response.items || [];
+      const items = (response.items || []).map((item) => ({
+        ...item,
+        deadline: toLegacyDeadlineValue({
+          type: item.type,
+          startDate: item.startDate,
+          endDate: item.endDate,
+          deadlines: item.deadlines,
+        }),
+      }));
       merged.push(...items);
       hasMore = items.length === pageSize;
       page += 1;
@@ -525,11 +536,19 @@ function AdminScrutinyEventsPage() {
       }
 
       for (const sourceEvent of sourceEvents) {
+        const normalizedSourceDeadlines = normalizeUniqueSingleDates(
+          Array.isArray(sourceEvent.deadlines) && sourceEvent.deadlines.length > 0
+            ? sourceEvent.deadlines
+            : sourceEvent.deadline
+              ? [sourceEvent.deadline]
+              : []
+        );
         const payload = {
           electionId: scrutinyId,
           title: sourceEvent.title,
           additionalInfo: sourceEvent.additionalInfo || undefined,
           deadline: sourceEvent.deadline,
+          deadlines: normalizedSourceDeadlines,
           description: sourceEvent.description,
           responsible: sourceEvent.responsible || [],
           group: sourceEvent.group || [],
@@ -573,7 +592,7 @@ function AdminScrutinyEventsPage() {
 
   return (
     <div className="admin-layout bg-body-tertiary">
-      <Sidebar activeItem="Evenimente" onChange={handleAdminMenuChange} />
+      <Sidebar activeItem="Programe" onChange={handleAdminMenuChange} />
       <main className="admin-layout__content p-3 p-md-4">
         <header className="admin-events-topbar bg-white border rounded-3 px-3 px-md-4 py-3 mb-3 d-flex justify-content-between align-items-center">
           <button
@@ -594,13 +613,13 @@ function AdminScrutinyEventsPage() {
         </header>
 
         <div className="admin-events-info text-secondary fw-medium mb-3">
-          Evenimente scrutin: {election?.title || '-'}
+          {election?.title || '-'}
         </div>
 
         <section className="card border-0 shadow-sm">
           <div className="card-body p-3 p-md-4">
             <div className="d-flex justify-content-between align-items-center mb-3">
-              <h2 className="h4 mb-0">Evenimente scrutin</h2>
+              <h2 className="h4 mb-0">Acțiuni în program</h2>
               <div className="d-flex align-items-center gap-2">
                 <button
                   type="button"
@@ -610,21 +629,22 @@ function AdminScrutinyEventsPage() {
                     setIsImportModalOpen(true);
                   }}
                 >
-                  Preia din alt scrutin
+                  Preia din alt program
                 </button>
                 <button type="button" className="btn btn-primary" onClick={openCreateEvent}>
-                  Adaugă eveniment
+                  Adaugă acțiune
                 </button>
               </div>
             </div>
+            {scrutinyQuery.isLoading || scrutinyQuery.isFetching ? <div className="alert alert-info py-2">Se încarcă evenimentele...</div> : null}
             {error ? <div className="alert alert-warning">{error}</div> : null}
             <div className="table-responsive border rounded-3">
               <table className="table align-middle mb-0">
                 <thead className="table-light">
                   <tr>
-                    <th>Titlu</th>
-                    <th>Data</th>
-                    <th>Responsabili</th>
+                    <th>Titlu acțiune</th>
+                    <th>Termen de realizare</th>
+                    <th>Responsabili de realizare</th>
                     <th>Grupuri</th>
                     <th className="text-end">Acțiuni</th>
                   </tr>
@@ -674,45 +694,99 @@ function AdminScrutinyEventsPage() {
             />
           </div>
           <div className="offcanvas-body">
-            <div className="mb-3 pb-2 border-bottom">
-              <h6 className="mb-0 fw-semibold">{election?.title || 'Scrutin'}</h6>
-            </div>
-            <form onSubmit={saveEvent}>
-              <div className="mb-3">
-                <label className="form-label fw-semibold">Titlu:</label>
-                <input className="form-control" value={form.title} onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))} />
-              </div>
-              <div className="mb-3">
-                <label className="form-label fw-semibold">Informații adiționale:</label>
-                <input className="form-control" value={form.additionalInfo} onChange={(e) => setForm((p) => ({ ...p, additionalInfo: e.target.value }))} />
-              </div>
-              <div className="mb-3">
-                <label className="form-label fw-semibold">Termen limită:</label>
-                <div className="form-check mb-2">
-                  <input
-                    id="useDateInterval"
-                    type="checkbox"
-                    className="form-check-input"
-                    checked={useDateInterval}
-                    onChange={(e) => setUseDateInterval(e.target.checked)}
-                  />
-                  <label className="form-check-label" htmlFor="useDateInterval">
-                    Interval
-                  </label>
+            <form onSubmit={saveEvent} className="admin-event-form">
+              <div className="admin-event-form__section">
+                <div className="admin-event-form__section-title">
+                  <i className="fa-regular fa-clipboard" aria-hidden="true" />
+                  <span>Informații generale</span>
                 </div>
-                {useDateInterval ? (
-                  <DateRangePicker value={dateRange} onChange={setDateRange} />
-                ) : (
-                  <input
-                    type="date"
-                    className="form-control"
-                    value={singleDeadlineDate}
-                    onChange={(e) => setSingleDeadlineDate(e.target.value)}
-                  />
-                )}
+                <div className="admin-event-form__grid">
+                  <div>
+                    <label className="form-label">Titlu *</label>
+                    <input className="form-control" value={form.title} onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))} />
+                  </div>
+                </div>
               </div>
-              <div className="mb-3">
-                <label className="form-label fw-semibold">Responsabil:</label>
+
+              <div className="admin-event-form__section">
+                <div className="admin-event-form__section-title">
+                  <i className="fa-regular fa-calendar" aria-hidden="true" />
+                  <span>Perioadă de realizare</span>
+                </div>
+                <div className="admin-event-form__grid">
+                  <div className="form-check mt-1">
+                    <input
+                      id="useDateInterval"
+                      type="checkbox"
+                      className="form-check-input"
+                      checked={useDateInterval}
+                      onChange={(e) => handleUseDateIntervalChange(e.target.checked)}
+                    />
+                    <label className="form-check-label" htmlFor="useDateInterval">
+                      Interval de realizare
+                    </label>
+                  </div>
+                  <div>
+                    <label className="form-label">{useDateInterval ? 'Interval realizare *' : 'Data realizării *'}</label>
+                    {useDateInterval ? (
+                      <DateRangePicker value={dateRange} onChange={setDateRange} />
+                    ) : (
+                      <>
+                        <div className="admin-event-form__single-date-row">
+                          <input
+                            type="date"
+                            className="form-control"
+                            value={singleDeadlineDateInput}
+                            onChange={(e) => setSingleDeadlineDateInput(e.target.value)}
+                          />
+                          <button
+                            type="button"
+                            className="btn btn-outline-primary"
+                            onClick={() => {
+                              if (!singleDeadlineDateInput) return;
+                              setSingleDeadlineDates((prev) =>
+                                normalizeUniqueSingleDates([...prev, singleDeadlineDateInput])
+                              );
+                            }}
+                          >
+                            Adaugă dată
+                          </button>
+                        </div>
+                        <div className="admin-event-form__single-date-list">
+                          {normalizeUniqueSingleDates(singleDeadlineDates).map((date) => (
+                            <div key={date} className="admin-event-form__single-date-chip">
+                              <span>{toRoDateLocal(new Date(`${date}T00:00:00`))}</span>
+                              <button
+                                type="button"
+                                className="btn btn-link p-0 text-danger text-decoration-none"
+                                onClick={() =>
+                                  setSingleDeadlineDates((prev) => {
+                                    const next = prev.filter((item) => item !== date);
+                                    return next;
+                                  })
+                                }
+                                aria-label={`Elimină data ${date}`}
+                              >
+                                elimină
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <div className="mt-3">
+                    <label className="form-label">Informații suplimentare</label>
+                    <input className="form-control" value={form.additionalInfo} onChange={(e) => setForm((p) => ({ ...p, additionalInfo: e.target.value }))} />
+                  </div>
+              </div>
+
+              <div className="admin-event-form__section">
+                <div className="admin-event-form__section-title">
+                  <i className="fa-regular fa-user" aria-hidden="true" />
+                  <span>Responsabil de realizare</span>
+                </div>
                 <div className="admin-responsible-dropdown mb-2" ref={responsibleDropdownRef}>
                   <button
                     type="button"
@@ -720,7 +794,7 @@ function AdminScrutinyEventsPage() {
                     onClick={() => setIsResponsibleDropdownOpen((prev) => !prev)}
                     aria-expanded={isResponsibleDropdownOpen}
                   >
-                    <span>{responsibles.length > 0 ? `${responsibles.length} selectat(e)` : 'Selecteaza responsabili'}</span>
+                    <span>{responsibles.length > 0 ? `${responsibles.length} selectat(e)` : 'Selectează responsabili'}</span>
                     <i className={`fa-solid ${isResponsibleDropdownOpen ? 'fa-chevron-up' : 'fa-chevron-down'}`} aria-hidden="true" />
                   </button>
                   {isResponsibleDropdownOpen ? (
@@ -752,12 +826,20 @@ function AdminScrutinyEventsPage() {
                   </div>
                 ))}
               </div>
-              <div className="mb-3">
-                <label className="form-label fw-semibold">Descriere:</label>
-                <textarea className="form-control" rows={3} value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} />
+
+              <div className="admin-event-form__section">
+                <div className="admin-event-form__section-title">
+                  <i className="fa-regular fa-comment-dots" aria-hidden="true" />
+                  <span>Descriere acțiunii</span>
+                </div>
+                <textarea className="form-control" rows={4} value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} />
               </div>
-              <div className="mb-2">
-                <label className="form-label fw-semibold">Reglementări relevante:</label>
+
+              <div className="admin-event-form__section">
+                <div className="admin-event-form__section-title">
+                  <i className="fa-solid fa-balance-scale" aria-hidden="true" />
+                  <span>Reglementări relevante</span>
+                </div>
                 <div className="d-flex gap-2 mb-2">
                   <input
                     className="form-control"
@@ -776,7 +858,7 @@ function AdminScrutinyEventsPage() {
                   <button type="button" className="btn btn-primary" onClick={addRegulation}>Adaugă</button>
                 </div>
                 <div className="d-flex flex-column gap-2 mb-2">
-                  <label className="form-label mb-0">Încarcă PDF</label>
+                  <label className="form-label mb-0">Încarcă document</label>
                   <input
                     type="file"
                     className="form-control"
@@ -788,7 +870,7 @@ function AdminScrutinyEventsPage() {
                       e.currentTarget.value = '';
                     }}
                   />
-                  {isUploadingRegulation ? <span className="small text-secondary">Se încarcă PDF-ul...</span> : null}
+                  {isUploadingRegulation ? <span className="small text-secondary">Se încarcă documentul...</span> : null}
                 </div>
                 {regulations.map((regulation, index) => (
                   <div key={`${regulation.id || regulation.title}-${index}`} className="d-flex justify-content-between align-items-center small text-secondary border rounded px-2 py-1 mb-1">
@@ -799,28 +881,44 @@ function AdminScrutinyEventsPage() {
                   </div>
                 ))}
               </div>
-              <div className="mb-2">
-                <label className="form-label fw-semibold">Grupuri:</label>
-                <div className="d-flex flex-wrap gap-3">
-                  {AVAILABLE_GROUPS.map((group) => (
-                    <div className="form-check" key={group.key}>
-                      <input
-                        id={`group-${group.key}`}
-                        type="checkbox"
-                        className="form-check-input"
-                        checked={selectedGroups.includes(group.key)}
-                        onChange={() => toggleGroup(group.key)}
-                      />
-                      <label className="form-check-label" htmlFor={`group-${group.key}`}>
-                        {group.label}
-                      </label>
+
+              <div className="admin-event-form__section">
+                <div className="admin-event-form__section-title">
+                  <i className="fa-solid fa-users" aria-hidden="true" />
+                  <span>Grupuri țintă</span>
+                </div>
+                <div className="admin-responsible-dropdown" ref={groupsDropdownRef}>
+                  <button
+                    type="button"
+                    className="btn btn-light border w-100 d-flex align-items-center justify-content-between"
+                    onClick={() => setIsGroupsDropdownOpen((prev) => !prev)}
+                    aria-expanded={isGroupsDropdownOpen}
+                  >
+                    <span>{selectedGroups.length > 0 ? `${selectedGroups.length} selectat(e)` : 'Selectează grupuri țintă'}</span>
+                    <i className={`fa-solid ${isGroupsDropdownOpen ? 'fa-chevron-up' : 'fa-chevron-down'}`} aria-hidden="true" />
+                  </button>
+                  {isGroupsDropdownOpen ? (
+                    <div className="admin-responsible-dropdown__menu border rounded p-2 mt-2">
+                      {AVAILABLE_GROUPS.map((group) => (
+                        <label key={group.key} className="form-check d-flex align-items-start gap-2 mb-2">
+                          <input
+                            id={`group-${group.key}`}
+                            type="checkbox"
+                            className="form-check-input mt-1"
+                            checked={selectedGroups.includes(group.key)}
+                            onChange={() => toggleGroup(group.key)}
+                          />
+                          <span className="form-check-label">{group.label}</span>
+                        </label>
+                      ))}
                     </div>
-                  ))}
+                  ) : null}
                 </div>
               </div>
+
               {error ? <div className="alert alert-warning mt-3 mb-0">{error}</div> : null}
 
-              <div className="d-flex justify-content-end gap-2 mt-4">
+              <div className="admin-event-form__footer">
                 <button type="button" className="btn btn-light border" onClick={() => setIsModalOpen(false)}>Renunță</button>
                 <button type="submit" className="btn btn-primary" disabled={isSaving}>{isSaving ? 'Se salvează...' : 'Salvează'}</button>
               </div>

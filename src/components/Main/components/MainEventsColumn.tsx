@@ -10,7 +10,7 @@ type MainEventsColumnProps = {
   appliedSearchQuery: string;
   appliedFilter: FilterType;
   appliedDateKey: string | null;
-  appliedSelectedResponsible: string;
+  appliedSelectedResponsible: string[];
 };
 
 function MainEventsColumn({

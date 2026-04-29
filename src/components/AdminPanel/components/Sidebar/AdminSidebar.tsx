@@ -1,10 +1,9 @@
 import type { AdminMenuItem, SidebarProps } from './AdminSidebar.interface';
 
 const MENU: Array<{ key: AdminMenuItem; icon: string }> = [
-  { key: 'Evenimente', icon: 'fa-solid fa-calendar-days' },
+  { key: 'Programe', icon: 'fa-solid fa-calendar-days' },
   { key: 'Utilizatori', icon: 'fa-solid fa-users' },
-  { key: 'Informații Utile', icon: 'fa-solid fa-circle-info' },
-  { key: 'Setări', icon: 'fa-solid fa-cog' }
+  { key: 'Informații Utile', icon: 'fa-solid fa-circle-info' }
 ];
 
 function Sidebar({ activeItem, onChange }: SidebarProps) {
@@ -12,7 +11,7 @@ function Sidebar({ activeItem, onChange }: SidebarProps) {
     <aside className="admin-sidebar text-white d-flex flex-column">
       <div className="admin-sidebar__brand d-flex align-items-center gap-2 px-3 py-3">
         <img src="/logo.svg" className="logo" alt="logo" />
-        <span className="fw-semibold">Admin Panel</span>
+        <span className="fw-semibold">Panou de administrare</span>
       </div>
 
       <nav className="px-2 py-2" aria-label="Admin navigation">

@@ -44,10 +44,21 @@ namespace CalendarDay.Infrastructure.Migrations
                     b.Property<Guid>("ElectionId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateOnly?>("EndDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly?>("StartDate")
+                        .HasColumnType("date");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(350)
                         .HasColumnType("character varying(350)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<DateTime>("UpdatedAtUtc")
                         .HasColumnType("timestamp with time zone");
@@ -57,6 +68,30 @@ namespace CalendarDay.Infrastructure.Migrations
                     b.HasIndex("ElectionId");
 
                     b.ToTable("Deadlines");
+                });
+
+            modelBuilder.Entity("CalendarDay.Domain.Entities.DeadlineDate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("DeadlineId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("EventDate")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeadlineId", "EventDate")
+                        .IsUnique();
+
+                    b.ToTable("deadline_dates", (string)null);
                 });
 
             modelBuilder.Entity("CalendarDay.Domain.Entities.DeadlineGroup", b =>
@@ -265,6 +300,17 @@ namespace CalendarDay.Infrastructure.Migrations
                     b.Navigation("Election");
                 });
 
+            modelBuilder.Entity("CalendarDay.Domain.Entities.DeadlineDate", b =>
+                {
+                    b.HasOne("CalendarDay.Domain.Entities.Deadline", "Deadline")
+                        .WithMany("Dates")
+                        .HasForeignKey("DeadlineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Deadline");
+                });
+
             modelBuilder.Entity("CalendarDay.Domain.Entities.DeadlineGroup", b =>
                 {
                     b.HasOne("CalendarDay.Domain.Entities.Deadline", "Deadline")
@@ -300,6 +346,8 @@ namespace CalendarDay.Infrastructure.Migrations
 
             modelBuilder.Entity("CalendarDay.Domain.Entities.Deadline", b =>
                 {
+                    b.Navigation("Dates");
+
                     b.Navigation("Groups");
 
                     b.Navigation("Regulations");

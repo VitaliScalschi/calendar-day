@@ -6,7 +6,7 @@ import { StatusDeadline } from '../../enum/index'
 import Modal from '../Modal/Modal'
 import './EventDeadlines.css'
 
-function EventDeadlines({data, searchQuery = '', activeFilter = 'all', selectedDateKey = null, selectedResponsible = ''}: EventDeadlinesProps) {
+function EventDeadlines({data, searchQuery = '', activeFilter = 'all', selectedDateKey = null, selectedResponsible = []}: EventDeadlinesProps) {
   const [selectedDeadline, setSelectedDeadline] = useState<EventDeadlineProps | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [displayedCount, setDisplayedCount] = useState(5)
@@ -154,24 +154,24 @@ function EventDeadlines({data, searchQuery = '', activeFilter = 'all', selectedD
       return null;
     };
 
-    const isDateInDeadline = (value: string | undefined, selectedKey: string): boolean => {
+    const isDateInDeadline = (value: string | undefined, selectedKey: string, values?: string[]): boolean => {
+      if (Array.isArray(values) && values.length > 0) {
+        return values.some((entry) => parseDateKey(entry) === selectedKey);
+      }
       const range = getDeadlineRange(value);
       if (range) return selectedKey >= range.start && selectedKey <= range.end;
       return parseDateKey(value) === selectedKey;
     };
 
-    // Aplică filtrul de status doar când NU avem o dată selectată din calendar.
-    // Când selectezi o dată, prioritatea e să vezi toate evenimentele din ziua respectivă.
     if (!selectedDateKey && activeFilter !== 'all') {
         result = result.filter(deadline => {
           const status = getDeadlineStatus(deadline);
         
         if (activeFilter === 'in_progress') {
-          // Include atât evenimentele în desfășurare, cât și cele care urmează
           return status === StatusDeadline.InProgress || status === StatusDeadline.Urgent || status === StatusDeadline.Upcoming;
         }
         if (activeFilter === 'today') {
-          return isDateInDeadline(deadline.deadline, todayKey);
+          return isDateInDeadline(deadline.deadline, todayKey, deadline.deadlines);
         }
         if (activeFilter === StatusDeadline.Expired) {
           return status === StatusDeadline.Expired;
@@ -196,12 +196,15 @@ function EventDeadlines({data, searchQuery = '', activeFilter = 'all', selectedD
 
 
     if (selectedDateKey) {
-      result = result.filter((deadline) => isDateInDeadline(deadline.deadline, selectedDateKey));
+      result = result.filter((deadline) => isDateInDeadline(deadline.deadline, selectedDateKey, deadline.deadlines));
     }
 
 
-    if (selectedResponsible) {
-      result = result.filter((deadline) => normalizeResponsible(deadline.responsible).includes(selectedResponsible));
+    if (selectedResponsible.length > 0) {
+      result = result.filter((deadline) => {
+        const deadlineResponsibles = normalizeResponsible(deadline.responsible);
+        return selectedResponsible.some((responsible) => deadlineResponsibles.includes(responsible));
+      });
     }
 
     return [...result].sort((a, b) => {

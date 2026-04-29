@@ -1,16 +1,15 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Header, Footer, ScrollToTop, SearchBar, Modal } from '../../components';
 import type { EventDeadlineProps } from '../../interface';
-import { API_BASE_URL, apiRequest } from '../../utils/api';
+import { API_BASE_URL } from '../../shared/services/apiClient';
+import { useHistoryArchiveQuery } from '../../features/elections/hooks/useHistoryArchiveQuery';
+import { useDebounce } from '../../shared/hooks/useDebounce';
+import { useFilters } from '../../shared/hooks/useFilters';
+import { useModal } from '../../shared/hooks/useModal';
+import { usePagination } from '../../shared/hooks/usePagination';
 import './HistoryPage.css';
 
-type ApiElection = {
-  id: string;
-  title: string;
-  isActive: boolean;
-  eday: string;
-  hasDocument?: boolean;
-};
+type ApiElection = { id: string; title: string; isActive: boolean; eday: string; hasDocument?: boolean };
 
 type ApiDeadline = {
   id: string;
@@ -24,10 +23,7 @@ type ApiDeadline = {
   regulations?: Array<{ id: string; title: string; link: string }>;
 };
 
-type ApiGroupedDeadlines = {
-  electionId: string;
-  deadlines: ApiDeadline[];
-};
+type ApiGroupedDeadlines = { electionId: string; deadlines: ApiDeadline[] };
 
 const PAGE_SIZE = 10;
 const API_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, '');
@@ -63,7 +59,10 @@ const groupLabel = (groups: string[]) =>
   (groups[0] || '')
     .replace('political_organ', 'Organele Electorale')
     .replace('political', 'Partidele Politice')
-    .replace('public', 'Public Larg') || '-';
+    .replace('public', 'Public Larg')
+    .replace('independent_candidates', 'Candidații independați')
+    .replace('observers', 'Observatori')
+    .replace('public_authorities', 'Autorități publice') || '-';
 const responsibleLabel = (responsible?: string[]) =>
   Array.isArray(responsible) && responsible.length > 0 ? responsible.join(', ') : '-';
 
@@ -77,44 +76,41 @@ function HistoryPage() {
   const [grouped, setGrouped] = useState<Map<string, ApiDeadline[]>>(new Map());
   const [selectedElectionId, setSelectedElectionId] = useState<string | null>(null);
   const [selectedDeadline, setSelectedDeadline] = useState<EventDeadlineProps | null>(null);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const { isOpen: isDetailsOpen, open: openDetailsModal, close: closeDetails } = useModal(false);
   const [page, setPage] = useState(1);
+  const archiveQuery = useHistoryArchiveQuery();
+  const debouncedElectionSearch = useDebounce(electionSearch, 250);
+  const debouncedEventSearch = useDebounce(eventSearch, 250);
 
   useEffect(() => {
-    const load = async () => {
-      setLoading(true);
+    setLoading(archiveQuery.isLoading || archiveQuery.isFetching);
+    if (archiveQuery.data) {
+      const groupedMap = new Map<string, ApiDeadline[]>();
+      archiveQuery.data.grouped.forEach((item) => groupedMap.set(item.electionId, item.deadlines || []));
+      const sorted = [...archiveQuery.data.elections].sort((a, b) => new Date(b.eday).getTime() - new Date(a.eday).getTime());
+      setElections(sorted as ApiElection[]);
+      setGrouped(groupedMap);
+      setSelectedElectionId((prev) => prev ?? sorted[0]?.id ?? null);
       setError('');
-      try {
-        const [apiElections, apiGrouped] = await Promise.all([
-          apiRequest<ApiElection[]>('/elections/inactive'),
-          apiRequest<ApiGroupedDeadlines[]>('/deadlines/grouped-by-election'),
-        ]);
-        const groupedMap = new Map<string, ApiDeadline[]>();
-        apiGrouped.forEach((item) => groupedMap.set(item.electionId, item.deadlines || []));
+      return;
+    }
+    if (archiveQuery.isError) {
+      setError('Nu am putut încărca arhiva.');
+    }
+  }, [archiveQuery.data, archiveQuery.isError, archiveQuery.isFetching, archiveQuery.isLoading]);
 
-        const sorted = [...apiElections].sort((a, b) => new Date(b.eday).getTime() - new Date(a.eday).getTime());
-        setElections(sorted);
-        setGrouped(groupedMap);
-        setSelectedElectionId(sorted[0]?.id || null);
-      } catch {
-        setError('Nu am putut încărca arhiva.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, []);
-
-  const filteredElections = useMemo(() => {
-    const q = electionSearch.trim().toLowerCase();
-    return elections.filter((election) => {
-      const matchesText = !q || election.title.toLowerCase().includes(q);
+  const normalizedElectionSearch = useMemo(() => debouncedElectionSearch.trim().toLowerCase(), [debouncedElectionSearch]);
+  const filterElectionPredicate = useCallback(
+    (election: ApiElection) => {
+      const matchesText = !normalizedElectionSearch || election.title.toLowerCase().includes(normalizedElectionSearch);
       const inferred = inferScrutinyType(election.title);
       const matchesType =
         !selectedScrutinyType || inferred === selectedScrutinyType || (!inferred && election.title.includes(selectedScrutinyType));
       return matchesText && matchesType;
-    });
-  }, [elections, electionSearch, selectedScrutinyType]);
+    },
+    [normalizedElectionSearch, selectedScrutinyType],
+  );
+  const filteredElections = useFilters(elections, filterElectionPredicate);
 
   useEffect(() => {
     if (filteredElections.length === 0) {
@@ -130,19 +126,20 @@ function HistoryPage() {
 
   const selectedElection = elections.find((x) => x.id === selectedElectionId) || null;
   const selectedDeadlines = selectedElectionId ? grouped.get(selectedElectionId) || [] : [];
-  const normalizedSearch = eventSearch.trim().toLowerCase();
-  const filteredDeadlines = selectedDeadlines.filter((item) => {
-    if (!normalizedSearch) return true;
-    return (
-      item.title.toLowerCase().includes(normalizedSearch) ||
-      responsibleLabel(item.responsible).toLowerCase().includes(normalizedSearch)
-    );
-  });
-
-  const totalPages = Math.max(1, Math.ceil(filteredDeadlines.length / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages);
-  const pageItems = filteredDeadlines.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
-  const openDetails = (item: ApiDeadline) => {
+  const normalizedSearch = debouncedEventSearch.trim().toLowerCase();
+  const filterDeadlinePredicate = useCallback(
+    (item: ApiDeadline) => {
+      if (!normalizedSearch) return true;
+      return (
+        item.title.toLowerCase().includes(normalizedSearch) ||
+        responsibleLabel(item.responsible).toLowerCase().includes(normalizedSearch)
+      );
+    },
+    [normalizedSearch],
+  );
+  const filteredDeadlines = useFilters(selectedDeadlines, filterDeadlinePredicate);
+  const { totalPages, safePage, pageItems, from, to } = usePagination({ items: filteredDeadlines, page, pageSize: PAGE_SIZE });
+  const openDetails = useCallback((item: ApiDeadline) => {
     setSelectedDeadline({
       id: item.id,
       election_id: selectedElectionId || '',
@@ -154,16 +151,16 @@ function HistoryPage() {
       group: item.group || [],
       regulations: item.regulations || [],
     });
-    setIsDetailsOpen(true);
-  };
-  const closeDetails = () => {
-    setIsDetailsOpen(false);
+    openDetailsModal();
+  }, [openDetailsModal, selectedElectionId]);
+  const closeDetailsModal = useCallback(() => {
+    closeDetails();
     setSelectedDeadline(null);
-  };
-  const downloadScrutinyDocument = () => {
+  }, [closeDetails]);
+  const downloadScrutinyDocument = useCallback(() => {
     if (!selectedElectionId) return;
     window.open(`${API_ORIGIN}/api/elections/${selectedElectionId}/download-document`, '_blank', 'noopener,noreferrer');
-  };
+  }, [selectedElectionId]);
 
   return (
     <div className="App d-flex flex-column min-vh-100 history-page-root">
@@ -236,11 +233,12 @@ function HistoryPage() {
               <div className="d-flex align-items-center gap-2">
                 <button
                   type="button"
-                  className="btn btn-outline-secondary btn-sm"
+                  className="btn btn-outline-primary btn-sm"
                   disabled={!selectedElectionId || !selectedElection?.hasDocument}
                   onClick={downloadScrutinyDocument}
                 >
-                  Descarcă document scrutin
+                  Descarcă planul calendaristic
+                  <i className="fa-solid fa-download ms-2" aria-hidden="true"></i>
                 </button>
               </div>
             </div>
@@ -256,6 +254,11 @@ function HistoryPage() {
 
             {loading ? <div className="alert alert-info py-2">Se încarcă arhiva...</div> : null}
             {error ? <div className="alert alert-warning py-2">{error}</div> : null}
+            {error ? (
+              <button type="button" className="btn btn-sm btn-outline-secondary mb-2" onClick={() => archiveQuery.refetch()}>
+                Reîncearcă încărcarea
+              </button>
+            ) : null}
 
             <div className="table-responsive border rounded-3 history-table-wrap">
               <table className="table table-sm align-middle mb-0 history-events-table">
@@ -286,7 +289,7 @@ function HistoryPage() {
                         <div className="history-actions">
                           <button
                             type="button"
-                            className="btn btn-sm btn-light border"
+                            className="btn btn-sm btn-outline-primary border"
                             title="Vezi detalii"
                             aria-label="Vezi detalii"
                             onClick={() => openDetails(item)}
@@ -307,7 +310,7 @@ function HistoryPage() {
             </div>
 
             <div className="d-flex justify-content-between align-items-center mt-3 small">
-              <span>{filteredDeadlines.length === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, filteredDeadlines.length)} din {filteredDeadlines.length}</span>
+              <span>{from}–{to} din {filteredDeadlines.length}</span>
               <div className="d-flex align-items-center gap-2">
                 <button type="button" className="btn btn-sm btn-outline-secondary" disabled={safePage <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>‹</button>
                 <span>{safePage}/{totalPages}</span>
@@ -319,7 +322,7 @@ function HistoryPage() {
       </main>
       <Footer />
       <ScrollToTop />
-      <Modal isOpen={isDetailsOpen} onClose={closeDetails} deadline={selectedDeadline} />
+      <Modal isOpen={isDetailsOpen} onClose={closeDetailsModal} deadline={selectedDeadline} />
     </div>
   );
 }

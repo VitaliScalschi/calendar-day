@@ -44,6 +44,19 @@ body {
   box-shadow: none;
 }
 
+.form-select:focus,
+.form-select:active {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 0.2rem rgba(6, 127, 195, 0.2);
+}
+
+.form-select option:hover,
+.form-select option:focus,
+.form-select option:checked {
+  background: var(--color-primary);
+  color: #fff;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
