@@ -1,0 +1,156 @@
+/* Dimensiuni aliniate cu formInputSizes: xs 32px, sm 35px, md 38px, lg 42px */
+
+.multi-checkbox-dropdown--xs .event-filter-dropdown__control .event-filter-dropdown__button {
+  min-height: 32px;
+  height: 32px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 0.1rem 0.45rem;
+  border-radius: 6px;
+}
+
+.multi-checkbox-dropdown--xs .event-filter-dropdown__button.has-clear {
+  padding-right: 1.55rem;
+}
+
+.multi-checkbox-dropdown--xs .event-filter-dropdown__clear-btn {
+  right: 1.75rem;
+  width: 0.38rem;
+  height: 0.38rem;
+}
+
+.multi-checkbox-dropdown--xs .event-filter-dropdown__button > i {
+  font-size: 0.68rem;
+}
+
+.multi-checkbox-dropdown--xs .event-filter-dropdown__menu {
+  max-height: 160px;
+  margin-top: 0.3rem;
+  border-radius: 6px;
+}
+
+.multi-checkbox-dropdown--xs .event-filter-election-item.event-filter-dropdown__item {
+  padding: 0.28rem 0.42rem;
+  font-size: 0.72rem;
+  gap: 0.35rem;
+}
+
+.multi-checkbox-dropdown--sm .event-filter-dropdown__control .event-filter-dropdown__button {
+  min-height: 35px;
+  height: 35px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+}
+
+.multi-checkbox-dropdown--sm .event-filter-dropdown__button.has-clear {
+  padding-right: 0.5rem;
+}
+
+.multi-checkbox-dropdown--sm .event-filter-dropdown__clear-btn {
+  right: 2rem;
+  width: 0.42rem;
+  height: 0.42rem;
+}
+
+.multi-checkbox-dropdown--sm .event-filter-dropdown__button > i {
+  font-size: 0.74rem;
+}
+
+.multi-checkbox-dropdown--sm .event-filter-dropdown__menu {
+  max-height: 200px;
+  margin-top: 0.35rem;
+  border-radius: 6px;
+}
+
+.multi-checkbox-dropdown--sm .event-filter-election-item.event-filter-dropdown__item {
+  padding: 0.36rem 0.5rem;
+  font-size: 0.78rem;
+  gap: 0.42rem;
+}
+
+.multi-checkbox-dropdown--md .event-filter-dropdown__control .event-filter-dropdown__button {
+  min-height: 38px;
+  height: 38px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+}
+
+.multi-checkbox-dropdown--md .event-filter-dropdown__button.has-clear {
+  padding-right: 2rem;
+}
+
+.multi-checkbox-dropdown--md .event-filter-dropdown__clear-btn {
+  right: 2.2rem;
+  width: 0.45rem;
+  height: 0.45rem;
+}
+
+.multi-checkbox-dropdown--md .event-filter-dropdown__menu {
+  max-height: 220px;
+  margin-top: 0.4rem;
+  border-radius: 6px;
+}
+
+.multi-checkbox-dropdown--md .event-filter-election-item.event-filter-dropdown__item {
+  padding: 0.42rem 0.55rem;
+  font-size: 0.82rem;
+  gap: 0.5rem;
+}
+
+.multi-checkbox-dropdown--lg .event-filter-dropdown__control .event-filter-dropdown__button {
+  min-height: 42px;
+  height: 42px;
+  font-size: 0.92rem;
+  font-weight: 500;
+  padding: 0.28rem 0.75rem;
+  border-radius: 6px;
+}
+
+.multi-checkbox-dropdown--lg .event-filter-dropdown__button.has-clear {
+  padding-right: 0.8rem;
+}
+
+.multi-checkbox-dropdown--lg .event-filter-dropdown__clear-btn {
+  right: 2.55rem;
+  width: 0.5rem;
+  height: 0.5rem;
+}
+
+.multi-checkbox-dropdown--lg .event-filter-dropdown__menu {
+  max-height: 280px;
+  margin-top: 0.45rem;
+  border-radius: 6px;
+}
+
+.multi-checkbox-dropdown--lg .event-filter-election-item.event-filter-dropdown__item {
+  padding: 0.52rem 0.65rem;
+  font-size: 0.9rem;
+  gap: 0.55rem;
+}
+
+@media (max-width: 768px) {
+  .multi-checkbox-dropdown--md .event-filter-dropdown__control .event-filter-dropdown__button {
+    min-height: 46px;
+    height: 46px;
+  }
+
+  .multi-checkbox-dropdown--lg .event-filter-dropdown__control .event-filter-dropdown__button {
+    min-height: 50px;
+    height: 50px;
+    font-size: 0.95rem;
+  }
+
+  .multi-checkbox-dropdown--xs .event-filter-dropdown__control .event-filter-dropdown__button {
+    min-height: 40px;
+    height: 40px;
+  }
+
+  .multi-checkbox-dropdown--sm .event-filter-dropdown__control .event-filter-dropdown__button {
+    min-height: 44px;
+    height: 44px;
+  }
+}

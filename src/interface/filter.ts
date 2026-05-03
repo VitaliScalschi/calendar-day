@@ -10,6 +10,8 @@ export interface ElectionFilterOption {
 
 export interface EventFilterProps {
   electionOptions: ElectionFilterOption[];
+  /** Din `/api/audiences` (key + denumire afișată). */
+  targetGroupOptions: Array<{ key: string; label: string }>;
   selectedElectionId: string | null;
   onElectionChange: (electionId: string) => void;
   selectedTargetGroups: string[];

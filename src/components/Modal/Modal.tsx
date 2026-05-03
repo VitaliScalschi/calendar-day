@@ -1,11 +1,16 @@
 import { useEffect } from 'react'
 import { calculateDaysRemaining, formatDateTime } from '../../utils/dateUtils'
+import { FALLBACK_TARGET_GROUP_OPTIONS } from '../../utils/electionFilters'
 import type { ModalProps } from '../../interface/index'
 import { API_BASE_URL } from '../../shared/services/apiClient'
 import './Modal.css'
 
 const TITLE_CARD = 'Detalii Eveniment'
 const API_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, '')
+
+const TARGET_GROUP_LABEL_BY_KEY = new Map(
+  FALLBACK_TARGET_GROUP_OPTIONS.map((o) => [o.key, o.label])
+)
 
 function Modal({ isOpen, onClose, deadline }: ModalProps) {
 
@@ -114,6 +119,17 @@ function Modal({ isOpen, onClose, deadline }: ModalProps) {
                 {/* <span className="badge rounded-pill modal-responsible-badge ms-3">
                   {responsibleLabel}
                 </span> */}
+              </div>
+            )}
+
+            {deadline.group && deadline.group.length > 0 && (
+              <div className="modal-card p-3">
+                <h6 className="modal-label mb-2">Grupuri țintă</h6>
+                {deadline.group.map((key: string, index: number) => (
+                  <span key={index} className="badge rounded-pill modal-responsible-badge m-1">
+                    {TARGET_GROUP_LABEL_BY_KEY.get(key) || key}
+                  </span>
+                ))}
               </div>
             )}
           </div>

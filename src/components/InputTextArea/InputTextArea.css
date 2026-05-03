@@ -1,0 +1,37 @@
+/**
+ * Textarea: clasele .form-input-size--* setează înălțime fixă pentru input-uri;
+ * aici forțăm înălțime automată și min-height pentru mai multe rânduri.
+ */
+textarea.input-text-area.form-input-size--xs.form-control,
+textarea.input-text-area.form-input-size--xs.form-control-sm {
+  height: auto !important;
+  min-height: 5.25rem;
+}
+
+textarea.input-text-area.form-input-size--sm.form-control,
+textarea.input-text-area.form-input-size--sm.form-control-sm {
+  height: auto !important;
+  min-height: 5.75rem;
+}
+
+textarea.input-text-area.form-input-size--md.form-control {
+  height: auto !important;
+  min-height: 6.25rem;
+}
+
+textarea.input-text-area.form-input-size--lg.form-control,
+textarea.input-text-area.form-input-size--lg.form-control-lg {
+  height: auto !important;
+  min-height: 7rem;
+}
+
+@media (max-width: 768px) {
+  textarea.input-text-area.form-input-size--md.form-control {
+    min-height: 6.75rem;
+  }
+
+  textarea.input-text-area.form-input-size--lg.form-control,
+  textarea.input-text-area.form-input-size--lg.form-control-lg {
+    min-height: 7.5rem;
+  }
+}

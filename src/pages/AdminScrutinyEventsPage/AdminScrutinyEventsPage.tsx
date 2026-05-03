@@ -1,14 +1,22 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Sidebar } from '../../components/AdminPanel/components';
 import type { AdminMenuItem } from '../../components/AdminPanel/components/Sidebar/AdminSidebar.interface';
 import { logoutAdmin } from '../../shared/auth/adminAuth';
 import { ApiError, apiRequest } from '../../shared/services/apiClient';
 import DateRangePicker from '../../components/DateRangePicker/DateRangePicker';
+import { InputDate } from '../../components/InputDate';
+import { InputText } from '../../components/InputText';
+import { InputTextArea } from '../../components/InputTextArea';
+import { InputUpload } from '../../components/InputUpload';
 import type { SelectionRange } from '../../interface';
 import { formatDeadlineLabel, toLegacyDeadlineValue, toRoDateLocal } from '../../shared/utils/deadlineDate';
 import { useScrutinyEventsQuery } from '../../features/admin/hooks/useScrutinyEventsQuery';
+import { useAudiencesQuery } from '../../features/audiences/hooks/useAudiencesQuery';
+import { MultiCheckboxDropdown } from '../../components/MultiCheckboxDropdown';
+import { FALLBACK_TARGET_GROUP_OPTIONS } from '../../utils/electionFilters';
 import '../../components/AdminPanel/components/AdminPanel.css';
+import '../../components/EventFilter/EventFilter.css';
 
 type ApiElection = {
   id: string;
@@ -45,16 +53,6 @@ type PagedResult<T> = {
   items: T[];
 };
 
-const AVAILABLE_GROUPS = [
-  { key: 'political', label: 'Partidele Politice' },
-  { key: 'political_organ', label: 'Organele Electorale' },
-  { key: 'public', label: 'Public Larg' },
-  { key: 'independent_candidates', label: 'Candidații independați' },
-  { key: 'observers', label: 'Observatori' },
-  { key: 'public_authorities', label: 'Autorități publice' },
-] as const;
-const ALLOWED_GROUP_KEYS = AVAILABLE_GROUPS.map((group) => group.key);
-
 const parseApiErrorMessage = (message: string) => {
   try {
     const parsed = JSON.parse(message) as { message?: string };
@@ -90,12 +88,9 @@ function AdminScrutinyEventsPage() {
   const [regulationLink, setRegulationLink] = useState('');
   const [regulations, setRegulations] = useState<Array<{ id?: string; title: string; link: string }>>([]);
   const [isUploadingRegulation, setIsUploadingRegulation] = useState(false);
+  const [regulationPdfFile, setRegulationPdfFile] = useState<File | null>(null);
   const [responsibles, setResponsibles] = useState<string[]>([]);
   const [responsibleOptions, setResponsibleOptions] = useState<ApiResponsibleOption[]>([]);
-  const [isResponsibleDropdownOpen, setIsResponsibleDropdownOpen] = useState(false);
-  const [isGroupsDropdownOpen, setIsGroupsDropdownOpen] = useState(false);
-  const responsibleDropdownRef = useRef<HTMLDivElement | null>(null);
-  const groupsDropdownRef = useRef<HTMLDivElement | null>(null);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [form, setForm] = useState({
     title: '',
@@ -114,6 +109,19 @@ function AdminScrutinyEventsPage() {
     Array.from(new Set(values.map((value) => value.trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b));
 
   const scrutinyQuery = useScrutinyEventsQuery(scrutinyId);
+  const audiencesQuery = useAudiencesQuery(true);
+
+  const targetGroupOptions = useMemo(() => {
+    if (audiencesQuery.data && audiencesQuery.data.length > 0) {
+      return audiencesQuery.data.map((a) => ({ key: a.key, label: a.name }));
+    }
+    return FALLBACK_TARGET_GROUP_OPTIONS;
+  }, [audiencesQuery.data]);
+
+  const audienceKeySet = useMemo(() => new Set(targetGroupOptions.map((o) => o.key)), [targetGroupOptions]);
+
+  const allowedAudienceKeys = useMemo(() => targetGroupOptions.map((o) => o.key), [targetGroupOptions]);
+
   const loadData = useCallback(async () => {
     await scrutinyQuery.refetch();
   }, [scrutinyQuery]);
@@ -152,39 +160,15 @@ function AdminScrutinyEventsPage() {
     };
   }, [isModalOpen, isDeleteModalOpen]);
 
-  useEffect(() => {
-    if (!isResponsibleDropdownOpen) return;
+  const responsibleMultiOptions = useMemo(
+    () => responsibleOptions.map((o) => ({ key: o.label, label: o.label })),
+    [responsibleOptions]
+  );
 
-    const handleClickOutside = (event: MouseEvent) => {
-      if (!responsibleDropdownRef.current) return;
-      const targetNode = event.target as Node | null;
-      if (targetNode && !responsibleDropdownRef.current.contains(targetNode)) {
-        setIsResponsibleDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isResponsibleDropdownOpen]);
-
-  useEffect(() => {
-    if (!isGroupsDropdownOpen) return;
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (!groupsDropdownRef.current) return;
-      const targetNode = event.target as Node | null;
-      if (targetNode && !groupsDropdownRef.current.contains(targetNode)) {
-        setIsGroupsDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isGroupsDropdownOpen]);
+  const allowedResponsibleKeys = useMemo(
+    () => responsibleMultiOptions.map((o) => o.key),
+    [responsibleMultiOptions]
+  );
 
   const rows = useMemo(
     () =>
@@ -236,7 +220,7 @@ function AdminScrutinyEventsPage() {
     setIsSaving(true);
     try {
       const cleanedResponsibles = responsibles.map((x) => x.trim()).filter(Boolean);
-      const cleanedGroups = selectedGroups.filter((group) => ALLOWED_GROUP_KEYS.includes(group as (typeof ALLOWED_GROUP_KEYS)[number]));
+      const cleanedGroups = selectedGroups.filter((group) => audienceKeySet.has(group));
       const singleAdditionalInfo = form.additionalInfo.trim() || undefined;
       const intervalAdditionalInfo = singleAdditionalInfo;
       const deadlineValue =
@@ -327,8 +311,7 @@ function AdminScrutinyEventsPage() {
       setRegulations([]);
       setRegulationTitle('');
       setRegulationLink('');
-      setIsResponsibleDropdownOpen(false);
-      setIsGroupsDropdownOpen(false);
+      setRegulationPdfFile(null);
       setResponsibles([]);
       setSelectedGroups([]);
       setEditingEventId(null);
@@ -391,12 +374,19 @@ function AdminScrutinyEventsPage() {
     }
   };
 
-  const toggleResponsible = (label: string) => {
-    setResponsibles((prev) => (prev.includes(label) ? prev.filter((value) => value !== label) : [...prev, label]));
+  const handleRegulationPdfChange = (file: File | null) => {
+    if (!file) {
+      setRegulationPdfFile(null);
+      return;
+    }
+    setRegulationPdfFile(file);
+    void uploadRegulationPdf(file).finally(() => {
+      setRegulationPdfFile(null);
+    });
   };
 
-  const removeResponsible = (label: string) => {
-    setResponsibles((prev) => prev.filter((value) => value !== label));
+  const handleResponsibleToggle = (label: string) => {
+    setResponsibles((prev) => (prev.includes(label) ? prev.filter((value) => value !== label) : [...prev, label]));
   };
 
   const editEvent = (event: ApiDeadline) => {
@@ -417,7 +407,7 @@ function AdminScrutinyEventsPage() {
       additionalInfo: event.additionalInfo || '',
     });
     setResponsibles((event.responsible || []).map((x) => x.trim()).filter(Boolean));
-    setSelectedGroups((event.group || []).filter((group) => ALLOWED_GROUP_KEYS.includes(group as (typeof ALLOWED_GROUP_KEYS)[number])));
+    setSelectedGroups((event.group || []).filter((group) => audienceKeySet.has(group)));
     setDateRange([{ startDate: baseDate, endDate: endDate, key: 'selection' }]);
     setUseDateInterval(Boolean(rangeMatch));
     const eventSingleDates = normalizeUniqueSingleDates(
@@ -430,8 +420,7 @@ function AdminScrutinyEventsPage() {
     setRegulations((event.regulations || []).map((r) => ({ title: r.title, link: r.link })));
     setRegulationTitle('');
     setRegulationLink('');
-    setIsResponsibleDropdownOpen(false);
-    setIsGroupsDropdownOpen(false);
+    setRegulationPdfFile(null);
     setError('');
     setIsModalOpen(true);
   };
@@ -446,8 +435,7 @@ function AdminScrutinyEventsPage() {
     setRegulations([]);
     setRegulationTitle('');
     setRegulationLink('');
-    setIsResponsibleDropdownOpen(false);
-    setIsGroupsDropdownOpen(false);
+    setRegulationPdfFile(null);
     setResponsibles([]);
     setSelectedGroups([]);
     setError('');
@@ -474,7 +462,7 @@ function AdminScrutinyEventsPage() {
     }
   };
 
-  const toggleGroup = (group: string) => {
+  const handleTargetGroupToggle = (group: string) => {
     setSelectedGroups((prev) => (prev.includes(group) ? prev.filter((g) => g !== group) : [...prev, group]));
   };
 
@@ -702,8 +690,15 @@ function AdminScrutinyEventsPage() {
                 </div>
                 <div className="admin-event-form__grid">
                   <div>
-                    <label className="form-label">Titlu *</label>
-                    <input className="form-control" value={form.title} onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))} />
+                    <label className="form-label" htmlFor="admin-event-title">
+                      Titlu *
+                    </label>
+                    <InputText
+                      id="admin-event-title"
+                      value={form.title}
+                      onValueChange={(title) => setForm((p) => ({ ...p, title }))}
+                      size="md"
+                    />
                   </div>
                 </div>
               </div>
@@ -733,11 +728,14 @@ function AdminScrutinyEventsPage() {
                     ) : (
                       <>
                         <div className="admin-event-form__single-date-row">
-                          <input
-                            type="date"
-                            className="form-control"
-                            value={singleDeadlineDateInput}
-                            onChange={(e) => setSingleDeadlineDateInput(e.target.value)}
+                          <InputDate
+                            id="admin-scrutiny-event-single-deadline-date"
+                            isoValue={singleDeadlineDateInput}
+                            onIsoChange={setSingleDeadlineDateInput}
+                            size="md"
+                            wrapClassName="w-100 min-w-0"
+                            pickerAriaLabel="Selectează data realizării"
+                            pickerTitle="Selectează data"
                           />
                           <button
                             type="button"
@@ -777,8 +775,15 @@ function AdminScrutinyEventsPage() {
                   </div>
                 </div>
                 <div className="mt-3">
-                    <label className="form-label">Informații suplimentare</label>
-                    <input className="form-control" value={form.additionalInfo} onChange={(e) => setForm((p) => ({ ...p, additionalInfo: e.target.value }))} />
+                    <label className="form-label" htmlFor="admin-event-additional-info">
+                      Informații suplimentare
+                    </label>
+                    <InputText
+                      id="admin-event-additional-info"
+                      value={form.additionalInfo}
+                      onValueChange={(additionalInfo) => setForm((p) => ({ ...p, additionalInfo }))}
+                      size="md"
+                    />
                   </div>
               </div>
 
@@ -787,44 +792,22 @@ function AdminScrutinyEventsPage() {
                   <i className="fa-regular fa-user" aria-hidden="true" />
                   <span>Responsabil de realizare</span>
                 </div>
-                <div className="admin-responsible-dropdown mb-2" ref={responsibleDropdownRef}>
-                  <button
-                    type="button"
-                    className="btn btn-light border w-100 d-flex align-items-center justify-content-between"
-                    onClick={() => setIsResponsibleDropdownOpen((prev) => !prev)}
-                    aria-expanded={isResponsibleDropdownOpen}
-                  >
-                    <span>{responsibles.length > 0 ? `${responsibles.length} selectat(e)` : 'Selectează responsabili'}</span>
-                    <i className={`fa-solid ${isResponsibleDropdownOpen ? 'fa-chevron-up' : 'fa-chevron-down'}`} aria-hidden="true" />
-                  </button>
-                  {isResponsibleDropdownOpen ? (
-                    <div className="admin-responsible-dropdown__menu border rounded p-2 mt-2">
-                      {responsibleOptions.length === 0 ? (
-                        <div className="small text-secondary">Nomenclatorul nu este disponibil momentan.</div>
-                      ) : (
-                        responsibleOptions.map((option) => (
-                          <label key={option.id} className="form-check d-flex align-items-start gap-2 mb-2">
-                            <input
-                              type="checkbox"
-                              className="form-check-input mt-1"
-                              checked={responsibles.includes(option.label)}
-                              onChange={() => toggleResponsible(option.label)}
-                            />
-                            <span className="form-check-label">{option.label}</span>
-                          </label>
-                        ))
-                      )}
-                    </div>
-                  ) : null}
-                </div>
-                {responsibles.map((item) => (
-                  <div key={item} className="d-flex justify-content-between align-items-center small text-secondary border rounded px-2 py-1 mb-1">
-                    <span>{item}</span>
-                    <button type="button" className="btn btn-link p-0 text-danger text-decoration-none" onClick={() => removeResponsible(item)}>
-                      elimină
-                    </button>
-                  </div>
-                ))}
+                {responsibleOptions.length === 0 ? (
+                  <div className="small text-secondary mb-2">Nomenclatorul nu este disponibil momentan.</div>
+                ) : null}
+                <MultiCheckboxDropdown
+                  options={responsibleMultiOptions}
+                  allowedKeys={allowedResponsibleKeys}
+                  selectedKeys={responsibles}
+                  onToggle={handleResponsibleToggle}
+                  onClear={() => setResponsibles([])}
+                  placeholder="Selectează responsabili"
+                  disabled={responsibleOptions.length === 0}
+                  checkboxGroupName="admin-event-responsibles"
+                  clearButtonAriaLabel="Șterge selecția responsabililor"
+                  className="admin-responsible-dropdown mb-0"
+                  size="lg"
+                />
               </div>
 
               <div className="admin-event-form__section">
@@ -832,7 +815,14 @@ function AdminScrutinyEventsPage() {
                   <i className="fa-regular fa-comment-dots" aria-hidden="true" />
                   <span>Descriere acțiunii</span>
                 </div>
-                <textarea className="form-control" rows={4} value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} />
+                <InputTextArea
+                  id="admin-event-description"
+                  rows={4}
+                  value={form.description}
+                  onValueChange={(description) => setForm((p) => ({ ...p, description }))}
+                  size="md"
+                  aria-label="Descriere acțiunii"
+                />
               </div>
 
               <div className="admin-event-form__section">
@@ -841,36 +831,48 @@ function AdminScrutinyEventsPage() {
                   <span>Reglementări relevante</span>
                 </div>
                 <div className="d-flex gap-2 mb-2">
-                  <input
-                    className="form-control"
+                  <InputText
+                    id="admin-event-regulation-title"
                     value={regulationTitle}
-                    onChange={(e) => setRegulationTitle(e.target.value)}
+                    onValueChange={setRegulationTitle}
+                    size="md"
                     placeholder="Titlu regulament"
+                    aria-label="Titlu regulament"
+                    className="w-100"
                   />
                 </div>
-                <div className="d-flex gap-2 mb-2">
-                  <input
-                    className="form-control"
+                <div className="d-flex gap-2 mb-2 align-items-center">
+                  <InputText
+                    id="admin-event-regulation-link"
                     value={regulationLink}
-                    onChange={(e) => setRegulationLink(e.target.value)}
+                    onValueChange={setRegulationLink}
+                    size="md"
                     placeholder="Link regulament (optional)"
+                    aria-label="Link regulament"
+                    className="flex-grow-1 min-w-0"
                   />
-                  <button type="button" className="btn btn-primary" onClick={addRegulation}>Adaugă</button>
+                  <button type="button" className="btn btn-primary" onClick={addRegulation}>
+                    Adaugă
+                  </button>
                 </div>
                 <div className="d-flex flex-column gap-2 mb-2">
-                  <label className="form-label mb-0">Încarcă document</label>
-                  <input
-                    type="file"
-                    className="form-control"
+                  <label className="form-label mb-0" htmlFor="admin-event-regulation-upload">
+                    Încarcă document
+                  </label>
+                  <InputUpload
+                    id="admin-event-regulation-upload"
+                    file={regulationPdfFile}
+                    onFileChange={handleRegulationPdfChange}
                     accept=".pdf,application/pdf"
                     disabled={isUploadingRegulation}
-                    onChange={(e) => {
-                      const file = e.target.files?.[0] || null;
-                      void uploadRegulationPdf(file);
-                      e.currentTarget.value = '';
-                    }}
+                    dropTitle="Document PDF"
+                    dropSubtitle="Trage aici sau click pentru a alege"
+                    helperText={
+                      isUploadingRegulation
+                        ? 'Se încarcă documentul...'
+                        : 'După încărcare, regulamentul apare în lista de mai jos.'
+                    }
                   />
-                  {isUploadingRegulation ? <span className="small text-secondary">Se încarcă documentul...</span> : null}
                 </div>
                 {regulations.map((regulation, index) => (
                   <div key={`${regulation.id || regulation.title}-${index}`} className="d-flex justify-content-between align-items-center small text-secondary border rounded px-2 py-1 mb-1">
@@ -887,33 +889,19 @@ function AdminScrutinyEventsPage() {
                   <i className="fa-solid fa-users" aria-hidden="true" />
                   <span>Grupuri țintă</span>
                 </div>
-                <div className="admin-responsible-dropdown" ref={groupsDropdownRef}>
-                  <button
-                    type="button"
-                    className="btn btn-light border w-100 d-flex align-items-center justify-content-between"
-                    onClick={() => setIsGroupsDropdownOpen((prev) => !prev)}
-                    aria-expanded={isGroupsDropdownOpen}
-                  >
-                    <span>{selectedGroups.length > 0 ? `${selectedGroups.length} selectat(e)` : 'Selectează grupuri țintă'}</span>
-                    <i className={`fa-solid ${isGroupsDropdownOpen ? 'fa-chevron-up' : 'fa-chevron-down'}`} aria-hidden="true" />
-                  </button>
-                  {isGroupsDropdownOpen ? (
-                    <div className="admin-responsible-dropdown__menu border rounded p-2 mt-2">
-                      {AVAILABLE_GROUPS.map((group) => (
-                        <label key={group.key} className="form-check d-flex align-items-start gap-2 mb-2">
-                          <input
-                            id={`group-${group.key}`}
-                            type="checkbox"
-                            className="form-check-input mt-1"
-                            checked={selectedGroups.includes(group.key)}
-                            onChange={() => toggleGroup(group.key)}
-                          />
-                          <span className="form-check-label">{group.label}</span>
-                        </label>
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
+                <MultiCheckboxDropdown
+                  options={targetGroupOptions}
+                  allowedKeys={allowedAudienceKeys}
+                  selectedKeys={selectedGroups}
+                  onToggle={handleTargetGroupToggle}
+                  onClear={() => setSelectedGroups([])}
+                  placeholder="Selectează grupuri țintă"
+                  disabled={targetGroupOptions.length === 0}
+                  checkboxGroupName="admin-event-target-groups"
+                  clearButtonAriaLabel="Șterge selecția grupurilor țintă"
+                  className="admin-responsible-dropdown"
+                  size="lg"
+                />
               </div>
 
               {error ? <div className="alert alert-warning mt-3 mb-0">{error}</div> : null}

@@ -51,7 +51,7 @@ function LoginPage() {
               <input
                 id="email"
                 type="email"
-                className="form-control"
+                className="form-control form-input-size--md"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="username"
@@ -64,7 +64,7 @@ function LoginPage() {
               <input
                 id="password"
                 type="password"
-                className="form-control"
+                className="form-control form-input-size--md"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"

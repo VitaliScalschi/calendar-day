@@ -6,6 +6,7 @@ export type AdminElection = {
   isActive: boolean;
   eday: string;
   hasDocument?: boolean;
+  electionTypeIds?: number[];
 };
 
 export type AdminUser = {
@@ -22,13 +23,22 @@ type UploadDocumentResponse = {
 };
 
 export async function fetchAdminPanelData(signal?: AbortSignal) {
-  const elections = await apiRequest<AdminElection[]>('/elections', { signal });
-  const users = await apiRequest<AdminUser[]>('/users', { signal });
+  const [activeElections, inactiveElections, users] = await Promise.all([
+    apiRequest<AdminElection[]>('/elections', { signal }),
+    apiRequest<AdminElection[]>('/elections/inactive', { signal }),
+    apiRequest<AdminUser[]>('/users', { signal }),
+  ]);
+  const byId = new Map<string, AdminElection>();
+  inactiveElections.forEach((e) => byId.set(e.id, e));
+  activeElections.forEach((e) => byId.set(e.id, e));
+  const elections = Array.from(byId.values()).sort(
+    (a, b) => new Date(a.eday).getTime() - new Date(b.eday).getTime(),
+  );
   return { elections, users };
 }
 
 export async function upsertElection(
-  payload: { title: string; isActive: boolean; eday: string },
+  payload: { title: string; isActive: boolean; eday: string; electionTypeIds: number[] },
   electionId?: string,
   document?: File | null,
 ) {

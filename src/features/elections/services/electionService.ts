@@ -8,6 +8,7 @@ type ApiElection = {
   isActive: boolean;
   eday: string;
   hasDocument?: boolean;
+  electionTypeIds?: number[];
 };
 
 type ApiRegulation = {
@@ -43,6 +44,7 @@ export type InactiveElection = {
   isActive: boolean;
   eday: string;
   hasDocument?: boolean;
+  electionTypeIds?: number[];
 };
 
 export type GroupedDeadlines = {
@@ -66,15 +68,18 @@ export async function fetchActiveElectionsWithDeadlines(signal?: AbortSignal): P
     apiRequest<ApiGroupedDeadlines[]>('/deadlines/grouped-by-election', { signal }),
   ]);
 
+  const activeOnly = apiElections.filter((e) => e.isActive === true);
+
   const groupedMap = new Map<string, ApiDeadline[]>();
   grouped.forEach((item) => groupedMap.set(item.electionId, item.deadlines ?? []));
 
-  return apiElections.map((election) => ({
+  return activeOnly.map((election) => ({
     id: election.id,
     title: election.title,
     is_active: election.isActive,
     eday: election.eday,
     hasDocument: election.hasDocument,
+    electionTypeIds: election.electionTypeIds,
     deadlines: (groupedMap.get(election.id) ?? []).map((deadline) => ({
       id: deadline.id,
       election_id: deadline.electionId,
@@ -100,7 +105,8 @@ export async function fetchActiveElectionsWithDeadlines(signal?: AbortSignal): P
 }
 
 export async function fetchInactiveElections(signal?: AbortSignal): Promise<InactiveElection[]> {
-  return apiRequest<InactiveElection[]>('/elections/inactive', { signal });
+  const list = await apiRequest<InactiveElection[]>('/elections/inactive', { signal });
+  return list.filter((e) => e.isActive === false);
 }
 
 export async function fetchGroupedDeadlines(signal?: AbortSignal): Promise<GroupedDeadlines[]> {

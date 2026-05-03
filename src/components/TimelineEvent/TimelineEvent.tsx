@@ -8,7 +8,7 @@ const GroupLabel = new Map<string, string>([
   ['political', 'Partidele Politice'],
   ['political_organ', 'Organele Electorale'],
   ['public', 'Publicul Larg'],
-  ['independent_candidates', 'Candidații independați'],
+  ['independent_candidates', 'Candidații independenți'],
   ['observers', 'Observatori'],
   ['public_authorities', 'Autorități publice'],
 ])
@@ -123,7 +123,7 @@ function TimelineEvent({
       </div>
       <div className="timeline-content border rounded border-gray-300 p-3 shadow-sm bg-white">
         <h4 className="timeline-title me-2">{displayTitle}</h4>
-        <div className="d-flex justify-content-between align-items-center">
+        <div className="d-flex justify-content-between align-items-center gap-2">
         <div>
           {deadlineFormatted && (
           <div className="timeline-deadline">
