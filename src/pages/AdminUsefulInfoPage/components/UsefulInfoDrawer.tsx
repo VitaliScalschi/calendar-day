@@ -50,7 +50,7 @@ function UsefulInfoDrawer({
             <div>
               <label className="form-label fw-semibold">Titlu</label>
               <input
-                className="form-control"
+                className="form-control form-input-size--md"
                 value={form.title}
                 onChange={(e) => onFormChange((previous) => ({ ...previous, title: e.target.value }))}
                 required
@@ -60,7 +60,7 @@ function UsefulInfoDrawer({
             <div>
               <label className="form-label fw-semibold">Tip conținut</label>
               <select
-                className="form-select"
+                className="form-select form-input-size--md"
                 value={form.type}
                 onChange={(e) => onFormChange((previous) => ({ ...previous, type: e.target.value as UsefulInfoType }))}
               >
@@ -75,7 +75,10 @@ function UsefulInfoDrawer({
             {form.type === 'document' ? (
               <div>
                 <label className="form-label fw-semibold">Document</label>
-                <label className="form-control d-flex flex-column align-items-center justify-content-center text-center py-4 border border-2 border-dashed bg-light-subtle" style={{ cursor: 'pointer' }}>
+                <label
+                  className="form-control d-flex flex-column align-items-center justify-content-center text-center py-4 border border-2 border-dashed bg-light-subtle"
+                  style={{ cursor: 'pointer', borderRadius: '6px' }}
+                >
                   <i className="fa-solid fa-file-arrow-up mb-2 text-secondary" aria-hidden="true"></i>
                   <span className="fw-medium">{isUploading ? 'Se încarcă...' : 'Apasă pentru a încărca PDF / DOC / DOCX'}</span>
                   <small className="text-secondary">{uploadedFileName || 'Nu este selectat niciun fișier.'}</small>
@@ -88,7 +91,7 @@ function UsefulInfoDrawer({
                   />
                 </label>
                 <input
-                  className="form-control mt-2"
+                  className="form-control form-input-size--md mt-2"
                   value={form.slug}
                   readOnly
                   placeholder="URL document încărcat"
@@ -99,7 +102,7 @@ function UsefulInfoDrawer({
               <div>
                 <label className="form-label fw-semibold">Link extern</label>
                 <input
-                  className="form-control"
+                  className="form-control form-input-size--md"
                   value={form.slug}
                   onChange={(e) => onFormChange((previous) => ({ ...previous, slug: e.target.value }))}
                   placeholder="https://..."

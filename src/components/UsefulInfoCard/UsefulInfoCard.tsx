@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import './UsefulInfoCard.css';
-import { TITLE_CARD } from './constant';
 import { API_BASE_URL } from '../../shared/services/apiClient';
 import {
   fetchUsefulInfoItems,
   type UsefulInfoItem,
 } from '../../features/usefulInfo/services/usefulInfoService';
+
+const TITLE_CARD = 'Informații Utile';
 
 const API_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, '');
 

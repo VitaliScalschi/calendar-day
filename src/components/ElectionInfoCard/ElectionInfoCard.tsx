@@ -3,6 +3,8 @@ import './ElectionInfoCard.css';
 
 type ElectionInfoCardProps = {
   title: string;
+  /** Subtitlu (ex.: tipuri de scrutin), sub denumirea planului. */
+  planSubtitle?: string;
   displayDate: string;
   totalActions: number;
   completedActions: number;
@@ -13,6 +15,7 @@ type ElectionInfoCardProps = {
 
 function ElectionInfoCard({
   title,
+  planSubtitle,
   displayDate,
   totalActions,
   completedActions,
@@ -27,7 +30,8 @@ function ElectionInfoCard({
   return (
     <aside className="col-12 col-xl-3">
         <div className="election-info-card card p-3 border rounded">
-          <h3 className="election-info-card__title mb-2">{title}</h3>
+          <h3 className="election-info-card__title mb-1">{title}</h3>
+          {planSubtitle ? <p className="election-info-card__subtitle mb-2">{planSubtitle}</p> : null}
           <div className="bg-white border rounded p-3">
             <div className="election-info-card__date d-flex align-items-center gap-2 mb-2 pb-2">
               <span aria-hidden="true">🗓️</span>

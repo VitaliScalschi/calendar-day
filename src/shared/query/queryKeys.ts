@@ -9,6 +9,12 @@ export const queryKeys = {
     all: ['usefulInfo'] as const,
     list: (activeOnly: boolean) => ['usefulInfo', 'list', { activeOnly }] as const,
   },
+  audiences: {
+    list: () => ['audiences', 'list'] as const,
+  },
+  electionTypes: {
+    list: () => ['election-types', 'list'] as const,
+  },
   admin: {
     panel: () => ['admin', 'panel'] as const,
     scrutinyEvents: (scrutinyId: string) => ['admin', 'scrutinyEvents', scrutinyId] as const,

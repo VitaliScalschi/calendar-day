@@ -34,7 +34,7 @@ function EventsTable({
             </span>
             <input
               type="text"
-              className="form-control"
+              className="form-control form-input-size--md"
               placeholder="Caută program..."
               value={search}
               onChange={(e) => onSearch(e.target.value)}
@@ -47,6 +47,7 @@ function EventsTable({
             <thead className="table-light">
               <tr>
                 <th scope="col">Titlu program</th>
+                <th scope="col">Tipuri de scrutin</th>
                 <th scope="col">Data</th>
                 <th scope="col">Starea programului</th>
                 <th scope="col" className="text-end">Acțiuni</th>
@@ -56,6 +57,9 @@ function EventsTable({
               {events.map((event) => (
                 <tr key={event.id}>
                   <td className="fw-semibold">{event.title}</td>
+                  <td className="fw-semibold">
+                    {event.scrutinyTypesLabel}
+                  </td>
                   <td>{event.date}</td>
                   <td>
                     <span className={`badge ${event.status === 'Activ' ? 'text-bg-success' : 'text-bg-secondary'}`}>
@@ -79,7 +83,7 @@ function EventsTable({
               ))}
               {events.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="text-center text-secondary py-4">
+                  <td colSpan={5} className="text-center text-secondary py-4">
                     Nu există rezultate pentru filtrele alese.
                   </td>
                 </tr>

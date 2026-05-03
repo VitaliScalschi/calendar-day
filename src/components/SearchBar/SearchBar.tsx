@@ -18,13 +18,13 @@ function SearchBar({ placeholder = 'Caută eveniment...', onSearch, onFilter }: 
 
   return (
     <div className="search-bar-container">
-      <div className="input-group input-group-sm flex-grow-1">
+      <div className="input-group flex-grow-1">
         <span className="input-group-text bg-white" aria-hidden="true">
           <i className="fa-solid fa-magnifying-glass text-secondary"></i>
         </span>
         <input
           type="text"
-          className="input form-control form-control-sm"
+          className="form-control form-input-size--md"
           placeholder={placeholder}
           value={searchQuery}
           onChange={handleChange}

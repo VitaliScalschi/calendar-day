@@ -3,6 +3,8 @@ export type EventTypeFilter = 'Toate' | 'Alegeri Locale' | 'Referendum';
 export interface AdminEventItem {
   id: string;
   title: string;
+  /** Denumiri tipuri de scrutin (din nomenclator), separate prin virgulă. */
+  scrutinyTypesLabel: string;
   date: string;
   status: 'Activ' | 'Inactiv';
 }

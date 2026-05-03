@@ -1,17 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {ElectionInfoCard} from '../index';
 import type { ElectionItem, FilterType, MainProps } from '../../interface/index';
 import { calculateDaysRemaining } from '../../utils/dateUtils';
 import { convertFromSQLDate } from '../../utils/dateUtils';
-import { filterDeadlinesByTargetGroups, getActiveElections, type TargetGroupKey } from '../../utils/electionFilters';
+import { filterDeadlinesByTargetGroups, getActiveElections } from '../../utils/electionFilters';
+import { expandMultiDateDeadlinesForDisplay } from '../../shared/utils/expandMultiDateDeadlines';
 import MainFiltersColumn from './components/MainFiltersColumn';
 import MainEventsColumn from './components/MainEventsColumn';
+import { useElectionTypesQuery } from '../../features/election-types/hooks/useElectionTypesQuery';
 import './Main.css';
 
 const DEFAULT_FILTER: FilterType = 'today';
 const DEFAULT_RESPONSIBLE: string[] = [];
 const DEFAULT_SEARCH = '';
-const DEFAULT_TARGET_GROUPS: TargetGroupKey[] = [];
+const DEFAULT_TARGET_GROUPS: string[] = [];
 const DEFAULT_DATE_RANGE_START = '';
 const DEFAULT_DATE_RANGE_END = '';
 
@@ -19,6 +21,7 @@ function Main({
   data,
   activeElectionId,
   onElectionChange,
+  targetGroupOptions,
 }: MainProps) {
   const [selectedElectionId, setSelectedElectionId] = useState<string | null>(activeElectionId || null);
   const [appliedElectionId, setAppliedElectionId] = useState<string | null>(activeElectionId || null);
@@ -26,7 +29,7 @@ function Main({
   const [draftSearchQuery, setDraftSearchQuery] = useState(DEFAULT_SEARCH);
   const [draftFilter, setDraftFilter] = useState<FilterType>(DEFAULT_FILTER);
   const [draftSelectedResponsible, setDraftSelectedResponsible] = useState<string[]>(DEFAULT_RESPONSIBLE);
-  const [draftTargetGroups, setDraftTargetGroups] = useState<TargetGroupKey[]>(DEFAULT_TARGET_GROUPS);
+  const [draftTargetGroups, setDraftTargetGroups] = useState<string[]>(DEFAULT_TARGET_GROUPS);
   const [draftDateKey, setDraftDateKey] = useState<string | null>(null);
   const [draftDateRangeStart, setDraftDateRangeStart] = useState(DEFAULT_DATE_RANGE_START);
   const [draftDateRangeEnd, setDraftDateRangeEnd] = useState(DEFAULT_DATE_RANGE_END);
@@ -34,11 +37,12 @@ function Main({
   const [appliedSearchQuery, setAppliedSearchQuery] = useState(DEFAULT_SEARCH);
   const [appliedFilter, setAppliedFilter] = useState<FilterType>(DEFAULT_FILTER);
   const [appliedSelectedResponsible, setAppliedSelectedResponsible] = useState<string[]>(DEFAULT_RESPONSIBLE);
-  const [appliedTargetGroups, setAppliedTargetGroups] = useState<TargetGroupKey[]>(DEFAULT_TARGET_GROUPS);
+  const [appliedTargetGroups, setAppliedTargetGroups] = useState<string[]>(DEFAULT_TARGET_GROUPS);
   const [appliedDateKey, setAppliedDateKey] = useState<string | null>(null);
   const [appliedDateRangeStart, setAppliedDateRangeStart] = useState(DEFAULT_DATE_RANGE_START);
   const [appliedDateRangeEnd, setAppliedDateRangeEnd] = useState(DEFAULT_DATE_RANGE_END);
 
+  const electionTypesQuery = useElectionTypesQuery(true);
   const activeElections = getActiveElections(data);
   const selectedElection =
     (selectedElectionId ? activeElections.find((election) => election.id === selectedElectionId) : null) ||
@@ -65,10 +69,9 @@ function Main({
   };
 
   const handleTargetGroupToggle = (group: string) => {
-    setDraftTargetGroups((prev) => {
-      const groupKey = group as TargetGroupKey;
-      return prev.includes(groupKey) ? prev.filter((g) => g !== groupKey) : [...prev, groupKey];
-    });
+    setDraftTargetGroups((prev) =>
+      prev.includes(group) ? prev.filter((g) => g !== group) : [...prev, group],
+    );
   };
 
   const toDateKey = (value?: string): string | null => {
@@ -130,6 +133,7 @@ function Main({
   const getFilteredDeadlines = (deadlines?: ElectionItem['deadlines'], selectedGroups: string[] = []) => {
     if (!deadlines || !Array.isArray(deadlines)) return [];
     let result = filterDeadlinesByTargetGroups(deadlines, selectedGroups);
+    result = expandMultiDateDeadlinesForDisplay(result);
 
     if (appliedDateKey) {
       result = result.filter((d) => isDateInDeadline(d.deadline, appliedDateKey, d.deadlines));
@@ -216,6 +220,15 @@ function Main({
     ? (/^\d{4}-\d{2}-\d{2}/.test(selectedElection.eday) ? convertFromSQLDate(selectedElection.eday) : selectedElection.eday)
     : 'Data indisponibila';
 
+  const planSubtitle = useMemo(() => {
+    const ids = selectedElection?.electionTypeIds;
+    const types = electionTypesQuery.data;
+    if (!ids?.length || !types?.length) return '';
+    const nameById = new Map(types.map((t) => [t.id, t.name]));
+    const names = ids.map((id) => nameById.get(id)).filter((n): n is string => Boolean(n));
+    return names.length ? names.join(', ') : '';
+  }, [selectedElection?.electionTypeIds, electionTypesQuery.data]);
+
   useEffect(() => {
     if (activeElections.length === 0) {
       setSelectedElectionId(null);
@@ -263,6 +276,7 @@ function Main({
     <div className="main-layout row g-3 align-items-start">
       <MainFiltersColumn
         electionOptions={electionOptions}
+        targetGroupOptions={targetGroupOptions}
         selectedElectionId={selectedElectionId}
         onElectionChange={handleElectionChange}
         selectedTargetGroups={draftTargetGroups}
@@ -301,6 +315,7 @@ function Main({
 
       <ElectionInfoCard
         title={selectedElection?.title ?? 'Ziua alegerilor'}
+        planSubtitle={planSubtitle || undefined}
         displayDate={selectedElectionDisplayDate}
         totalActions={selectedElectionTotalActions}
         completedActions={selectedElectionCompletedStages}

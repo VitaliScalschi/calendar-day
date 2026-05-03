@@ -279,7 +279,7 @@ function AdminUsefulInfoPage() {
             <div className="input-group mb-3">
               <span className="input-group-text bg-white"><i className="fa-solid fa-magnifying-glass" aria-hidden="true" /></span>
               <input
-                className="form-control"
+                className="form-control form-input-size--md"
                 placeholder="Caută după titlu, tip, status..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}

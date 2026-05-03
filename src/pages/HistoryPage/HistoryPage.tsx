@@ -3,11 +3,14 @@ import { Header, Footer, ScrollToTop, SearchBar, Modal } from '../../components'
 import type { EventDeadlineProps } from '../../interface';
 import { API_BASE_URL } from '../../shared/services/apiClient';
 import { useHistoryArchiveQuery } from '../../features/elections/hooks/useHistoryArchiveQuery';
+import { useElectionTypesQuery } from '../../features/election-types/hooks/useElectionTypesQuery';
+import { MultiCheckboxDropdown } from '../../components/MultiCheckboxDropdown';
 import { useDebounce } from '../../shared/hooks/useDebounce';
 import { useFilters } from '../../shared/hooks/useFilters';
 import { useModal } from '../../shared/hooks/useModal';
 import { usePagination } from '../../shared/hooks/usePagination';
 import './HistoryPage.css';
+import '../../components/EventFilter/EventFilter.css';
 
 type ApiElection = { id: string; title: string; isActive: boolean; eday: string; hasDocument?: boolean };
 
@@ -28,7 +31,8 @@ type ApiGroupedDeadlines = { electionId: string; deadlines: ApiDeadline[] };
 const PAGE_SIZE = 10;
 const API_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, '');
 
-const SCRUTINY_TYPES = [
+/** Dacă `/api/election-types` nu răspunde, folosim aceleași denumiri ca în baza de date. */
+const FALLBACK_SCRUTINY_TYPE_NAMES = [
   'Alegeri parlamentare',
   'Alegeri parlamentare noi',
   'Alegeri prezidențiale',
@@ -38,9 +42,9 @@ const SCRUTINY_TYPES = [
   'Alegeri regionale',
 ] as const;
 
-function inferScrutinyType(title: string): string | null {
+function inferScrutinyType(title: string, typeNames: readonly string[]): string | null {
   const normalized = title.trim();
-  const byLength = [...SCRUTINY_TYPES].sort((a, b) => b.length - a.length);
+  const byLength = [...typeNames].sort((a, b) => b.length - a.length);
   for (const t of byLength) {
     if (normalized === t || normalized.startsWith(`${t} `) || normalized.startsWith(`${t}-`)) {
       return t;
@@ -60,7 +64,7 @@ const groupLabel = (groups: string[]) =>
     .replace('political_organ', 'Organele Electorale')
     .replace('political', 'Partidele Politice')
     .replace('public', 'Public Larg')
-    .replace('independent_candidates', 'Candidații independați')
+    .replace('independent_candidates', 'Candidații independenți')
     .replace('observers', 'Observatori')
     .replace('public_authorities', 'Autorități publice') || '-';
 const responsibleLabel = (responsible?: string[]) =>
@@ -70,7 +74,7 @@ function HistoryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [electionSearch, setElectionSearch] = useState('');
-  const [selectedScrutinyType, setSelectedScrutinyType] = useState<string>('');
+  const [selectedScrutinyTypes, setSelectedScrutinyTypes] = useState<string[]>([]);
   const [eventSearch, setEventSearch] = useState('');
   const [elections, setElections] = useState<ApiElection[]>([]);
   const [grouped, setGrouped] = useState<Map<string, ApiDeadline[]>>(new Map());
@@ -79,6 +83,7 @@ function HistoryPage() {
   const { isOpen: isDetailsOpen, open: openDetailsModal, close: closeDetails } = useModal(false);
   const [page, setPage] = useState(1);
   const archiveQuery = useHistoryArchiveQuery();
+  const electionTypesQuery = useElectionTypesQuery(true);
   const debouncedElectionSearch = useDebounce(electionSearch, 250);
   const debouncedEventSearch = useDebounce(eventSearch, 250);
 
@@ -87,7 +92,9 @@ function HistoryPage() {
     if (archiveQuery.data) {
       const groupedMap = new Map<string, ApiDeadline[]>();
       archiveQuery.data.grouped.forEach((item) => groupedMap.set(item.electionId, item.deadlines || []));
-      const sorted = [...archiveQuery.data.elections].sort((a, b) => new Date(b.eday).getTime() - new Date(a.eday).getTime());
+      const sorted = [...archiveQuery.data.elections]
+        .filter((e) => e.isActive === false)
+        .sort((a, b) => new Date(b.eday).getTime() - new Date(a.eday).getTime());
       setElections(sorted as ApiElection[]);
       setGrouped(groupedMap);
       setSelectedElectionId((prev) => prev ?? sorted[0]?.id ?? null);
@@ -99,16 +106,32 @@ function HistoryPage() {
     }
   }, [archiveQuery.data, archiveQuery.isError, archiveQuery.isFetching, archiveQuery.isLoading]);
 
+  const scrutinyTypeOptions = useMemo(() => {
+    if (electionTypesQuery.data && electionTypesQuery.data.length > 0) {
+      return electionTypesQuery.data.map((t) => ({ key: t.name, label: t.name }));
+    }
+    return FALLBACK_SCRUTINY_TYPE_NAMES.map((name) => ({ key: name, label: name }));
+  }, [electionTypesQuery.data]);
+
+  const scrutinyTypeNamesForInfer = useMemo(
+    () => scrutinyTypeOptions.map((o) => o.key),
+    [scrutinyTypeOptions],
+  );
+
+  const allowedScrutinyTypeKeys = useMemo(() => scrutinyTypeOptions.map((o) => o.key), [scrutinyTypeOptions]);
+
   const normalizedElectionSearch = useMemo(() => debouncedElectionSearch.trim().toLowerCase(), [debouncedElectionSearch]);
   const filterElectionPredicate = useCallback(
     (election: ApiElection) => {
       const matchesText = !normalizedElectionSearch || election.title.toLowerCase().includes(normalizedElectionSearch);
-      const inferred = inferScrutinyType(election.title);
+      const inferred = inferScrutinyType(election.title, scrutinyTypeNamesForInfer);
       const matchesType =
-        !selectedScrutinyType || inferred === selectedScrutinyType || (!inferred && election.title.includes(selectedScrutinyType));
+        selectedScrutinyTypes.length === 0 ||
+        (inferred != null && selectedScrutinyTypes.includes(inferred)) ||
+        (inferred == null && selectedScrutinyTypes.some((s) => election.title.includes(s)));
       return matchesText && matchesType;
     },
-    [normalizedElectionSearch, selectedScrutinyType],
+    [normalizedElectionSearch, selectedScrutinyTypes, scrutinyTypeNamesForInfer],
   );
   const filteredElections = useFilters(elections, filterElectionPredicate);
 
@@ -178,22 +201,30 @@ function HistoryPage() {
                 }}
               />
             </div>
-            <label className="form-label small text-secondary mb-1">Tip scrutin</label>
-            <select
-              className="form-select form-select-sm mb-3"
-              value={selectedScrutinyType}
-              onChange={(e) => {
-                setSelectedScrutinyType(e.target.value);
+            <label className="form-label small text-secondary mb-1" id="history-scrutiny-type-label">
+              Tip scrutin
+            </label>
+            <MultiCheckboxDropdown
+              size="sm"
+              options={scrutinyTypeOptions}
+              allowedKeys={allowedScrutinyTypeKeys}
+              selectedKeys={selectedScrutinyTypes}
+              onToggle={(key) => {
+                setSelectedScrutinyTypes((prev) =>
+                  prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
+                );
                 setPage(1);
               }}
-            >
-              <option value="">Toate tipurile</option>
-              {SCRUTINY_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
+              onClear={() => {
+                setSelectedScrutinyTypes([]);
+                setPage(1);
+              }}
+              placeholder="Toate tipurile"
+              disabled={scrutinyTypeOptions.length === 0}
+              checkboxGroupName="history-scrutiny-types"
+              clearButtonAriaLabel="Șterge filtrul tip scrutin"
+              className="mb-3"
+            />
             <div className="d-flex flex-column gap-2 history-elections-list">
               {filteredElections.map((election) => {
                 const count = grouped.get(election.id)?.length || 0;

@@ -6,6 +6,7 @@ const TABLET_BREAKPOINT = 1024;
 
 type MainFiltersColumnProps = {
   electionOptions: Array<{ id: string; label: string }>;
+  targetGroupOptions: Array<{ key: string; label: string }>;
   selectedElectionId: string | null;
   onElectionChange: (value: string) => void;
   selectedTargetGroups: string[];
@@ -29,6 +30,7 @@ type MainFiltersColumnProps = {
 
 function MainFiltersColumn({
   electionOptions,
+  targetGroupOptions,
   selectedElectionId,
   onElectionChange,
   selectedTargetGroups,
@@ -133,6 +135,7 @@ function MainFiltersColumn({
               <div className="offcanvas-body p-2">
                 <EventFilter
                   electionOptions={electionOptions}
+                  targetGroupOptions={targetGroupOptions}
                   selectedElectionId={selectedElectionId}
                   onElectionChange={onElectionChange}
                   selectedTargetGroups={selectedTargetGroups}
@@ -170,6 +173,7 @@ function MainFiltersColumn({
           <div id="main-filters-panel" className="main-layout__filters-panel">
             <EventFilter
               electionOptions={electionOptions}
+              targetGroupOptions={targetGroupOptions}
               selectedElectionId={selectedElectionId}
               onElectionChange={onElectionChange}
               selectedTargetGroups={selectedTargetGroups}

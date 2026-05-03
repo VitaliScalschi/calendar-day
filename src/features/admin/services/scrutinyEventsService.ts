@@ -32,11 +32,16 @@ type PagedResult<T> = {
 };
 
 export async function fetchScrutinyEventsData(scrutinyId: string, signal?: AbortSignal) {
-  const [elections, deadlines, responsibleOptions] = await Promise.all([
+  const [activeElections, inactiveElections, deadlines, responsibleOptions] = await Promise.all([
     apiRequest<ScrutinyElection[]>('/elections', { signal }),
+    apiRequest<ScrutinyElection[]>('/elections/inactive', { signal }),
     apiRequest<PagedResult<ScrutinyDeadline>>(`/deadlines?electionId=${scrutinyId}&page=1&pageSize=200`, { signal }),
     apiRequest<ResponsibleOption[]>('/responsible-options', { signal }),
   ]);
+  const byId = new Map<string, ScrutinyElection>();
+  inactiveElections.forEach((e) => byId.set(e.id, e));
+  activeElections.forEach((e) => byId.set(e.id, e));
+  const elections = Array.from(byId.values());
 
   const events = (deadlines.items || []).map((item) => {
     const normalized = {

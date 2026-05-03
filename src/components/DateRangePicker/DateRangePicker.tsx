@@ -52,7 +52,7 @@ export default function DateRangeDropdown({ value, onChange }: DateRangeDropdown
     <div className="position-relative" ref={ref}>
       
       <input
-        className="form-control"
+        className="form-control form-input-size--md"
         value={formatted}
         onClick={() => setShow(!show)}
         readOnly

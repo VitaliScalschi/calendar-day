@@ -186,6 +186,15 @@ function Calendar({ eday, deadlines = [], selectedDateKey: selectedDateKeyProp =
   
   const renderDays = useCallback(() => {
     const days = []
+
+    const getExpiryStatusValueForCell = (d: EventDeadlineProps, cellKey: string): string | null => {
+      const list = d.deadlines?.filter((v) => v?.trim()) ?? [];
+      if (list.length > 1) {
+        const forCell = list.find((v) => parseDateKey(v) === cellKey);
+        if (forCell) return getStatusDateValue(forCell);
+      }
+      return getStatusDateValue(d.deadline);
+    };
     
     // Empty cells for days before the first day of the month
     for (let i = 0; i < adjustedStartingDay; i++) {
@@ -206,7 +215,7 @@ function Calendar({ eday, deadlines = [], selectedDateKey: selectedDateKeyProp =
       const isExpiredDate =
         dayDeadlines.length > 0 &&
         dayDeadlines.every((d) => {
-          const statusValue = getStatusDateValue(d.deadline);
+          const statusValue = getExpiryStatusValueForCell(d, cellKey);
           return statusValue ? calculateDaysRemaining(statusValue) < 0 : false;
         });
       const inDeadlineRange =

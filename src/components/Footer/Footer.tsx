@@ -42,7 +42,6 @@ export const SOCIAL_LINKS = [
 
 
 type FooterProps = {
-  /** Ziua alegerilor pentru scrutinul curent (ex. din API), afișată lângă titlu */
   electionDayLabel?: string | null;
 };
 

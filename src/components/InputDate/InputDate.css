@@ -1,0 +1,65 @@
+.input-date__wrap {
+  position: relative;
+}
+
+.input-date__text {
+  min-width: 0;
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid #cfd6e2;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  font-weight: 500;
+  color: #2f3743;
+  background-color: #fff;
+}
+
+/* Buton calendar — proporțional cu size (înălțimi în formInputSizes.css) */
+.input-date__wrap--xs .input-date__picker-btn {
+  width: 1.25rem;
+  height: 1.25rem;
+  right: 0.3rem;
+}
+
+.input-date__wrap--sm .input-date__picker-btn {
+  width: 1.4rem;
+  height: 1.4rem;
+  right: 0.35rem;
+}
+
+.input-date__wrap--md .input-date__picker-btn {
+  width: 1.5rem;
+  height: 1.5rem;
+  right: 0.4rem;
+}
+
+.input-date__wrap--lg .input-date__picker-btn {
+  width: 1.65rem;
+  height: 1.65rem;
+  right: 0.45rem;
+}
+
+.input-date__picker-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: #6b7280;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.input-date__picker-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.input-date__native {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}

@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../../../shared/query/queryKeys';
 import { deleteElection, deleteUser, fetchAdminPanelData, upsertElection, upsertUser } from '../services/adminService';
 
+type UpsertElectionPayload = { title: string; isActive: boolean; eday: string; electionTypeIds: number[] };
+
 export function useAdminPanelQuery() {
   return useQuery({
     queryKey: queryKeys.admin.panel(),
@@ -28,6 +30,7 @@ export function useDeleteElectionMutation() {
     mutationFn: (electionId: string) => deleteElection(electionId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.panel() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.elections.all });
     },
   });
 }

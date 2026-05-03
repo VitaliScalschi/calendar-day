@@ -24,7 +24,7 @@ function Users({ users, search, onSearch, onCreateUserClick, onEditUserClick, on
           <div className="d-flex gap-2 flex-wrap justify-content-end">
             <input
               type="search"
-              className="form-control"
+              className="form-control form-input-size--md"
               style={{ maxWidth: 320 }}
               placeholder="Cauta dupa email, rol sau status..."
               value={search}

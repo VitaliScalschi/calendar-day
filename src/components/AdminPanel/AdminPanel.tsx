@@ -13,6 +13,15 @@ import {
   useUpsertElectionMutation,
   useUpsertUserMutation,
 } from '../../features/admin/hooks/useAdminPanelQueries';
+import { Button } from '../Button';
+import { InputDate } from '../InputDate';
+import { InputText } from '../InputText';
+import { InputUpload } from '../InputUpload';
+import { Label } from '../Label';
+import { RadioButton } from '../RadioButton';
+import { MultiCheckboxDropdown } from '../MultiCheckboxDropdown';
+import { useElectionTypesQuery } from '../../features/election-types/hooks/useElectionTypesQuery';
+import '../EventFilter/EventFilter.css';
 import './components/AdminPanel.css';
 import type { AdminMenuItem } from './components/Sidebar/AdminSidebar.interface';
 
@@ -22,6 +31,8 @@ type ScrutinyForm = {
   title: string;
   electionDay: string;
   isActive: boolean;
+  /** Id-uri `election_types` ca string (chei pentru MultiCheckboxDropdown). */
+  electionTypeIds: string[];
 };
 
 type UserForm = {
@@ -42,12 +53,18 @@ function formatDate(dateStr: string): string {
   return date.toLocaleDateString('ro-RO', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-function openNativeDatePicker(input: HTMLInputElement) {
-  if ('showPicker' in input && typeof input.showPicker === 'function') {
-    input.showPicker();
-  } else {
-    input.focus();
-  }
+/** Opțiuni Activ / Inactiv pentru radiouri (modal scrutin + modal utilizator). */
+const ADMIN_ACTIVE_INACTIVE_RADIO_OPTIONS = [
+  { idSuffix: 'Active', value: 'active', label: 'Activ', isActive: true },
+  { idSuffix: 'Inactive', value: 'inactive', label: 'Inactiv', isActive: false },
+] as const;
+
+/** Aliniat cu backend: ElectionsController + ElectionDocumentFiles */
+const CALENDAR_PROGRAM_FILE_ACCEPT =
+  '.pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.webp,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,image/jpeg,image/png,image/gif,image/webp';
+
+function isAllowedCalendarProgramFileName(name: string): boolean {
+  return /\.(pdf|doc|docx|xls|xlsx|jpe?g|png|gif|webp)$/i.test(name);
 }
 
 function AdminPanel() {
@@ -80,8 +97,10 @@ function AdminPanel() {
     title: '',
     electionDay: '',
     isActive: true,
+    electionTypeIds: [],
   });
   const [scrutinyDocumentFile, setScrutinyDocumentFile] = useState<File | null>(null);
+  const electionTypesQuery = useElectionTypesQuery(true);
   const adminPanelQuery = useAdminPanelQuery();
   const upsertElectionMutation = useUpsertElectionMutation();
   const deleteElectionMutation = useDeleteElectionMutation();
@@ -109,21 +128,29 @@ function AdminPanel() {
     setPage(1);
   }, [activeMenuItem]);
 
-  const scrutinyRows = useMemo<AdminEventItem[]>(
-    () =>
-      elections.map((election) => ({
+  const scrutinyRows = useMemo<AdminEventItem[]>(() => {
+    const nameById = new Map((electionTypesQuery.data ?? []).map((t) => [t.id, t.name] as const));
+    return elections.map((election) => {
+      const typeNames = (election.electionTypeIds ?? [])
+        .map((id) => nameById.get(id))
+        .filter((n): n is string => Boolean(n));
+      const scrutinyTypesLabel = typeNames.length > 0 ? typeNames.join(', ') : '—';
+      return {
         id: election.id,
         title: election.title,
+        scrutinyTypesLabel,
         date: formatDate(election.eday),
         status: election.isActive ? 'Activ' : 'Inactiv',
-      })),
-    [elections]
-  );
+      };
+    });
+  }, [elections, electionTypesQuery.data]);
 
   const filteredRows = useMemo(() => {
     const query = search.trim().toLowerCase();
     if (!query) return scrutinyRows;
-    return scrutinyRows.filter((row) => [row.title, row.date, row.status].join(' ').toLowerCase().includes(query));
+    return scrutinyRows.filter((row) =>
+      [row.title, row.scrutinyTypesLabel, row.date, row.status].join(' ').toLowerCase().includes(query),
+    );
   }, [scrutinyRows, search]);
 
   const totalPages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE));
@@ -136,6 +163,12 @@ function AdminPanel() {
     const inactive = total - active;
     return { total, active, inactive };
   }, [scrutinyRows]);
+
+  const scrutinyTypeOptions = useMemo(
+    () => (electionTypesQuery.data ?? []).map((t) => ({ key: String(t.id), label: t.name })),
+    [electionTypesQuery.data],
+  );
+  const allowedScrutinyTypeKeys = useMemo(() => scrutinyTypeOptions.map((o) => o.key), [scrutinyTypeOptions]);
 
   const usersRows = useMemo<Array<{ id: string; email: string; role: string; status: 'Activ' | 'Inactiv'; createdAt: string }>>(
     () =>
@@ -174,7 +207,7 @@ function AdminPanel() {
 
   const openCreateModal = () => {
     setFormError('');
-    setScrutinyForm({ title: '', electionDay: '', isActive: true });
+    setScrutinyForm({ title: '', electionDay: '', isActive: true, electionTypeIds: [] });
     setScrutinyDocumentFile(null);
     setIsModalOpen(true);
   };
@@ -188,6 +221,7 @@ function AdminPanel() {
       title: election.title,
       electionDay: election.eday,
       isActive: election.isActive,
+      electionTypeIds: (election.electionTypeIds ?? []).map(String),
     });
     setScrutinyDocumentFile(null);
     setIsModalOpen(true);
@@ -197,20 +231,28 @@ function AdminPanel() {
     e.preventDefault();
     setFormError('');
     if (!scrutinyForm.title.trim() || !scrutinyForm.electionDay) {
-      setFormError('Completeaza tipul scrutinului si data scrutinului.');
+      setFormError('Completați denumirea planului calendaristic și data scrutinului.');
       return;
     }
-    if (scrutinyDocumentFile && !scrutinyDocumentFile.name.toLowerCase().endsWith('.pdf')) {
-      setFormError('Poți încărca doar fișiere PDF.');
+    if (scrutinyForm.electionTypeIds.length === 0) {
+      setFormError('Selectați cel puțin un tip de scrutin.');
+      return;
+    }
+    if (scrutinyDocumentFile && !isAllowedCalendarProgramFileName(scrutinyDocumentFile.name)) {
+      setFormError('Poți încărca PDF, Word, Excel sau imagini (JPG, PNG, GIF, WEBP).');
       return;
     }
 
     setIsSaving(true);
     try {
+      const electionTypeIds = scrutinyForm.electionTypeIds
+        .map((k) => Number.parseInt(k, 10))
+        .filter((n) => !Number.isNaN(n));
       const payload = {
         title: scrutinyForm.title.trim(),
         isActive: scrutinyForm.isActive,
         eday: scrutinyForm.electionDay,
+        electionTypeIds,
       };
 
       await upsertElectionMutation.mutateAsync({
@@ -411,82 +453,111 @@ function AdminPanel() {
               <form onSubmit={handleSaveScrutiny}>
                 <div className="modal-body">
                   <div className="mb-3">
-                    <label className="form-label">Tip scrutin</label>
-                    <input
-                      type="text"
-                      className="form-control"
+                    <Label htmlFor="scrutiny-title" variant="form">
+                      Denumirea planului calendaristic
+                    </Label>
+                    <InputText
+                      id="scrutiny-title"
+                      size="md"
                       value={scrutinyForm.title}
-                      placeholder="Introduceți denumirea scrutinului"
-                      onChange={(e) => setScrutinyForm((prev) => ({ ...prev, title: e.target.value }))}
+                      placeholder="Introduceți denumirea planului calendaristic"
+                      onValueChange={(title) => setScrutinyForm((prev) => ({ ...prev, title }))}
                     />
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label">Data scrutinului</label>
-                    <input
-                      type="date"
-                      className="form-control"
-                      value={scrutinyForm.electionDay}
-                      onClick={(e) => openNativeDatePicker(e.currentTarget)}
-                      onFocus={(e) => openNativeDatePicker(e.currentTarget)}
-                      onChange={(e) => setScrutinyForm((prev) => ({ ...prev, electionDay: e.target.value }))}
+                    <Label className="d-block" variant="form">
+                      Tip scrutin
+                    </Label>
+                    <MultiCheckboxDropdown
+                  
+                      options={scrutinyTypeOptions}
+                      allowedKeys={allowedScrutinyTypeKeys}
+                      selectedKeys={scrutinyForm.electionTypeIds}
+                      onToggle={(key) =>
+                        setScrutinyForm((prev) => ({
+                          ...prev,
+                          electionTypeIds: prev.electionTypeIds.includes(key)
+                            ? prev.electionTypeIds.filter((k) => k !== key)
+                            : [...prev.electionTypeIds, key],
+                        }))
+                      }
+                      onClear={() => setScrutinyForm((prev) => ({ ...prev, electionTypeIds: [] }))}
+                      placeholder="Selectați tipul de scrutin"
+                      disabled={scrutinyTypeOptions.length === 0 || electionTypesQuery.isLoading}
+                      checkboxGroupName="admin-scrutiny-election-types"
+                      clearButtonAriaLabel="Șterge selecția tipurilor de scrutin"
                     />
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label">Programul calendaristic (PDF/word)</label>
-                    <input
-                      type="file"
-                      className="form-control"
-                      accept=".pdf,application/pdf"
-                      onChange={(e) => setScrutinyDocumentFile(e.target.files?.[0] || null)}
+                    <Label htmlFor="scrutiny-election-day" variant="form">
+                      Data scrutinului
+                    </Label>
+                    <InputDate
+                      id="scrutiny-election-day"
+                      isoValue={scrutinyForm.electionDay}
+                      onIsoChange={(electionDay) =>
+                        setScrutinyForm((prev) => ({ ...prev, electionDay }))
+                      }
+                      size="md"
+                      pickerAriaLabel="Selectează data scrutinului"
+                      pickerTitle="Selectează data"
                     />
-                    <div className="form-text">
-                      Fișierul va fi disponibil la descărcare după salvarea scrutinului.
-                    </div>
+                  </div>
+
+                  <div className="mb-3">
+                    <Label htmlFor="scrutiny-calendar-file" variant="form">
+                      Programul calendaristic (document sau imagine)
+                    </Label>
+                    <InputUpload
+                      id="scrutiny-calendar-file"
+                      file={scrutinyDocumentFile}
+                      accept={CALENDAR_PROGRAM_FILE_ACCEPT}
+                      onFileChange={setScrutinyDocumentFile}
+                      helperText="Fișierul va fi disponibil la descărcare după salvarea scrutinului."
+                    />
                   </div>
 
                   <div>
-                    <label className="form-label d-block">Status</label>
-                    <div className="form-check form-check-inline">
-                      <input
-                        id="statusActive"
-                        type="radio"
-                        className="form-check-input"
-                        checked={scrutinyForm.isActive}
-                        onChange={() => setScrutinyForm((prev) => ({ ...prev, isActive: true }))}
-                      />
-                      <label className="form-check-label" htmlFor="statusActive">Activ</label>
-                    </div>
-                    <div className="form-check form-check-inline">
-                      <input
-                        id="statusInactive"
-                        type="radio"
-                        className="form-check-input"
-                        checked={!scrutinyForm.isActive}
-                        onChange={() => setScrutinyForm((prev) => ({ ...prev, isActive: false }))}
-                      />
-                      <label className="form-check-label" htmlFor="statusInactive">Inactiv</label>
-                    </div>
+                    <Label className="d-block" htmlFor="statusActive" variant="form">
+                      Status
+                    </Label>
+                    {ADMIN_ACTIVE_INACTIVE_RADIO_OPTIONS.map((opt) => (
+                      <div key={opt.value} className="form-check form-check-inline">
+                        <RadioButton
+                          id={`status${opt.idSuffix}`}
+                          name="scrutiny-status"
+                          value={opt.value}
+                          checked={scrutinyForm.isActive === opt.isActive}
+                          onChange={() =>
+                            setScrutinyForm((prev) => ({ ...prev, isActive: opt.isActive }))
+                          }
+                          inputClassName="form-check-input"
+                          className="form-check-label"
+                        >
+                          {opt.label}
+                        </RadioButton>
+                      </div>
+                    ))}
                   </div>
 
                   {formError ? <div className="alert alert-danger mt-3 mb-0 py-2">{formError}</div> : null}
                 </div>
 
                 <div className="modal-footer">
-                  <button type="submit" className="btn btn-success" disabled={isSaving}>
+                  <Button type="submit" variant="success" disabled={isSaving}>
                     {isSaving ? 'Se salvează...' : 'Salvează'}
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-danger"
+                  </Button>
+                  <Button
+                    variant="danger"
                     onClick={() => {
                       setIsModalOpen(false);
                       setScrutinyDocumentFile(null);
                     }}
                   >
                     Anulează
-                  </button>
+                  </Button>
                 </div>
               </form>
             </div>
@@ -516,8 +587,7 @@ function AdminPanel() {
                 Ești sigur că vrei să ștergi acest program calendaristic?
               </div>
               <div className="modal-footer admin-confirm-modal__footer">
-                <button
-                  type="button"
+                <Button
                   className="btn admin-confirm-modal__btn admin-confirm-modal__btn--cancel"
                   onClick={() => {
                     setIsDeleteModalOpen(false);
@@ -526,15 +596,14 @@ function AdminPanel() {
                   disabled={isDeleting}
                 >
                   Renunță
-                </button>
-                <button
-                  type="button"
+                </Button>
+                <Button
                   className="btn admin-confirm-modal__btn admin-confirm-modal__btn--delete"
                   onClick={confirmDeleteScrutiny}
                   disabled={isDeleting}
                 >
                   {isDeleting ? 'Se șterge...' : 'Șterge'}
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -554,20 +623,26 @@ function AdminPanel() {
               <form onSubmit={handleCreateUser}>
                 <div className="modal-body">
                   <div className="mb-3">
-                    <label className="form-label">Email</label>
+                    <Label htmlFor="user-email" variant="form">
+                      Email
+                    </Label>
                     <input
+                      id="user-email"
                       type="email"
-                      className="form-control"
+                      className="form-control form-input-size--md"
                       value={userForm.email}
                       onChange={(e) => setUserForm((prev) => ({ ...prev, email: e.target.value }))}
                     />
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label">Parola</label>
+                    <Label htmlFor="user-password" variant="form">
+                      Parola
+                    </Label>
                     <input
+                      id="user-password"
                       type="password"
-                      className="form-control"
+                      className="form-control form-input-size--md"
                       value={userForm.password}
                       onChange={(e) => setUserForm((prev) => ({ ...prev, password: e.target.value }))}
                       placeholder={editingUserId ? 'Lasa gol pentru a pastra parola curenta' : ''}
@@ -575,9 +650,12 @@ function AdminPanel() {
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label">Rol</label>
+                    <Label htmlFor="user-role" variant="form">
+                      Rol
+                    </Label>
                     <select
-                      className="form-select"
+                      id="user-role"
+                      className="form-select form-input-size--md"
                       value={userForm.role}
                       onChange={(e) =>
                         setUserForm((prev) => ({ ...prev, role: e.target.value as UserForm['role'] }))
@@ -590,39 +668,38 @@ function AdminPanel() {
                   </div>
 
                   <div>
-                    <label className="form-label d-block">Status</label>
-                    <div className="form-check form-check-inline">
-                      <input
-                        id="userStatusActive"
-                        type="radio"
-                        className="form-check-input"
-                        checked={userForm.isActive}
-                        onChange={() => setUserForm((prev) => ({ ...prev, isActive: true }))}
-                      />
-                      <label className="form-check-label" htmlFor="userStatusActive">Activ</label>
-                    </div>
-                    <div className="form-check form-check-inline">
-                      <input
-                        id="userStatusInactive"
-                        type="radio"
-                        className="form-check-input"
-                        checked={!userForm.isActive}
-                        onChange={() => setUserForm((prev) => ({ ...prev, isActive: false }))}
-                      />
-                      <label className="form-check-label" htmlFor="userStatusInactive">Inactiv</label>
-                    </div>
+                    <Label className="d-block" htmlFor="userStatusActive" variant="form">
+                      Status
+                    </Label>
+                    {ADMIN_ACTIVE_INACTIVE_RADIO_OPTIONS.map((opt) => (
+                      <div key={opt.value} className="form-check form-check-inline">
+                        <RadioButton
+                          id={`userStatus${opt.idSuffix}`}
+                          name="user-status"
+                          value={opt.value}
+                          checked={userForm.isActive === opt.isActive}
+                          onChange={() =>
+                            setUserForm((prev) => ({ ...prev, isActive: opt.isActive }))
+                          }
+                          inputClassName="form-check-input"
+                          className="form-check-label"
+                        >
+                          {opt.label}
+                        </RadioButton>
+                      </div>
+                    ))}
                   </div>
 
                   {userFormError ? <div className="alert alert-danger mt-3 mb-0 py-2">{userFormError}</div> : null}
                 </div>
 
                 <div className="modal-footer">
-                  <button type="submit" className="btn btn-success" disabled={isCreatingUser}>
+                  <Button type="submit" variant="success" disabled={isCreatingUser}>
                     {isCreatingUser ? 'Se salveaza...' : editingUserId ? 'Salveaza' : 'Creaza'}
-                  </button>
-                  <button type="button" className="btn btn-danger" onClick={() => setIsUserModalOpen(false)}>
+                  </Button>
+                  <Button variant="danger" onClick={() => setIsUserModalOpen(false)}>
                     Anuleaza
-                  </button>
+                  </Button>
                 </div>
               </form>
             </div>
@@ -650,8 +727,7 @@ function AdminPanel() {
                 Ești sigur că vrei să ștergi acest utilizator?
               </div>
               <div className="modal-footer admin-confirm-modal__footer">
-                <button
-                  type="button"
+                <Button
                   className="btn admin-confirm-modal__btn admin-confirm-modal__btn--cancel"
                   onClick={() => {
                     setIsDeleteUserModalOpen(false);
@@ -660,15 +736,14 @@ function AdminPanel() {
                   disabled={isDeletingUser}
                 >
                   Renunță
-                </button>
-                <button
-                  type="button"
+                </Button>
+                <Button
                   className="btn admin-confirm-modal__btn admin-confirm-modal__btn--delete"
                   onClick={confirmDeleteUser}
                   disabled={isDeletingUser}
                 >
                   {isDeletingUser ? 'Se șterge...' : 'Șterge'}
-                </button>
+                </Button>
               </div>
             </div>
           </div>

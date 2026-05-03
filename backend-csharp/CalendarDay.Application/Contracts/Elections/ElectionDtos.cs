@@ -5,14 +5,15 @@ public record ElectionDto(
     string Title,
     bool IsActive,
     DateOnly Eday,
-    bool HasDocument
-);
+    bool HasDocument,
+    IReadOnlyList<int> ElectionTypeIds);
 
 public class CreateElectionDto
 {
     public string Title { get; set; } = string.Empty;
     public bool IsActive { get; set; }
     public DateOnly Eday { get; set; }
+    public List<int>? ElectionTypeIds { get; set; }
 }
 
 public class UpdateElectionDto
@@ -20,4 +21,5 @@ public class UpdateElectionDto
     public string Title { get; set; } = string.Empty;
     public bool IsActive { get; set; }
     public DateOnly Eday { get; set; }
+    public List<int>? ElectionTypeIds { get; set; }
 }

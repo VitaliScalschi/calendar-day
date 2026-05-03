@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import {Header, Footer, Main, ScrollToTop} from '../../components/index'
 import type { ElectionItem } from '../../interface/index'
 import { formatElectionDayFooterLabel } from '../../utils/dateUtils'
+import { FALLBACK_TARGET_GROUP_OPTIONS } from '../../utils/electionFilters'
+import { useAudiencesQuery } from '../../features/audiences/hooks/useAudiencesQuery'
 import { useHomeElectionsQuery } from '../../features/elections/hooks/useHomeElectionsQuery'
 import data from '../../data.json'
 
@@ -11,6 +13,14 @@ function HomePage() {
   const [activeElectionId, setActiveElectionId] = useState<string | null>(null)
   const shouldUseMock = import.meta.env.VITE_USE_MOCK_TABS === 'true';
   const homeQuery = useHomeElectionsQuery(!shouldUseMock);
+  const audiencesQuery = useAudiencesQuery(!shouldUseMock);
+
+  const targetGroupOptions = useMemo(() => {
+    if (audiencesQuery.data && audiencesQuery.data.length > 0) {
+      return audiencesQuery.data.map((a) => ({ key: a.key, label: a.name }));
+    }
+    return FALLBACK_TARGET_GROUP_OPTIONS;
+  }, [audiencesQuery.data]);
 
   useEffect(() => {
     if (shouldUseMock) {
@@ -69,6 +79,7 @@ function HomePage() {
                 data={elections}
                 activeElectionId={activeElectionId}
                 onElectionChange={setActiveElectionId}
+                targetGroupOptions={targetGroupOptions}
               />
             </div>
           </div>

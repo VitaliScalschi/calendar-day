@@ -14,6 +14,8 @@ public class CalendarDayDbContext(DbContextOptions<CalendarDayDbContext> options
     public DbSet<DeadlineGroup> DeadlineGroups => Set<DeadlineGroup>();
     public DbSet<ResponsibleOption> ResponsibleOptions => Set<ResponsibleOption>();
     public DbSet<UsefulInfo> UsefulInfos => Set<UsefulInfo>();
+    public DbSet<Audience> Audiences => Set<Audience>();
+    public DbSet<ElectionType> ElectionTypes => Set<ElectionType>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -21,6 +23,9 @@ public class CalendarDayDbContext(DbContextOptions<CalendarDayDbContext> options
         {
             e.HasKey(x => x.Id);
             e.Property(x => x.Title).IsRequired().HasMaxLength(250);
+            e.Property(x => x.ElectionTypeIds)
+                .HasColumnName("election_type_ids")
+                .HasColumnType("integer[]");
         });
 
         modelBuilder.Entity<User>(u =>
@@ -101,6 +106,26 @@ public class CalendarDayDbContext(DbContextOptions<CalendarDayDbContext> options
             u.Property(x => x.Type).IsRequired().HasMaxLength(50);
             u.Property(x => x.Icon).HasMaxLength(120);
             u.HasIndex(x => x.Order);
+        });
+
+        modelBuilder.Entity<Audience>(a =>
+        {
+            a.ToTable("audiences");
+            a.HasKey(x => x.Id);
+            a.Property(x => x.Id).HasColumnName("id");
+            a.Property(x => x.Key).HasColumnName("key").IsRequired().HasMaxLength(200);
+            a.Property(x => x.Name).HasColumnName("name").IsRequired().HasMaxLength(500);
+            a.Property(x => x.CreatedAt).HasColumnName("created_at");
+            a.HasIndex(x => x.Key).IsUnique();
+        });
+
+        modelBuilder.Entity<ElectionType>(t =>
+        {
+            t.ToTable("election_types");
+            t.HasKey(x => x.Id);
+            t.Property(x => x.Id).HasColumnName("id").ValueGeneratedNever();
+            t.Property(x => x.Name).HasColumnName("name").IsRequired().HasMaxLength(200);
+            t.HasIndex(x => x.Name).IsUnique();
         });
     }
 }
