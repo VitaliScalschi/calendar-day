@@ -20,6 +20,7 @@ import { InputUpload } from '../InputUpload';
 import { Label } from '../Label';
 import { RadioButton } from '../RadioButton';
 import { MultiCheckboxDropdown } from '../MultiCheckboxDropdown';
+import { PasswordInput } from '../PasswordInput';
 import { useElectionTypesQuery } from '../../features/election-types/hooks/useElectionTypesQuery';
 import '../EventFilter/EventFilter.css';
 import './components/AdminPanel.css';
@@ -639,9 +640,8 @@ function AdminPanel() {
                     <Label htmlFor="user-password" variant="form">
                       Parola
                     </Label>
-                    <input
+                    <PasswordInput
                       id="user-password"
-                      type="password"
                       className="form-control form-input-size--md"
                       value={userForm.password}
                       onChange={(e) => setUserForm((prev) => ({ ...prev, password: e.target.value }))}

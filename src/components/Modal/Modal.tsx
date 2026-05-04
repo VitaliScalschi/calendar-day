@@ -64,9 +64,6 @@ function Modal({ isOpen, onClose, deadline }: ModalProps) {
           <div className="modal-card p-3 mt-3">
             <div className="mb-2">
               <h6 className="modal-label mb-0">Termen limită</h6>
-            {deadline.additional_info && (
-                <p className="mt-1 fs-6 ms-3"><i>({deadline.additional_info})</i></p>
-              )}
             </div>
             <p className="modal-main-date mb-3 ms-3">
               {deadline.deadline ? formatDateTime(deadline.deadline) : 'Data necunoscută'}
@@ -74,7 +71,9 @@ function Modal({ isOpen, onClose, deadline }: ModalProps) {
             <span className={`badge rounded-pill modal-time-badge ms-3 ${daysRemaining !== null && daysRemaining < 0 ? 'modal-time-badge--expired' : ''}`}>
               ⌛ {timeBadgeText}
             </span>
-            
+            {deadline.additional_info && (
+                <p className="mt-1 fs-6 ms-3"><i>({deadline.additional_info})</i></p>
+              )}
           </div>
 
           <div className="d-flex flex-column gap-3 mt-3">
