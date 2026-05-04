@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { PasswordInput } from '../../components/PasswordInput';
 import { isAdminLoggedIn, loginAdmin } from '../../shared/auth/adminAuth';
 
 function LoginPage() {
@@ -61,9 +62,8 @@ function LoginPage() {
 
             <div>
               <label htmlFor="password" className="form-label">Parolă</label>
-              <input
+              <PasswordInput
                 id="password"
-                type="password"
                 className="form-control form-input-size--md"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

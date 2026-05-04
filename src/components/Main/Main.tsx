@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {ElectionInfoCard} from '../index';
 import type { ElectionItem, FilterType, MainProps } from '../../interface/index';
 import { calculateDaysRemaining } from '../../utils/dateUtils';
@@ -8,6 +8,7 @@ import { expandMultiDateDeadlinesForDisplay } from '../../shared/utils/expandMul
 import MainFiltersColumn from './components/MainFiltersColumn';
 import MainEventsColumn from './components/MainEventsColumn';
 import { useElectionTypesQuery } from '../../features/election-types/hooks/useElectionTypesQuery';
+import { CALENDAR_HOME_RESET_EVENT } from '../../shared/calendarHomeReset';
 import './Main.css';
 
 const DEFAULT_FILTER: FilterType = 'today';
@@ -41,6 +42,7 @@ function Main({
   const [appliedDateKey, setAppliedDateKey] = useState<string | null>(null);
   const [appliedDateRangeStart, setAppliedDateRangeStart] = useState(DEFAULT_DATE_RANGE_START);
   const [appliedDateRangeEnd, setAppliedDateRangeEnd] = useState(DEFAULT_DATE_RANGE_END);
+  const [searchResetKey, setSearchResetKey] = useState(0);
 
   const electionTypesQuery = useElectionTypesQuery(true);
   const activeElections = getActiveElections(data);
@@ -272,6 +274,29 @@ function Main({
     setAppliedDateRangeEnd(draftDateRangeEnd);
   }, [selectedElectionId, draftFilter, draftSelectedResponsible, draftTargetGroups, draftSearchQuery, draftDateKey, draftDateRangeStart, draftDateRangeEnd]);
 
+  const resetFiltersToDefaults = useCallback(() => {
+    setDraftSearchQuery(DEFAULT_SEARCH);
+    setDraftFilter(DEFAULT_FILTER);
+    setDraftSelectedResponsible(DEFAULT_RESPONSIBLE);
+    setDraftTargetGroups(DEFAULT_TARGET_GROUPS);
+    setDraftDateKey(null);
+    setDraftDateRangeStart(DEFAULT_DATE_RANGE_START);
+    setDraftDateRangeEnd(DEFAULT_DATE_RANGE_END);
+    setAppliedSearchQuery(DEFAULT_SEARCH);
+    setAppliedFilter(DEFAULT_FILTER);
+    setAppliedSelectedResponsible(DEFAULT_RESPONSIBLE);
+    setAppliedTargetGroups(DEFAULT_TARGET_GROUPS);
+    setAppliedDateKey(null);
+    setAppliedDateRangeStart(DEFAULT_DATE_RANGE_START);
+    setAppliedDateRangeEnd(DEFAULT_DATE_RANGE_END);
+    setSearchResetKey((k) => k + 1);
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener(CALENDAR_HOME_RESET_EVENT, resetFiltersToDefaults);
+    return () => window.removeEventListener(CALENDAR_HOME_RESET_EVENT, resetFiltersToDefaults);
+  }, [resetFiltersToDefaults]);
+
   return (
     <div className="main-layout row g-3 align-items-start">
       <MainFiltersColumn
@@ -302,7 +327,7 @@ function Main({
       />
 
       <MainEventsColumn
-        searchResetKey={0}
+        searchResetKey={searchResetKey}
         onSearch={handleSearch}
         appliedElection={appliedElection}
         getFilteredDeadlines={getFilteredDeadlines}
