@@ -11,10 +11,13 @@ import { InputTextArea } from '../../components/InputTextArea';
 import { InputUpload } from '../../components/InputUpload';
 import type { SelectionRange } from '../../interface';
 import { formatDeadlineLabel, toLegacyDeadlineValue, toRoDateLocal } from '../../shared/utils/deadlineDate';
+import { getDeadlineRangeFromString, parseDateKey } from '../../shared/utils/deadlineTodayKind';
 import { useScrutinyEventsQuery } from '../../features/admin/hooks/useScrutinyEventsQuery';
 import { useAudiencesQuery } from '../../features/audiences/hooks/useAudiencesQuery';
 import { MultiCheckboxDropdown } from '../../components/MultiCheckboxDropdown';
 import { FALLBACK_TARGET_GROUP_OPTIONS } from '../../utils/electionFilters';
+import { usePagination } from '../../shared/hooks/usePagination';
+import { SearchBar } from '../../components';
 import '../../components/AdminPanel/components/AdminPanel.css';
 import '../../components/EventFilter/EventFilter.css';
 
@@ -63,6 +66,7 @@ const parseApiErrorMessage = (message: string) => {
 };
 
 function AdminScrutinyEventsPage() {
+  const PAGE_SIZE = 10;
   const { scrutinyId } = useParams();
   const navigate = useNavigate();
   const [allElections, setAllElections] = useState<ApiElection[]>([]);
@@ -78,6 +82,11 @@ function AdminScrutinyEventsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState('');
+  const [page, setPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResetKey, setSearchResetKey] = useState(0);
+  const [filterDateFrom, setFilterDateFrom] = useState('');
+  const [filterDateTo, setFilterDateTo] = useState('');
   const [dateRange, setDateRange] = useState<SelectionRange[]>([
     { startDate: new Date(), endDate: new Date(), key: 'selection' },
   ]);
@@ -178,6 +187,72 @@ function AdminScrutinyEventsPage() {
       })),
     [events]
   );
+
+  const normalizeSearch = (value: string) =>
+    value
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+
+  const filteredRows = useMemo(() => {
+    const normalizedQuery = normalizeSearch(searchQuery.trim());
+    const fromKey = filterDateFrom || null;
+    const toKey = filterDateTo || null;
+
+    const getRowWindow = (row: ApiDeadline): { start: string | null; end: string | null } => {
+      const ranged = getDeadlineRangeFromString(row.deadline);
+      if (ranged) {
+        return { start: ranged.start, end: ranged.end };
+      }
+
+      const parsedDeadlines = (row.deadlines || [])
+        .map((d) => parseDateKey(d))
+        .filter((d): d is string => Boolean(d))
+        .sort((a, b) => a.localeCompare(b));
+
+      if (parsedDeadlines.length > 0) {
+        return { start: parsedDeadlines[0], end: parsedDeadlines[parsedDeadlines.length - 1] };
+      }
+
+      const single = parseDateKey(row.deadline);
+      return { start: single, end: single };
+    };
+
+    return rows.filter((row) => {
+      if (normalizedQuery) {
+        const searchBlob = normalizeSearch(
+          [
+            row.title,
+            row.description,
+            row.deadlineLabel,
+            ...(row.responsible || []),
+            ...(row.group || []),
+          ]
+            .filter(Boolean)
+            .join(' ')
+        );
+        if (!searchBlob.includes(normalizedQuery)) return false;
+      }
+
+      if (!fromKey && !toKey) return true;
+
+      const window = getRowWindow(row);
+      if (!window.start || !window.end) return false;
+      if (fromKey && window.end < fromKey) return false;
+      if (toKey && window.start > toKey) return false;
+      return true;
+    });
+  }, [rows, searchQuery, filterDateFrom, filterDateTo]);
+
+  const { pageItems, safePage, totalPages, from, to, totalItems } = usePagination({
+    items: filteredRows,
+    page,
+    pageSize: PAGE_SIZE,
+  });
+
+  useEffect(() => {
+    setPage(1);
+  }, [filteredRows.length]);
 
   const sourceElectionOptions = useMemo(
     () => allElections.filter((item) => item.id !== scrutinyId),
@@ -626,6 +701,56 @@ function AdminScrutinyEventsPage() {
             </div>
             {scrutinyQuery.isLoading || scrutinyQuery.isFetching ? <div className="alert alert-info py-2">Se încarcă evenimentele...</div> : null}
             {error ? <div className="alert alert-warning">{error}</div> : null}
+            <div className="row g-2 mb-3">
+              <div className="col-12 col-md-6">
+                <label className="form-label mb-1">Caută</label>
+                <SearchBar
+                  key={searchResetKey}
+                  placeholder="Titlu, descriere, responsabil, grup..."
+                  onSearch={setSearchQuery}
+                />
+              </div>
+              <div className="col-6 col-md-3">
+                <label className="form-label mb-1" htmlFor="admin-events-filter-from">Data de la</label>
+                <InputDate
+                  id="admin-events-filter-from"
+                  isoValue={filterDateFrom}
+                  onIsoChange={setFilterDateFrom}
+                  size="md"
+                  wrapClassName="w-100 min-w-0"
+                  pickerAriaLabel="Selectează data de început pentru filtrare"
+                  pickerTitle="Selectează data de început"
+                />
+              </div>
+              <div className="col-6 col-md-3">
+                <label className="form-label mb-1" htmlFor="admin-events-filter-to">Data până la</label>
+                <InputDate
+                  id="admin-events-filter-to"
+                  isoValue={filterDateTo}
+                  onIsoChange={setFilterDateTo}
+                  size="md"
+                  wrapClassName="w-100 min-w-0"
+                  pickerAriaLabel="Selectează data de sfârșit pentru filtrare"
+                  pickerTitle="Selectează data de sfârșit"
+                />
+              </div>
+              {(searchQuery || filterDateFrom || filterDateTo) ? (
+                <div className="col-12 d-flex justify-content-end">
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-outline-secondary"
+                    onClick={() => {
+                      setSearchQuery('');
+                      setSearchResetKey((k) => k + 1);
+                      setFilterDateFrom('');
+                      setFilterDateTo('');
+                    }}
+                  >
+                    Resetează filtrele
+                  </button>
+                </div>
+              ) : null}
+            </div>
             <div className="table-responsive border rounded-3">
               <table className="table align-middle mb-0">
                 <thead className="table-light">
@@ -638,7 +763,7 @@ function AdminScrutinyEventsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {rows.map((row) => (
+                  {pageItems.map((row) => (
                     <tr key={row.id}>
                       <td>{row.title}</td>
                       <td>{row.deadlineLabel}</td>
@@ -656,13 +781,39 @@ function AdminScrutinyEventsPage() {
                       </td>
                     </tr>
                   ))}
-                  {rows.length === 0 ? (
+                  {pageItems.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="text-center text-secondary py-4">Nu exista evenimente pentru acest scrutin.</td>
+                      <td colSpan={5} className="text-center text-secondary py-4">
+                        {searchQuery || filterDateFrom || filterDateTo
+                          ? 'Nu există evenimente care corespund filtrelor.'
+                          : 'Nu exista evenimente pentru acest scrutin.'}
+                      </td>
                     </tr>
                   ) : null}
                 </tbody>
               </table>
+            </div>
+            <div className="d-flex justify-content-between align-items-center mt-3 small">
+              <span>{from}-{to} din {totalItems}</span>
+              <div className="d-flex align-items-center gap-2">
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-secondary"
+                  disabled={safePage <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                >
+                  ‹
+                </button>
+                <span>{safePage}/{totalPages}</span>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-secondary"
+                  disabled={safePage >= totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                >
+                  ›
+                </button>
+              </div>
             </div>
           </div>
         </section>
