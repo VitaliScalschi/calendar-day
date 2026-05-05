@@ -194,6 +194,12 @@ function AdminScrutinyEventsPage() {
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '');
 
+  const toDateKey = (value?: string | null): string | null => {
+    if (!value) return null;
+    const normalized = value.trim().replace(/\./g, '/');
+    return parseDateKey(normalized);
+  };
+
   const filteredRows = useMemo(() => {
     const normalizedQuery = normalizeSearch(searchQuery.trim());
     const fromKey = filterDateFrom || null;
@@ -206,7 +212,7 @@ function AdminScrutinyEventsPage() {
       }
 
       const parsedDeadlines = (row.deadlines || [])
-        .map((d) => parseDateKey(d))
+        .map((d) => toDateKey(d))
         .filter((d): d is string => Boolean(d))
         .sort((a, b) => a.localeCompare(b));
 
@@ -214,7 +220,7 @@ function AdminScrutinyEventsPage() {
         return { start: parsedDeadlines[0], end: parsedDeadlines[parsedDeadlines.length - 1] };
       }
 
-      const single = parseDateKey(row.deadline);
+      const single = toDateKey(row.deadline);
       return { start: single, end: single };
     };
 
@@ -848,7 +854,6 @@ function AdminScrutinyEventsPage() {
                       id="admin-event-title"
                       value={form.title}
                       onValueChange={(title) => setForm((p) => ({ ...p, title }))}
-                      size="md"
                     />
                   </div>
                 </div>
@@ -933,7 +938,6 @@ function AdminScrutinyEventsPage() {
                       id="admin-event-additional-info"
                       value={form.additionalInfo}
                       onValueChange={(additionalInfo) => setForm((p) => ({ ...p, additionalInfo }))}
-                      size="md"
                     />
                   </div>
               </div>
@@ -986,7 +990,6 @@ function AdminScrutinyEventsPage() {
                     id="admin-event-regulation-title"
                     value={regulationTitle}
                     onValueChange={setRegulationTitle}
-                    size="md"
                     placeholder="Titlu regulament"
                     aria-label="Titlu regulament"
                     className="w-100"
@@ -997,7 +1000,6 @@ function AdminScrutinyEventsPage() {
                     id="admin-event-regulation-link"
                     value={regulationLink}
                     onValueChange={setRegulationLink}
-                    size="md"
                     placeholder="Link regulament (optional)"
                     aria-label="Link regulament"
                     className="flex-grow-1 min-w-0"
