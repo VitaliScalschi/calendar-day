@@ -106,7 +106,23 @@ export function isValidDate(dateStr: string): boolean {
  */
 export function formatDateTime(dateStr: string): string {
   if (!dateStr) return 'Data necunoscută';
-  
+
+  // Interval "DD/MM/YYYY - DD/MM/YYYY" sau "DD.MM.YYYY - DD.MM.YYYY"
+  const ddmmRange = dateStr.match(/\d{1,2}[/.]\d{1,2}[/.]\d{4}/g);
+  if (ddmmRange && ddmmRange.length >= 2) {
+    const start = ddmmRange[0].replace(/\//g, '.');
+    const end = ddmmRange[1].replace(/\//g, '.');
+    return `${start} - ${end}`;
+  }
+
+  // Interval "YYYY-MM-DD - YYYY-MM-DD"
+  const isoRange = dateStr.match(/\d{4}-\d{2}-\d{2}/g);
+  if (isoRange && isoRange.length >= 2) {
+    const start = convertFromSQLDate(isoRange[0]);
+    const end = convertFromSQLDate(isoRange[1]);
+    return `${start} - ${end}`;
+  }
+
   // Dacă este deja în format DD/MM/YYYY sau DD.MM.YYYY, normalizează la DD.MM.YYYY
   if (/^\d{2}[/.]\d{2}[/.]\d{4}/.test(dateStr)) {
     return dateStr.replace(/\//g, '.');
