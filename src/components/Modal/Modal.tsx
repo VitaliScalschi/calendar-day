@@ -72,7 +72,7 @@ function Modal({ isOpen, onClose, deadline }: ModalProps) {
               ⌛ {timeBadgeText}
             </span>
             {deadline.additional_info && (
-                <p className="mt-1 fs-6 ms-3"><i>({deadline.additional_info})</i></p>
+                <p className="mt-1 fs-6 ms-3"><i>{deadline.additional_info}</i></p>
               )}
           </div>
 
