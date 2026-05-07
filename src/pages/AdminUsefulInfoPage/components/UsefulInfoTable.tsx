@@ -52,11 +52,21 @@ function UsefulInfoTable({ items, loading, typeLabels, onEdit, onDelete, onDragS
               <td>{item.order}</td>
               <td>{item.updatedAt}</td>
               <td className="text-end">
-                <div className="d-inline-flex gap-2">
-                  <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => onEdit(item)} aria-label="Editează">
+                <div className="admin-table-actions">
+                  <button
+                    type="button"
+                    className="btn admin-table-actions__btn admin-table-actions__btn--edit"
+                    onClick={() => onEdit(item)}
+                    aria-label="Editează"
+                  >
                     <i className="fa-solid fa-pen" aria-hidden="true" />
                   </button>
-                  <button type="button" className="btn btn-outline-danger btn-sm" onClick={() => onDelete(item)} aria-label="Șterge">
+                  <button
+                    type="button"
+                    className="btn admin-table-actions__btn admin-table-actions__btn--delete"
+                    onClick={() => onDelete(item)}
+                    aria-label="Șterge"
+                  >
                     <i className="fa-solid fa-trash" aria-hidden="true" />
                   </button>
                 </div>

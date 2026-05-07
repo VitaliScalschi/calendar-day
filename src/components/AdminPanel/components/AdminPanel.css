@@ -350,6 +350,125 @@
   font-size: 1rem;
 }
 
+.admin-programs-table thead th {
+  text-align: left !important;
+}
+
+.admin-programs-table__title-col {
+  width: 34%;
+  min-width: 280px;
+}
+
+.admin-programs-table__title {
+  font-size: 1.03rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.admin-programs-table__actions-col {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.admin-programs-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: flex-start;
+}
+
+.admin-programs-actions__manage,
+.admin-programs-actions__edit,
+.admin-programs-actions__delete {
+  border-radius: 12px;
+  height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  font-weight: 500;
+  font-size: 0.92rem;
+}
+
+.admin-programs-actions__manage {
+  min-width: 245px;
+  padding: 0 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 35%, white);
+  color: var(--color-primary);
+  background: #fdfefe;
+}
+
+.admin-programs-actions__manage:hover {
+  background: color-mix(in srgb, var(--color-primary) 8%, white);
+  color: var(--color-primary);
+}
+
+.admin-programs-actions__edit,
+.admin-programs-actions__delete {
+  width: 52px;
+}
+
+.admin-programs-actions__edit {
+  border: 1px solid #d7dfee;
+  color: var(--color-primary);
+  background: #f5f8fc;
+}
+
+.admin-programs-actions__edit:hover {
+  background: #ecf2ff;
+  color: var(--color-primary);
+}
+
+.admin-programs-actions__delete {
+  border: 1px solid #f2cfd1;
+  color: #ef4444;
+  background: #fff8f8;
+}
+
+.admin-programs-actions__delete:hover {
+  background: #fff1f1;
+  color: #dc2626;
+}
+
+.admin-table-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
+.admin-table-actions__btn {
+  width: 52px;
+  height: 46px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.admin-table-actions__btn--edit {
+  border: 1px solid #d7dfee;
+  color: var(--color-primary);
+  background: #f5f8fc;
+}
+
+.admin-table-actions__btn--edit:hover {
+  background: #ecf2ff;
+  color: var(--color-primary);
+}
+
+.admin-table-actions__btn--delete {
+  border: 1px solid #f2cfd1;
+  color: #ef4444;
+  background: #fff8f8;
+}
+
+.admin-table-actions__btn--delete:hover {
+  background: #fff1f1;
+  color: #dc2626;
+}
+
 .admin-useful-info-row {
   transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -477,6 +596,23 @@
 
   .description-cell {
     max-width: 150px;
+  }
+
+  .admin-programs-actions {
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .admin-programs-actions__manage {
+    min-width: 220px;
+    height: 42px;
+    font-size: 0.84rem;
+  }
+
+  .admin-programs-actions__edit,
+  .admin-programs-actions__delete {
+    width: 54px;
+    height: 42px;
   }
 
   .admin-event-form__grid,

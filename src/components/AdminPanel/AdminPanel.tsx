@@ -101,6 +101,7 @@ function AdminPanel() {
     electionTypeIds: [],
   });
   const [scrutinyDocumentFile, setScrutinyDocumentFile] = useState<File | null>(null);
+  const [existingScrutinyDocument, setExistingScrutinyDocument] = useState<{ name: string; sizeBytes?: number; url?: string } | null>(null);
   const electionTypesQuery = useElectionTypesQuery(true);
   const adminPanelQuery = useAdminPanelQuery();
   const upsertElectionMutation = useUpsertElectionMutation();
@@ -110,6 +111,10 @@ function AdminPanel() {
   const elections = adminPanelQuery.data?.elections ?? [];
   const users = adminPanelQuery.data?.users ?? [];
   const loading = adminPanelQuery.isLoading || adminPanelQuery.isFetching;
+  const editingElection = useMemo(
+    () => elections.find((election) => election.id === scrutinyForm.id) ?? null,
+    [elections, scrutinyForm.id]
+  );
 
   useEffect(() => {
     const error = adminPanelQuery.error;
@@ -188,6 +193,9 @@ function AdminPanel() {
     if (!query) return usersRows;
     return usersRows.filter((user) => [user.email, user.role, user.status, user.createdAt].join(' ').toLowerCase().includes(query));
   }, [usersRows, search]);
+  const usersTotalPages = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
+  const usersSafePage = Math.min(page, usersTotalPages);
+  const pagedUsers = filteredUsers.slice((usersSafePage - 1) * PAGE_SIZE, usersSafePage * PAGE_SIZE);
 
   const handleLogout = useCallback(() => {
     logoutAdmin();
@@ -210,6 +218,7 @@ function AdminPanel() {
     setFormError('');
     setScrutinyForm({ title: '', electionDay: '', isActive: true, electionTypeIds: [] });
     setScrutinyDocumentFile(null);
+    setExistingScrutinyDocument(null);
     setIsModalOpen(true);
   };
 
@@ -225,6 +234,15 @@ function AdminPanel() {
       electionTypeIds: (election.electionTypeIds ?? []).map(String),
     });
     setScrutinyDocumentFile(null);
+    setExistingScrutinyDocument(
+      election.hasDocument
+        ? {
+            name: election.documentName || `document-${election.id}`,
+            sizeBytes: election.documentSizeBytes ?? undefined,
+            url: election.documentUrl || `/api/elections/${election.id}/download-document`,
+          }
+        : null
+    );
     setIsModalOpen(true);
   };
 
@@ -263,6 +281,7 @@ function AdminPanel() {
       });
       setIsModalOpen(false);
       setScrutinyDocumentFile(null);
+      setExistingScrutinyDocument(null);
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
         logoutAdmin();
@@ -406,11 +425,16 @@ function AdminPanel() {
 
         {activeMenuItem === 'Utilizatori' ? (
           <Users
-            users={filteredUsers}
+            users={pagedUsers}
+            page={usersSafePage}
+            pageSize={PAGE_SIZE}
+            totalCount={filteredUsers.length}
             search={search}
             onSearch={(value) => {
               setSearch(value);
+              setPage(1);
             }}
+            onPageChange={setPage}
             onCreateUserClick={openCreateUserModal}
             onEditUserClick={openEditUserModal}
             onDeleteUserClick={requestDeleteUser}
@@ -428,6 +452,7 @@ function AdminPanel() {
             onEdit={openEditModal}
             onDelete={handleDeleteScrutiny}
             page={safePage}
+            pageSize={PAGE_SIZE}
             totalPages={totalPages}
             onPageChange={setPage}
             totalCount={filteredRows.length}
@@ -460,6 +485,7 @@ function AdminPanel() {
                     <InputText
                       id="scrutiny-title"
                       size="md"
+                      className="form-input-size--md"
                       value={scrutinyForm.title}
                       placeholder="Introduceți denumirea planului calendaristic"
                       onValueChange={(title) => setScrutinyForm((prev) => ({ ...prev, title }))}
@@ -467,7 +493,7 @@ function AdminPanel() {
                   </div>
 
                   <div className="mb-3">
-                    <Label className="d-block" variant="form">
+                    <Label htmlFor="admin-scrutiny-election-types" className="d-block" variant="form">
                       Tip scrutin
                     </Label>
                     <MultiCheckboxDropdown
@@ -488,6 +514,7 @@ function AdminPanel() {
                       disabled={scrutinyTypeOptions.length === 0 || electionTypesQuery.isLoading}
                       checkboxGroupName="admin-scrutiny-election-types"
                       clearButtonAriaLabel="Șterge selecția tipurilor de scrutin"
+                      size="md"
                     />
                   </div>
 
@@ -514,9 +541,18 @@ function AdminPanel() {
                     <InputUpload
                       id="scrutiny-calendar-file"
                       file={scrutinyDocumentFile}
+                      existingFile={!scrutinyDocumentFile ? existingScrutinyDocument : null}
+                      onExistingFileClear={() => setExistingScrutinyDocument(null)}
                       accept={CALENDAR_PROGRAM_FILE_ACCEPT}
-                      onFileChange={setScrutinyDocumentFile}
-                      helperText="Fișierul va fi disponibil la descărcare după salvarea scrutinului."
+                      onFileChange={(file) => {
+                        setScrutinyDocumentFile(file);
+                        if (file) setExistingScrutinyDocument(null);
+                      }}
+                      helperText={
+                        editingElection?.hasDocument
+                          ? 'Poți încărca un fișier nou pentru a înlocui documentul existent.'
+                          : 'Fișierul va fi disponibil la descărcare după salvarea scrutinului.'
+                      }
                     />
                   </div>
 
@@ -555,6 +591,7 @@ function AdminPanel() {
                     onClick={() => {
                       setIsModalOpen(false);
                       setScrutinyDocumentFile(null);
+                      setExistingScrutinyDocument(null);
                     }}
                   >
                     Anulează

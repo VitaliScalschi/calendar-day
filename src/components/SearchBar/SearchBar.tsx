@@ -1,9 +1,23 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import './SearchBar.css'
 import type { SearchBarProps } from '../../interface/index'
 
-function SearchBar({ placeholder = 'Caută eveniment...', onSearch, onFilter }: SearchBarProps) {
-  const [searchQuery, setSearchQuery] = useState('')
+function SearchBar({
+  placeholder = 'Caută eveniment...',
+  value,
+  onSearch,
+  onFilter,
+  className = '',
+  containerClassName = '',
+  style,
+}: SearchBarProps) {
+  const [searchQuery, setSearchQuery] = useState(value ?? '')
+
+  useEffect(() => {
+    if (typeof value === 'string') {
+      setSearchQuery(value)
+    }
+  }, [value])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
@@ -17,29 +31,32 @@ function SearchBar({ placeholder = 'Caută eveniment...', onSearch, onFilter }: 
   }
 
   return (
-    <div className="search-bar-container">
-      <div className="input-group flex-grow-1">
-        <span className="input-group-text bg-white" aria-hidden="true">
-          <i className="fa-solid fa-magnifying-glass text-secondary"></i>
-        </span>
+    <div className={`search-bar-container ${containerClassName}`.trim()} style={style}>
+      <div className={`search-bar ${className}`.trim()}>
         <input
           type="text"
-          className="form-control form-input-size--md"
+          className="search-bar__input"
           placeholder={placeholder}
           value={searchQuery}
           onChange={handleChange}
         />
-        {searchQuery && (
-          <span className="input-group-text bg-white border-start-0">
+        <div className="search-bar__actions">
+          {searchQuery ? (
             <button
               type="button"
-              className="btn-close"
+              className="search-bar__clear-btn clear-btn"
               onClick={clearSearch}
               aria-label="Șterge căutarea"
               title="Șterge"
-            ></button>
+            >
+              <i className="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+          ) : null}
+          <span className="search-bar__divider" aria-hidden="true"></span>
+          <span className="search-bar__icon" aria-hidden="true">
+            <i className="fa-solid fa-magnifying-glass"></i>
           </span>
-        )}
+        </div>
       </div>
       {onFilter && (
         <button

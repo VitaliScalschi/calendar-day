@@ -6,7 +6,10 @@ public record ElectionDto(
     bool IsActive,
     DateOnly Eday,
     bool HasDocument,
-    IReadOnlyList<int> ElectionTypeIds);
+    IReadOnlyList<int> ElectionTypeIds,
+    string? DocumentName = null,
+    string? DocumentUrl = null,
+    long? DocumentSizeBytes = null);
 
 public class CreateElectionDto
 {

@@ -9,6 +9,7 @@ public class CalendarDayDbContext(DbContextOptions<CalendarDayDbContext> options
     public DbSet<User> Users => Set<User>();
     public DbSet<Deadline> Deadlines => Set<Deadline>();
     public DbSet<DeadlineDate> DeadlineDates => Set<DeadlineDate>();
+    public DbSet<Document> Documents => Set<Document>();
     public DbSet<Regulation> Regulations => Set<Regulation>();
     public DbSet<DeadlineResponsible> DeadlineResponsibles => Set<DeadlineResponsible>();
     public DbSet<DeadlineGroup> DeadlineGroups => Set<DeadlineGroup>();
@@ -26,6 +27,9 @@ public class CalendarDayDbContext(DbContextOptions<CalendarDayDbContext> options
             e.Property(x => x.ElectionTypeIds)
                 .HasColumnName("election_type_ids")
                 .HasColumnType("integer[]");
+            e.Property(x => x.DocumentOriginalName).HasMaxLength(500);
+            e.Property(x => x.DocumentStoredName).HasMaxLength(500);
+            e.Property(x => x.DocumentContentType).HasMaxLength(200);
         });
 
         modelBuilder.Entity<User>(u =>
@@ -61,6 +65,18 @@ public class CalendarDayDbContext(DbContextOptions<CalendarDayDbContext> options
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
+        modelBuilder.Entity<Document>(d =>
+        {
+            d.ToTable("documents");
+            d.HasKey(x => x.Id);
+            d.Property(x => x.OriginalName).IsRequired().HasMaxLength(500);
+            d.Property(x => x.StoredName).IsRequired().HasMaxLength(500);
+            d.Property(x => x.RelativeUrl).IsRequired().HasMaxLength(1000);
+            d.Property(x => x.ContentType).IsRequired().HasMaxLength(200);
+            d.Property(x => x.SizeBytes).IsRequired();
+            d.Property(x => x.CreatedAtUtc).IsRequired();
+        });
+
         modelBuilder.Entity<Regulation>(r =>
         {
             r.HasKey(x => x.Id);
@@ -69,6 +85,10 @@ public class CalendarDayDbContext(DbContextOptions<CalendarDayDbContext> options
                 .WithMany(d => d.Regulations)
                 .HasForeignKey(x => x.DeadlineId)
                 .OnDelete(DeleteBehavior.Cascade);
+            r.HasOne(x => x.Document)
+                .WithMany(d => d.Regulations)
+                .HasForeignKey(x => x.DocumentId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<DeadlineResponsible>(r =>

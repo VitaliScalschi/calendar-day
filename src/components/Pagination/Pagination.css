@@ -1,0 +1,30 @@
+.pagination-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.pagination-control__btn {
+  min-width: 30px;
+  height: 30px;
+  padding: 0.12rem 0.45rem;
+  font-size: 0.78rem;
+  line-height: 1;
+}
+
+.pagination-control__ellipsis {
+  padding: 0 0.2rem;
+  color: #6b7280;
+  font-size: 0.8rem;
+}
+
+.pagination-control--compact {
+  gap: 0.22rem;
+}
+
+.pagination-control--compact .pagination-control__btn {
+  min-width: 28px;
+  height: 28px;
+  padding: 0.08rem 0.36rem;
+  font-size: 0.73rem;
+}

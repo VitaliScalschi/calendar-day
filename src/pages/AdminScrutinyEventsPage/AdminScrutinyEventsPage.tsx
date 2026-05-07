@@ -16,10 +16,12 @@ import { useScrutinyEventsQuery } from '../../features/admin/hooks/useScrutinyEv
 import { useAudiencesQuery } from '../../features/audiences/hooks/useAudiencesQuery';
 import { MultiCheckboxDropdown } from '../../components/MultiCheckboxDropdown';
 import { FALLBACK_TARGET_GROUP_OPTIONS } from '../../utils/electionFilters';
-import { usePagination } from '../../shared/hooks/usePagination';
-import { SearchBar } from '../../components';
+import { SearchBar, Table } from '../../components';
+import Pagination from '../../components/Pagination/Pagination';
+import type { TableColumn } from '../../components/Table/Table';
 import '../../components/AdminPanel/components/AdminPanel.css';
 import '../../components/EventFilter/EventFilter.css';
+import './AdminScrutinyEventsPage.css';
 
 type ApiElection = {
   id: string;
@@ -38,7 +40,7 @@ type ApiDeadline = {
   description: string;
   responsible: string[];
   group: string[];
-  regulations?: Array<{ id: string; title: string; link: string }>;
+  regulations?: Array<{ id: string; documentId?: string | null; title: string; link: string }>;
 };
 
 type ApiResponsibleOption = {
@@ -47,6 +49,7 @@ type ApiResponsibleOption = {
 };
 
 type UploadDocumentResponse = {
+  documentId: string;
   url: string;
   originalName: string;
   title: string;
@@ -54,6 +57,10 @@ type UploadDocumentResponse = {
 
 type PagedResult<T> = {
   items: T[];
+};
+
+type AdminEventRow = ApiDeadline & {
+  deadlineLabel: string;
 };
 
 const parseApiErrorMessage = (message: string) => {
@@ -66,7 +73,7 @@ const parseApiErrorMessage = (message: string) => {
 };
 
 function AdminScrutinyEventsPage() {
-  const PAGE_SIZE = 10;
+  const PAGE_SIZE = 15;
   const { scrutinyId } = useParams();
   const navigate = useNavigate();
   const [allElections, setAllElections] = useState<ApiElection[]>([]);
@@ -85,8 +92,11 @@ function AdminScrutinyEventsPage() {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResetKey, setSearchResetKey] = useState(0);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filterDateFrom, setFilterDateFrom] = useState('');
   const [filterDateTo, setFilterDateTo] = useState('');
+  const [groupFilter, setGroupFilter] = useState<string[]>([]);
+  const [responsibleFilter, setResponsibleFilter] = useState<string[]>([]);
   const [dateRange, setDateRange] = useState<SelectionRange[]>([
     { startDate: new Date(), endDate: new Date(), key: 'selection' },
   ]);
@@ -95,9 +105,10 @@ function AdminScrutinyEventsPage() {
   const [singleDeadlineDates, setSingleDeadlineDates] = useState<string[]>([]);
   const [regulationTitle, setRegulationTitle] = useState('');
   const [regulationLink, setRegulationLink] = useState('');
-  const [regulations, setRegulations] = useState<Array<{ id?: string; title: string; link: string }>>([]);
+  const [regulations, setRegulations] = useState<Array<{ id?: string; documentId?: string | null; title: string; link: string }>>([]);
   const [isUploadingRegulation, setIsUploadingRegulation] = useState(false);
   const [regulationPdfFile, setRegulationPdfFile] = useState<File | null>(null);
+  const [isRegulationUploadOpen, setIsRegulationUploadOpen] = useState(false);
   const [responsibles, setResponsibles] = useState<string[]>([]);
   const [responsibleOptions, setResponsibleOptions] = useState<ApiResponsibleOption[]>([]);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
@@ -117,7 +128,7 @@ function AdminScrutinyEventsPage() {
   const normalizeUniqueSingleDates = (values: string[]) =>
     Array.from(new Set(values.map((value) => value.trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b));
 
-  const scrutinyQuery = useScrutinyEventsQuery(scrutinyId);
+  const scrutinyQuery = useScrutinyEventsQuery(scrutinyId, { page, pageSize: PAGE_SIZE });
   const audiencesQuery = useAudiencesQuery(true);
 
   const targetGroupOptions = useMemo(() => {
@@ -126,6 +137,11 @@ function AdminScrutinyEventsPage() {
     }
     return FALLBACK_TARGET_GROUP_OPTIONS;
   }, [audiencesQuery.data]);
+
+  const targetGroupLabelByKey = useMemo(
+    () => new Map(targetGroupOptions.map((opt) => [opt.key, opt.label] as const)),
+    [targetGroupOptions]
+  );
 
   const audienceKeySet = useMemo(() => new Set(targetGroupOptions.map((o) => o.key)), [targetGroupOptions]);
 
@@ -179,7 +195,7 @@ function AdminScrutinyEventsPage() {
     [responsibleMultiOptions]
   );
 
-  const rows = useMemo(
+  const rows = useMemo<AdminEventRow[]>(
     () =>
       events.map((event) => ({
         ...event,
@@ -240,6 +256,9 @@ function AdminScrutinyEventsPage() {
         if (!searchBlob.includes(normalizedQuery)) return false;
       }
 
+      if (groupFilter.length > 0 && !(row.group || []).some((g) => groupFilter.includes(g))) return false;
+      if (responsibleFilter.length > 0 && !(row.responsible || []).some((r) => responsibleFilter.includes(r))) return false;
+
       if (!fromKey && !toKey) return true;
 
       const window = getRowWindow(row);
@@ -248,17 +267,20 @@ function AdminScrutinyEventsPage() {
       if (toKey && window.start > toKey) return false;
       return true;
     });
-  }, [rows, searchQuery, filterDateFrom, filterDateTo]);
+  }, [rows, searchQuery, filterDateFrom, filterDateTo, groupFilter, responsibleFilter]);
 
-  const { pageItems, safePage, totalPages, from, to, totalItems } = usePagination({
-    items: filteredRows,
-    page,
-    pageSize: PAGE_SIZE,
-  });
+  const serverPage = scrutinyQuery.data?.page ?? page;
+  const serverPageSize = scrutinyQuery.data?.pageSize ?? PAGE_SIZE;
+  const totalItems = scrutinyQuery.data?.totalCount ?? filteredRows.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / serverPageSize));
+  const safePage = Math.min(Math.max(serverPage, 1), totalPages);
+  const from = totalItems === 0 ? 0 : (safePage - 1) * serverPageSize + 1;
+  const to = totalItems === 0 ? 0 : Math.min(from + filteredRows.length - 1, totalItems);
+  const pageItems = filteredRows;
 
   useEffect(() => {
     setPage(1);
-  }, [filteredRows.length]);
+  }, [searchQuery, filterDateFrom, filterDateTo, groupFilter.join('|'), responsibleFilter.join('|')]);
 
   const sourceElectionOptions = useMemo(
     () => allElections.filter((item) => item.id !== scrutinyId),
@@ -334,7 +356,12 @@ function AdminScrutinyEventsPage() {
       }
 
       const normalizedRegulations = regulations
-        .map((regulation) => ({ id: regulation.id, title: regulation.title.trim(), link: regulation.link.trim() }))
+        .map((regulation) => ({
+          id: regulation.id,
+          documentId: regulation.documentId || null,
+          title: regulation.title.trim(),
+          link: regulation.link.trim(),
+        }))
         .filter((regulation) => regulation.title);
 
       if (createdId) {
@@ -350,12 +377,13 @@ function AdminScrutinyEventsPage() {
               regulation.id
                 ? apiRequest(`/regulations/${regulation.id}`, {
                     method: 'PUT',
-                    body: JSON.stringify({ title: regulation.title, link: regulation.link }),
+                    body: JSON.stringify({ documentId: regulation.documentId, title: regulation.title, link: regulation.link }),
                   })
                 : apiRequest('/regulations', {
                     method: 'POST',
                     body: JSON.stringify({
                       deadlineId: createdId,
+                      documentId: regulation.documentId,
                       title: regulation.title,
                       link: regulation.link,
                     }),
@@ -374,6 +402,7 @@ function AdminScrutinyEventsPage() {
                 method: 'POST',
                 body: JSON.stringify({
                   deadlineId: createdId,
+                  documentId: regulation.documentId,
                   title: regulation.title,
                   link: regulation.link,
                 }),
@@ -440,6 +469,7 @@ function AdminScrutinyEventsPage() {
       setRegulations((prev) => [
         ...prev,
         {
+          documentId: uploaded.documentId,
           title: uploaded.title || file.name.replace(/\.pdf$/i, ''),
           link: uploaded.url,
         },
@@ -465,6 +495,15 @@ function AdminScrutinyEventsPage() {
       setRegulationPdfFile(null);
     });
   };
+
+  const uploadedPdfRegulations = useMemo(
+    () =>
+      regulations.filter((regulation) => {
+        const link = regulation.link?.toLowerCase() || '';
+        return link.includes('.pdf');
+      }),
+    [regulations]
+  );
 
   const handleResponsibleToggle = (label: string) => {
     setResponsibles((prev) => (prev.includes(label) ? prev.filter((value) => value !== label) : [...prev, label]));
@@ -498,7 +537,14 @@ function AdminScrutinyEventsPage() {
     );
     setSingleDeadlineDates(eventSingleDates);
     setSingleDeadlineDateInput(eventSingleDates[0] || toSqlDateLocal(baseDate));
-    setRegulations((event.regulations || []).map((r) => ({ title: r.title, link: r.link })));
+    const existingRegulations = (event.regulations || []).map((r) => ({
+      id: r.id,
+      documentId: r.documentId || null,
+      title: r.title,
+      link: r.link,
+    }));
+    setRegulations(existingRegulations);
+    setIsRegulationUploadOpen(existingRegulations.some((r) => (r.link || '').toLowerCase().includes('.pdf')));
     setRegulationTitle('');
     setRegulationLink('');
     setRegulationPdfFile(null);
@@ -514,6 +560,7 @@ function AdminScrutinyEventsPage() {
     setSingleDeadlineDateInput('');
     setSingleDeadlineDates([]);
     setRegulations([]);
+    setIsRegulationUploadOpen(false);
     setRegulationTitle('');
     setRegulationLink('');
     setRegulationPdfFile(null);
@@ -553,7 +600,15 @@ function AdminScrutinyEventsPage() {
       // Interval mode must keep only interval data.
       setSingleDeadlineDates([]);
       setSingleDeadlineDateInput('');
+      return;
     }
+
+    // Leaving interval mode: clear interval values and keep one selected day in single-date input.
+    const selectedRange = dateRange[0];
+    const selectedDate = selectedRange?.endDate ?? selectedRange?.startDate ?? null;
+    setDateRange([{ startDate: new Date(), endDate: new Date(), key: 'selection' }]);
+    setSingleDeadlineDates([]);
+    setSingleDeadlineDateInput(selectedDate ? toSqlDateLocal(selectedDate) : '');
   };
 
   const handleAdminMenuChange = (item: AdminMenuItem) => {
@@ -659,6 +714,67 @@ function AdminScrutinyEventsPage() {
     }
   };
 
+  const eventTableColumns = useMemo<TableColumn<AdminEventRow>[]>(
+    () => [
+      {
+        key: 'title',
+        header: 'Acțiune',
+        render: (row: AdminEventRow) => <span className="admin-events-table__action-title">{row.title}</span>,
+      },
+      {
+        key: 'deadlineLabel',
+        header: 'Deadline',
+        render: (row: AdminEventRow) => {
+          const statusClass = (() => {
+            const text = row.deadlineLabel.toLowerCase();
+            if (text.includes('expirat')) return 'is-late';
+            return 'is-soon';
+          })();
+          return <span className={`admin-events-table__deadline ${statusClass}`}>{row.deadlineLabel}</span>;
+        },
+      },
+      {
+        key: 'responsible',
+        header: 'Responsabili de realizare',
+        render: (row: AdminEventRow) => (row.responsible && row.responsible.length > 0 ? row.responsible.join(', ') : '-'),
+      },
+      {
+        key: 'group',
+        header: 'Grupuri',
+        render: (row: AdminEventRow) => {
+          const values = row.group || [];
+          if (values.length === 0) return '-';
+          return values.map((g) => targetGroupLabelByKey.get(g) || g).join(', ');
+        },
+      },
+      {
+        key: 'actions',
+        header: 'Acțiuni',
+        headerClassName: 'text-end',
+        cellClassName: 'text-end',
+        render: (row: AdminEventRow) => (
+          <div className="admin-table-actions">
+            <button
+              type="button"
+              className="btn admin-table-actions__btn admin-table-actions__btn--edit"
+              onClick={() => editEvent(row)}
+            >
+              <i className="fa-solid fa-pen" aria-hidden="true"></i>
+            </button>
+            <button
+              type="button"
+              className="btn admin-table-actions__btn admin-table-actions__btn--delete"
+              onClick={() => requestDeleteEvent(row.id)}
+            >
+              <i className="fa-solid fa-trash-can" aria-hidden="true"></i>
+            </button>
+          </div>
+        ),
+      },
+    ],
+    [editEvent, requestDeleteEvent, targetGroupLabelByKey]
+  );
+
   return (
     <div className="admin-layout bg-body-tertiary">
       <Sidebar activeItem="Programe" onChange={handleAdminMenuChange} />
@@ -685,10 +801,13 @@ function AdminScrutinyEventsPage() {
           {election?.title || '-'}
         </div>
 
-        <section className="card border-0 shadow-sm">
+        <section className="card border-0 shadow-sm admin-events-card">
           <div className="card-body p-3 p-md-4">
             <div className="d-flex justify-content-between align-items-center mb-3">
-              <h2 className="h4 mb-0">Acțiuni în program</h2>
+              <div>
+                <h2 className="h4 mb-0">Acțiuni în program</h2>
+                <div className="admin-events-subtitle">Gestionează și urmărește acțiunile planificate</div>
+              </div>
               <div className="d-flex align-items-center gap-2">
                 <button
                   type="button"
@@ -707,119 +826,123 @@ function AdminScrutinyEventsPage() {
             </div>
             {scrutinyQuery.isLoading || scrutinyQuery.isFetching ? <div className="alert alert-info py-2">Se încarcă evenimentele...</div> : null}
             {error ? <div className="alert alert-warning">{error}</div> : null}
-            <div className="row g-2 mb-3">
-              <div className="col-12 col-md-6">
-                <label className="form-label mb-1">Caută</label>
-                <SearchBar
-                  key={searchResetKey}
-                  placeholder="Titlu, descriere, responsabil, grup..."
-                  onSearch={setSearchQuery}
-                />
+            <div className="admin-events-filters mb-3">
+              <div className="admin-events-filters__header">
+                <div className="admin-events-filters__title">Filtrează</div>
+                <button
+                  type="button"
+                  className="admin-events-filters__toggle"
+                  aria-label={isFilterOpen ? 'Ascunde filtrele' : 'Afișează filtrele'}
+                  title={isFilterOpen ? 'Ascunde filtrele' : 'Afișează filtrele'}
+                  onClick={() => setIsFilterOpen((v) => !v)}
+                >
+                  <i className={`fa-solid ${isFilterOpen ? 'fa-chevron-up' : 'fa-filter'}`} aria-hidden />
+                </button>
               </div>
-              <div className="col-6 col-md-3">
-                <label className="form-label mb-1" htmlFor="admin-events-filter-from">Data de la</label>
-                <InputDate
-                  id="admin-events-filter-from"
-                  isoValue={filterDateFrom}
-                  onIsoChange={setFilterDateFrom}
-                  size="md"
-                  wrapClassName="w-100 min-w-0"
-                  pickerAriaLabel="Selectează data de început pentru filtrare"
-                  pickerTitle="Selectează data de început"
-                />
-              </div>
-              <div className="col-6 col-md-3">
-                <label className="form-label mb-1" htmlFor="admin-events-filter-to">Data până la</label>
-                <InputDate
-                  id="admin-events-filter-to"
-                  isoValue={filterDateTo}
-                  onIsoChange={setFilterDateTo}
-                  size="md"
-                  wrapClassName="w-100 min-w-0"
-                  pickerAriaLabel="Selectează data de sfârșit pentru filtrare"
-                  pickerTitle="Selectează data de sfârșit"
-                />
-              </div>
-              {(searchQuery || filterDateFrom || filterDateTo) ? (
-                <div className="col-12 d-flex justify-content-end">
+              <div className={`admin-events-filters__body ${isFilterOpen ? 'is-open' : 'is-closed'}`}>
+                <div className="admin-events-filter-item admin-events-filter-item--search">
+                  <SearchBar
+                    key={searchResetKey}
+                    placeholder="Caută acțiune, responsabil, grup..."
+                    onSearch={setSearchQuery}
+                  />
+                </div>
+                <div className="admin-events-filters__row">
+                <div className="admin-events-filter-item">
+                  <label className="form-label mb-1">Grupuri</label>
+                  <MultiCheckboxDropdown
+                    className="responsible-filter__control"
+                    options={targetGroupOptions}
+                    selectedKeys={groupFilter}
+                    onToggle={(key) =>
+                      setGroupFilter((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]))
+                    }
+                    onClear={() => setGroupFilter([])}
+                    placeholder="Toate"
+                    formatSelectionSummary={(n) => `${n} selectat(e)`}
+                    checkboxGroupName="admin-events-group-filter"
+                    clearButtonAriaLabel="Șterge filtrul grupuri"
+                    clearButtonTitle="Șterge filtrul"
+                    toggleButtonAriaLabel="Filtrează după grupuri"
+                  />
+                </div>
+                <div className="admin-events-filter-item">
+                  <label className="form-label mb-1">Responsabili</label>
+                  <MultiCheckboxDropdown
+                    className="responsible-filter__control"
+                    options={Array.from(new Set(rows.flatMap((r) => r.responsible || []))).map((g) => ({ key: g, label: g }))}
+                    selectedKeys={responsibleFilter}
+                    onToggle={(key) =>
+                      setResponsibleFilter((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]))
+                    }
+                    onClear={() => setResponsibleFilter([])}
+                    placeholder="Toți"
+                    formatSelectionSummary={(n) => `${n} selectat(i)`}
+                    checkboxGroupName="admin-events-responsible-filter"
+                    clearButtonAriaLabel="Șterge filtrul responsabili"
+                    clearButtonTitle="Șterge filtrul"
+                    toggleButtonAriaLabel="Filtrează după responsabili"
+                  />
+                </div>
+                <div className="admin-events-filter-item admin-events-filter-item--date">
+                  <label className="form-label mb-1">Perioadă</label>
+                  <div className="d-flex gap-2">
+                    <InputDate
+                      id="admin-events-filter-from"
+                      isoValue={filterDateFrom}
+                      onIsoChange={setFilterDateFrom}
+                      size="md"
+                      wrapClassName="w-100 min-w-0"
+                      pickerAriaLabel="Selectează data de început pentru filtrare"
+                      pickerTitle="Selectează data de început"
+                    />
+                    <InputDate
+                      id="admin-events-filter-to"
+                      isoValue={filterDateTo}
+                      onIsoChange={setFilterDateTo}
+                      size="md"
+                      wrapClassName="w-100 min-w-0"
+                      pickerAriaLabel="Selectează data de sfârșit pentru filtrare"
+                      pickerTitle="Selectează data de sfârșit"
+                    />
+                  </div>
+                </div>
+                <div className="admin-events-filter-item admin-events-filter-item--reset">
                   <button
                     type="button"
-                    className="btn btn-sm btn-outline-secondary"
+                    className="btn btn-sm btn-outline-secondary w-100"
                     onClick={() => {
                       setSearchQuery('');
                       setSearchResetKey((k) => k + 1);
                       setFilterDateFrom('');
                       setFilterDateTo('');
+                      setGroupFilter([]);
+                      setResponsibleFilter([]);
                     }}
                   >
-                    Resetează filtrele
+                    Resetează filtre
                   </button>
                 </div>
-              ) : null}
+              </div>
+              </div>
             </div>
             <div className="table-responsive border rounded-3">
-              <table className="table align-middle mb-0">
-                <thead className="table-light">
-                  <tr>
-                    <th>Titlu acțiune</th>
-                    <th>Termen de realizare</th>
-                    <th>Responsabili de realizare</th>
-                    <th>Grupuri</th>
-                    <th className="text-end">Acțiuni</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pageItems.map((row) => (
-                    <tr key={row.id}>
-                      <td>{row.title}</td>
-                      <td>{row.deadlineLabel}</td>
-                      <td>{row.responsible?.join(', ')}</td>
-                      <td>{row.group?.join(', ')}</td>
-                      <td className="text-end">
-                        <div className="d-inline-flex gap-2">
-                          <button type="button" className="btn btn-primary btn-sm" onClick={() => editEvent(row)}>
-                            <i className="fa-solid fa-pen" aria-hidden="true"></i>
-                          </button>
-                          <button type="button" className="btn btn-danger btn-sm" onClick={() => requestDeleteEvent(row.id)}>
-                            <i className="fa-solid fa-trash-can" aria-hidden="true"></i>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                  {pageItems.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} className="text-center text-secondary py-4">
-                        {searchQuery || filterDateFrom || filterDateTo
-                          ? 'Nu există evenimente care corespund filtrelor.'
-                          : 'Nu exista evenimente pentru acest scrutin.'}
-                      </td>
-                    </tr>
-                  ) : null}
-                </tbody>
-              </table>
+              <Table
+                rows={pageItems}
+                columns={eventTableColumns}
+                rowKey={(row) => row.id}
+                showRowNumber
+                rowNumberStart={from}
+                emptyMessage={
+                  searchQuery || filterDateFrom || filterDateTo
+                    ? 'Nu există evenimente care corespund filtrelor.'
+                    : 'Nu exista evenimente pentru acest scrutin.'
+                }
+              />
             </div>
             <div className="d-flex justify-content-between align-items-center mt-3 small">
               <span>{from}-{to} din {totalItems}</span>
-              <div className="d-flex align-items-center gap-2">
-                <button
-                  type="button"
-                  className="btn btn-sm btn-outline-secondary"
-                  disabled={safePage <= 1}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                >
-                  ‹
-                </button>
-                <span>{safePage}/{totalPages}</span>
-                <button
-                  type="button"
-                  className="btn btn-sm btn-outline-secondary"
-                  disabled={safePage >= totalPages}
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                >
-                  ›
-                </button>
-              </div>
+              <Pagination page={safePage} totalPages={totalPages} onPageChange={setPage} compact />
             </div>
           </div>
         </section>
@@ -852,6 +975,7 @@ function AdminScrutinyEventsPage() {
                     </label>
                     <InputText
                       id="admin-event-title"
+                      size="md"
                       value={form.title}
                       onValueChange={(title) => setForm((p) => ({ ...p, title }))}
                     />
@@ -936,6 +1060,7 @@ function AdminScrutinyEventsPage() {
                     </label>
                     <InputText
                       id="admin-event-additional-info"
+                      size="md"
                       value={form.additionalInfo}
                       onValueChange={(additionalInfo) => setForm((p) => ({ ...p, additionalInfo }))}
                     />
@@ -988,6 +1113,7 @@ function AdminScrutinyEventsPage() {
                 <div className="d-flex gap-2 mb-2">
                   <InputText
                     id="admin-event-regulation-title"
+                    size="md"
                     value={regulationTitle}
                     onValueChange={setRegulationTitle}
                     placeholder="Titlu regulament"
@@ -998,6 +1124,7 @@ function AdminScrutinyEventsPage() {
                 <div className="d-flex gap-2 mb-2 align-items-center">
                   <InputText
                     id="admin-event-regulation-link"
+                    size="md"
                     value={regulationLink}
                     onValueChange={setRegulationLink}
                     placeholder="Link regulament (optional)"
@@ -1008,24 +1135,70 @@ function AdminScrutinyEventsPage() {
                     Adaugă
                   </button>
                 </div>
-                <div className="d-flex flex-column gap-2 mb-2">
-                  <label className="form-label mb-0" htmlFor="admin-event-regulation-upload">
-                    Încarcă document
-                  </label>
-                  <InputUpload
-                    id="admin-event-regulation-upload"
-                    file={regulationPdfFile}
-                    onFileChange={handleRegulationPdfChange}
-                    accept=".pdf,application/pdf"
-                    disabled={isUploadingRegulation}
-                    dropTitle="Document PDF"
-                    dropSubtitle="Trage aici sau click pentru a alege"
-                    helperText={
-                      isUploadingRegulation
-                        ? 'Se încarcă documentul...'
-                        : 'După încărcare, regulamentul apare în lista de mai jos.'
-                    }
-                  />
+                <div className="admin-regulation-upload-accordion mb-2">
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary admin-regulation-upload-accordion__toggle"
+                    onClick={() => setIsRegulationUploadOpen((v) => !v)}
+                    aria-expanded={isRegulationUploadOpen}
+                    aria-controls="admin-event-regulation-upload-accordion"
+                  >
+                    <span>Încarcă document</span>
+                    <i className={`fa-solid ${isRegulationUploadOpen ? 'fa-chevron-up' : 'fa-chevron-down'}`} aria-hidden="true" />
+                  </button>
+                  {isRegulationUploadOpen ? (
+                    <div id="admin-event-regulation-upload-accordion" className="admin-regulation-upload-accordion__content">
+                      <InputUpload
+                        id="admin-event-regulation-upload"
+                        file={regulationPdfFile}
+                        onFileChange={handleRegulationPdfChange}
+                        accept=".pdf,application/pdf"
+                        disabled={isUploadingRegulation}
+                        dropTitle="Document PDF"
+                        dropSubtitle="Trage aici sau click pentru a alege"
+                        helperText={
+                          isUploadingRegulation
+                            ? 'Se încarcă documentul...'
+                            : 'După încărcare, regulamentul apare în lista de mai jos.'
+                        }
+                      />
+                      {uploadedPdfRegulations.length > 0 ? (
+                        <div className="mt-2 d-flex flex-column gap-1">
+                          {uploadedPdfRegulations.map((regulation) => (
+                            <div
+                              key={`${regulation.id || regulation.title}-${regulation.link}`}
+                              className="d-flex align-items-center justify-content-between small border rounded px-2 py-1"
+                            >
+                              <a
+                                href={regulation.link}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-decoration-none text-truncate pe-2"
+                                title={regulation.title}
+                              >
+                                {regulation.title}
+                              </a>
+                              <button
+                                type="button"
+                                className="btn btn-link p-0 text-danger text-decoration-none"
+                                onClick={() =>
+                                  setRegulations((prev) =>
+                                    prev.filter((item) =>
+                                      regulation.id
+                                        ? item.id !== regulation.id
+                                        : !(item.title === regulation.title && item.link === regulation.link)
+                                    )
+                                  )
+                                }
+                              >
+                                elimină
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
                 {regulations.map((regulation, index) => (
                   <div key={`${regulation.id || regulation.title}-${index}`} className="d-flex justify-content-between align-items-center small text-secondary border rounded px-2 py-1 mb-1">

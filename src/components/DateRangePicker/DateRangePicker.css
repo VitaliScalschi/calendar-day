@@ -22,6 +22,30 @@ input.form-control {
   animation: fadeIn 0.2s ease;
 }
 
+.date-range-picker__control {
+  position: relative;
+}
+
+.date-range-picker__input--clearable {
+  padding-right: 2.2rem;
+}
+
+.date-range-picker__clear-btn {
+  position: absolute;
+  right: 0.55rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: #6b7280;
+  width: 1.2rem;
+  height: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

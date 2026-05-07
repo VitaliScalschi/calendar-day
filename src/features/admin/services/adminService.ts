@@ -7,6 +7,9 @@ export type AdminElection = {
   eday: string;
   hasDocument?: boolean;
   electionTypeIds?: number[];
+  documentName?: string | null;
+  documentUrl?: string | null;
+  documentSizeBytes?: number | null;
 };
 
 export type AdminUser = {

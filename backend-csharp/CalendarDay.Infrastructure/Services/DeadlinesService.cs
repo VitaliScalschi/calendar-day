@@ -344,7 +344,7 @@ public class DeadlinesService(CalendarDayDbContext db) : IDeadlinesService
                     d.Description,
                     d.Responsibles.Select(x => x.Value).ToList(),
                     d.Groups.Select(x => x.Value).ToList(),
-                    d.Regulations.Select(r => new RegulationDto(r.Id, d.Id, r.Title, r.Link)).ToList()))
+                    d.Regulations.Select(r => new RegulationDto(r.Id, d.Id, r.DocumentId, r.Title, r.Link)).ToList()))
                 .ToList()))
             .ToList();
     }
@@ -410,6 +410,6 @@ public class DeadlinesService(CalendarDayDbContext db) : IDeadlinesService
             d.Description,
             d.Responsibles.Select(x => x.Value).ToList(),
             d.Groups.Select(x => x.Value).ToList(),
-            d.Regulations.Select(r => new RegulationDto(r.Id, d.Id, r.Title, r.Link)).ToList()
+            d.Regulations.Select(r => new RegulationDto(r.Id, d.Id, r.DocumentId, r.Title, r.Link)).ToList()
         );
 }

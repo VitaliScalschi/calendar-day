@@ -1,6 +1,8 @@
 using CalendarDay.Application.Abstractions;
 using CalendarDay.Application.Contracts.Elections;
 using CalendarDay.Infrastructure.Files;
+using CalendarDay.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
@@ -10,7 +12,7 @@ namespace CalendarDay.Api.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/elections")]
-public class ElectionsController(IElectionsService service) : ControllerBase
+public class ElectionsController(IElectionsService service, CalendarDayDbContext db) : ControllerBase
 {
     /// <summary>Programe active (<c>IsActive == true</c>) pentru site și calendar.</summary>
     [AllowAnonymous]
@@ -72,6 +74,17 @@ public class ElectionsController(IElectionsService service) : ControllerBase
         await using (var stream = System.IO.File.Create(fullPath))
         {
             await file.CopyToAsync(stream, ct);
+        }
+
+        var entity = await db.Elections.FirstOrDefaultAsync(e => e.Id == id, ct);
+        if (entity is not null)
+        {
+            entity.DocumentOriginalName = file.FileName;
+            entity.DocumentStoredName = fileName;
+            entity.DocumentContentType = file.ContentType;
+            entity.DocumentSizeBytes = file.Length;
+            entity.DocumentUploadedAtUtc = DateTime.UtcNow;
+            await db.SaveChangesAsync(ct);
         }
 
         var relativeUrl = $"/uploads/elections/{fileName}";
