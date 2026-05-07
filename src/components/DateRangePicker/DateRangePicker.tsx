@@ -29,7 +29,7 @@ export default function DateRangeDropdown({ value, onChange }: DateRangeDropdown
   });
 
   const activeRange = value && value.length ? value : internalRange;
-  const formatted = `${format(activeRange[0].startDate, 'dd/MM/yyyy')} - ${format(activeRange[0].endDate, 'dd/MM/yyyy')}`;
+  const formatted = `${format(activeRange[0].startDate, 'dd.MM.yyyy')} - ${format(activeRange[0].endDate, 'dd.MM.yyyy')}`;
 
   const handleRangeChange = (next: SelectionRange[]) => {
     if (!value) {
