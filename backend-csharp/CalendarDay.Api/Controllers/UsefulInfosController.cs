@@ -11,7 +11,7 @@ namespace CalendarDay.Api.Controllers;
 [Route("api/useful-infos")]
 public class UsefulInfosController(IUsefulInfosService service) : ControllerBase
 {
-    [Authorize(Roles = "SuperAdmin,Editor")]
+    [Authorize(Roles = "Admin,Editor")]
     [HttpPost("upload-document")]
     public async Task<ActionResult<object>> UploadDocument([FromForm] IFormFile file, CancellationToken ct)
     {
@@ -84,7 +84,7 @@ public class UsefulInfosController(IUsefulInfosService service) : ControllerBase
         return PhysicalFile(physicalPath, contentType, fileName);
     }
 
-    [Authorize(Roles = "SuperAdmin,Editor")]
+    [Authorize(Roles = "Admin,Editor")]
     [HttpPost]
     public async Task<ActionResult<UsefulInfoDto>> Create([FromBody] CreateUsefulInfoDto dto, CancellationToken ct)
     {
@@ -92,7 +92,7 @@ public class UsefulInfosController(IUsefulInfosService service) : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
-    [Authorize(Roles = "SuperAdmin,Editor")]
+    [Authorize(Roles = "Admin,Editor")]
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<UsefulInfoDto>> Update(Guid id, [FromBody] UpdateUsefulInfoDto dto, CancellationToken ct)
     {
@@ -100,7 +100,7 @@ public class UsefulInfosController(IUsefulInfosService service) : ControllerBase
         return updated is null ? NotFound() : Ok(updated);
     }
 
-    [Authorize(Roles = "SuperAdmin")]
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {

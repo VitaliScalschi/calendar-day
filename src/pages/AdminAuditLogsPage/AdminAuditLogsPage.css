@@ -1,0 +1,90 @@
+.admin-events-filters {
+  display: flex;
+  flex-direction: column;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 0.7rem;
+}
+
+.admin-events-filters__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.admin-events-filters__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-events-filters__toggle {
+  border: 0;
+  background: transparent;
+  color: #2563eb;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-events-filters__toggle:hover {
+  background: rgba(37, 99, 235, 0.08);
+}
+
+.admin-events-filters__body {
+  transition: max-height 0.25s ease, opacity 0.2s ease, margin-top 0.2s ease;
+}
+
+.admin-events-filters__body.is-open {
+  max-height: 800px;
+  opacity: 1;
+  margin-top: 0.1rem;
+  overflow: visible;
+}
+
+.admin-events-filters__body.is-closed {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  overflow: hidden;
+}
+
+.admin-events-filter-item .form-label {
+  font-size: 0.72rem;
+  color: #6b7280;
+  margin-bottom: 0.25rem;
+}
+
+.admin-events-filter-item--search .search-bar-container {
+  width: 100%;
+}
+
+.admin-events-filter-item--date .input-date-wrap {
+  width: 100%;
+}
+
+.admin-audit-filters__row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.6rem;
+  align-items: end;
+}
+
+.admin-audit-table-wrap table td,
+.admin-audit-table-wrap table th {
+  white-space: nowrap;
+}
+
+.admin-audit-table-wrap table td.text-break {
+  white-space: normal;
+}
+
+@media (max-width: 1200px) {
+  .admin-audit-filters__row {
+    grid-template-columns: 1fr 1fr;
+  }
+}

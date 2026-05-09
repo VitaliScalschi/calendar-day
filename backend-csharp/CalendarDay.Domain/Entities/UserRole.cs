@@ -1,8 +1,13 @@
 namespace CalendarDay.Domain.Entities;
 
-public enum UserRole
+public class UserRole
 {
-    SuperAdmin = 1,
-    Editor = 2,
-    Viewer = 3
+    public Guid UserId { get; set; }
+    public User User { get; set; } = null!;
+
+    public Guid RoleId { get; set; }
+    public Role Role { get; set; } = null!;
+
+    public DateTime AssignedAtUtc { get; set; } = DateTime.UtcNow;
+    public Guid? AssignedByUserId { get; set; }
 }

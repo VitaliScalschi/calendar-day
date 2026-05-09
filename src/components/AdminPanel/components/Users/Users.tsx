@@ -105,8 +105,9 @@ function Users({
               containerClassName="w-100"
               style={{ maxWidth: 320 }}
             />
-            <button type="button" className="btn btn-success" onClick={onCreateUserClick}>
-              Creeaza user
+            <button type="button" className="btn btn-primary" onClick={onCreateUserClick}>
+              <i className="fa-solid fa-plus me-2" aria-hidden="true"></i>
+              Adaugă user
             </button>
           </div>
         </div>

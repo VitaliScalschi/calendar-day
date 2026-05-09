@@ -1,0 +1,6 @@
+BEGIN;
+
+ALTER TABLE audit_logs
+    ADD COLUMN IF NOT EXISTS details varchar(4000) NULL;
+
+COMMIT;

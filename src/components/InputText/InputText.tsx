@@ -53,33 +53,29 @@ export const InputText = forwardRef<HTMLInputElement, InputTextProps>(function I
 
   const showClearButton = clearable && !rest.disabled && !!visibleValue;
 
-  if (!showClearButton) {
-    return (
-      <input ref={ref} type={type} className={mergedClass} {...rest} onChange={handleChange} />
-    );
-  }
-
   return (
     <div className="input-text__wrap">
       <input
         ref={ref}
         type={type}
-        className={`${mergedClass} input-text__field--clearable`.trim()}
+        className={`${mergedClass} ${showClearButton ? 'input-text__field--clearable' : ''}`.trim()}
         {...rest}
         onChange={handleChange}
       />
-      <button
-        type="button"
-        className="input-text__clear-btn clear-btn"
-        onClick={() => {
-          setUncontrolledValue('');
-          onValueChange?.('');
-        }}
-        aria-label={clearButtonAriaLabel}
-        title={clearButtonAriaLabel}
-      >
-        <i className="fa-solid fa-xmark" aria-hidden="true" />
-      </button>
+      {showClearButton ? (
+        <button
+          type="button"
+          className="input-text__clear-btn clear-btn"
+          onClick={() => {
+            setUncontrolledValue('');
+            onValueChange?.('');
+          }}
+          aria-label={clearButtonAriaLabel}
+          title={clearButtonAriaLabel}
+        >
+          <i className="fa-solid fa-xmark" aria-hidden="true" />
+        </button>
+      ) : null}
     </div>
   );
 });

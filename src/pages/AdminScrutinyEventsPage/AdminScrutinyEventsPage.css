@@ -18,7 +18,7 @@
 }
 
 .admin-events-filters__title {
-  font-size: 0.82rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #374151;
 }
@@ -187,6 +187,14 @@
 
 .admin-regulation-upload-accordion__content {
   width: 100%;
+}
+
+.admin-event-form__invalid-multi .event-filter-dropdown__button {
+  border-color: #dc3545 !important;
+}
+
+.admin-event-form__invalid-control .date-range-picker__control .form-control {
+  border-color: #dc3545 !important;
 }
 
 @media (max-width: 1200px) {

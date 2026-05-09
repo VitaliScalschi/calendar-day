@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CalendarDay.Api.Controllers;
 
-[Authorize(Roles = "SuperAdmin")]
+[Authorize(Roles = "Admin")]
 [ApiController]
 [Route("api/seed")]
 public class SeedController(SeedFromJsonService seedService) : ControllerBase

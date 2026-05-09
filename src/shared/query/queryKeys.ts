@@ -15,8 +15,11 @@ export const queryKeys = {
   electionTypes: {
     list: () => ['election-types', 'list'] as const,
   },
+  responsibleOptions: {
+    list: () => ['responsible-options', 'list'] as const,
+  },
   admin: {
-    panel: () => ['admin', 'panel'] as const,
+    panel: (includeUsers: boolean) => ['admin', 'panel', { includeUsers }] as const,
     scrutinyEvents: (scrutinyId: string) => ['admin', 'scrutinyEvents', scrutinyId] as const,
   },
 } as const;

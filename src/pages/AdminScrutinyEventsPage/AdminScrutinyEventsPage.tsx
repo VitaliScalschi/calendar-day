@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Sidebar } from '../../components/AdminPanel/components';
 import type { AdminMenuItem } from '../../components/AdminPanel/components/Sidebar/AdminSidebar.interface';
-import { logoutAdmin } from '../../shared/auth/adminAuth';
+import { canAccessUsersPage, getAdminEmail, logoutAdmin } from '../../shared/auth/adminAuth';
 import { ApiError, apiRequest } from '../../shared/services/apiClient';
 import DateRangePicker from '../../components/DateRangePicker/DateRangePicker';
 import { InputDate } from '../../components/InputDate';
@@ -73,9 +73,19 @@ const parseApiErrorMessage = (message: string) => {
 };
 
 function AdminScrutinyEventsPage() {
+  type EventFormValidation = {
+    title: boolean;
+    period: boolean;
+    responsible: boolean;
+    groups: boolean;
+  };
+
   const PAGE_SIZE = 15;
   const { scrutinyId } = useParams();
   const navigate = useNavigate();
+  const canManageUsers = canAccessUsersPage();
+  const currentUserEmail = getAdminEmail() || 'Admin';
+  const avatarInitial = currentUserEmail.trim().charAt(0).toUpperCase() || 'A';
   const [allElections, setAllElections] = useState<ApiElection[]>([]);
   const [election, setElection] = useState<ApiElection | null>(null);
   const [events, setEvents] = useState<ApiDeadline[]>([]);
@@ -84,6 +94,7 @@ function AdminScrutinyEventsPage() {
   const [isImporting, setIsImporting] = useState(false);
   const [selectedSourceElectionId, setSelectedSourceElectionId] = useState<string>('');
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
+  const [isViewOnly, setIsViewOnly] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [pendingDeleteEventId, setPendingDeleteEventId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -116,6 +127,12 @@ function AdminScrutinyEventsPage() {
     title: '',
     description: '',
     additionalInfo: '',
+  });
+  const [validation, setValidation] = useState<EventFormValidation>({
+    title: false,
+    period: false,
+    responsible: false,
+    groups: false,
   });
 
   const toSqlDateLocal = (date: Date): string => {
@@ -294,6 +311,7 @@ function AdminScrutinyEventsPage() {
 
   const saveEvent = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (isViewOnly) return;
     setError('');
     if (!scrutinyId) return;
     const rangeStartDate = dateRange[0]?.startDate ?? null;
@@ -301,22 +319,15 @@ function AdminScrutinyEventsPage() {
     const normalizedSingleDates = normalizeUniqueSingleDates(singleDeadlineDates.length > 0 ? singleDeadlineDates : [singleDeadlineDateInput]);
     const singleDeadline = normalizedSingleDates[0] ? new Date(`${normalizedSingleDates[0]}T00:00:00`) : null;
     const deadlineDate = useDateInterval ? rangeDeadlineDate : singleDeadline;
-    if (!useDateInterval && normalizedSingleDates.length === 0) {
-      setError('Adaugă cel puțin o dată de realizare.');
-      return;
-    }
-    if (!form.title.trim() || !deadlineDate || !form.description.trim()) {
-      setError('Completeaza titlu, termen limita si descriere.');
-      return;
-    }
-
-    if (responsibles.length === 0) {
-      setError('Adauga cel putin un responsabil.');
-      return;
-    }
-
-    if (selectedGroups.length === 0) {
-      setError('Selecteaza cel putin un grup.');
+    const nextValidation: EventFormValidation = {
+      title: !form.title.trim(),
+      period: !deadlineDate || (!useDateInterval && normalizedSingleDates.length === 0),
+      responsible: responsibles.length === 0,
+      groups: selectedGroups.length === 0,
+    };
+    setValidation(nextValidation);
+    if (nextValidation.title || nextValidation.period || nextValidation.responsible || nextValidation.groups) {
+      setError('Completează câmpurile obligatorii marcate cu *.');
       return;
     }
 
@@ -506,6 +517,7 @@ function AdminScrutinyEventsPage() {
   );
 
   const handleResponsibleToggle = (label: string) => {
+    setValidation((prev) => ({ ...prev, responsible: false }));
     setResponsibles((prev) => (prev.includes(label) ? prev.filter((value) => value !== label) : [...prev, label]));
   };
 
@@ -549,6 +561,53 @@ function AdminScrutinyEventsPage() {
     setRegulationLink('');
     setRegulationPdfFile(null);
     setError('');
+    setValidation({ title: false, period: false, responsible: false, groups: false });
+    setIsViewOnly(false);
+    setIsModalOpen(true);
+  };
+
+  const viewEvent = (event: ApiDeadline) => {
+    const rangeMatch = event.deadline.match(/^(\d{4}-\d{2}-\d{2}|\d{2}\/\d{2}\/\d{4})\s*-\s*(\d{4}-\d{2}-\d{2}|\d{2}\/\d{2}\/\d{4})$/);
+    const parseFlexibleDate = (value: string): Date => {
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
+        const [day, month, year] = value.split('/').map(Number);
+        return new Date(year, month - 1, day);
+      }
+      return new Date(value);
+    };
+    const baseDate = parseFlexibleDate(rangeMatch ? rangeMatch[1] : event.deadline);
+    const endDate = parseFlexibleDate(rangeMatch ? rangeMatch[2] : event.deadline);
+    setEditingEventId(event.id);
+    setForm({
+      title: event.title || '',
+      description: event.description || '',
+      additionalInfo: event.additionalInfo || '',
+    });
+    setResponsibles((event.responsible || []).map((x) => x.trim()).filter(Boolean));
+    setSelectedGroups((event.group || []).filter((group) => audienceKeySet.has(group)));
+    setDateRange([{ startDate: baseDate, endDate: endDate, key: 'selection' }]);
+    setUseDateInterval(Boolean(rangeMatch));
+    const eventSingleDates = normalizeUniqueSingleDates(
+      Array.isArray(event.deadlines) && event.deadlines.length > 0
+        ? event.deadlines
+        : [toSqlDateLocal(baseDate)]
+    );
+    setSingleDeadlineDates(eventSingleDates);
+    setSingleDeadlineDateInput(eventSingleDates[0] || toSqlDateLocal(baseDate));
+    const existingRegulations = (event.regulations || []).map((r) => ({
+      id: r.id,
+      documentId: r.documentId || null,
+      title: r.title,
+      link: r.link,
+    }));
+    setRegulations(existingRegulations);
+    setIsRegulationUploadOpen(existingRegulations.some((r) => (r.link || '').toLowerCase().includes('.pdf')));
+    setRegulationTitle('');
+    setRegulationLink('');
+    setRegulationPdfFile(null);
+    setError('');
+    setValidation({ title: false, period: false, responsible: false, groups: false });
+    setIsViewOnly(true);
     setIsModalOpen(true);
   };
 
@@ -567,6 +626,8 @@ function AdminScrutinyEventsPage() {
     setResponsibles([]);
     setSelectedGroups([]);
     setError('');
+    setValidation({ title: false, period: false, responsible: false, groups: false });
+    setIsViewOnly(false);
     setIsModalOpen(true);
   };
 
@@ -591,11 +652,13 @@ function AdminScrutinyEventsPage() {
   };
 
   const handleTargetGroupToggle = (group: string) => {
+    setValidation((prev) => ({ ...prev, groups: false }));
     setSelectedGroups((prev) => (prev.includes(group) ? prev.filter((g) => g !== group) : [...prev, group]));
   };
 
   const handleUseDateIntervalChange = (checked: boolean) => {
     setUseDateInterval(checked);
+    setValidation((prev) => ({ ...prev, period: false }));
     if (checked) {
       // Interval mode must keep only interval data.
       setSingleDeadlineDates([]);
@@ -613,7 +676,43 @@ function AdminScrutinyEventsPage() {
 
   const handleAdminMenuChange = (item: AdminMenuItem) => {
     if (item === 'Utilizatori') {
+      if (!canManageUsers) {
+        navigate('/admin/events');
+        return;
+      }
       navigate('/admin/users');
+      return;
+    }
+    if (item === 'Audit Logs') {
+      if (!canManageUsers) {
+        navigate('/admin/events');
+        return;
+      }
+      navigate('/admin/audit-logs');
+      return;
+    }
+    if (item === 'Nomenclatoare - Scrutine') {
+      if (!canManageUsers) {
+        navigate('/admin/events');
+        return;
+      }
+      navigate('/admin/nomenclatoare/scrutine');
+      return;
+    }
+    if (item === 'Nomenclatoare - Responsabili') {
+      if (!canManageUsers) {
+        navigate('/admin/events');
+        return;
+      }
+      navigate('/admin/nomenclatoare/responsabili');
+      return;
+    }
+    if (item === 'Nomenclatoare - Grupuri țintă') {
+      if (!canManageUsers) {
+        navigate('/admin/events');
+        return;
+      }
+      navigate('/admin/nomenclatoare/grupuri-tinta');
       return;
     }
     navigate('/admin/events');
@@ -756,6 +855,15 @@ function AdminScrutinyEventsPage() {
           <div className="admin-table-actions">
             <button
               type="button"
+              title="Vizualizează"
+              className="btn admin-table-actions__btn admin-table-actions__btn--view"
+              onClick={() => viewEvent(row)}
+            >
+              <i className="fa-solid fa-eye" aria-hidden="true"></i>
+            </button>
+            <button
+              type="button"
+              title="Editează"
               className="btn admin-table-actions__btn admin-table-actions__btn--edit"
               onClick={() => editEvent(row)}
             >
@@ -777,7 +885,7 @@ function AdminScrutinyEventsPage() {
 
   return (
     <div className="admin-layout bg-body-tertiary">
-      <Sidebar activeItem="Programe" onChange={handleAdminMenuChange} />
+      <Sidebar activeItem="Programe" onChange={handleAdminMenuChange} canManageUsers={canManageUsers} />
       <main className="admin-layout__content p-3 p-md-4">
         <header className="admin-events-topbar bg-white border rounded-3 px-3 px-md-4 py-3 mb-3 d-flex justify-content-between align-items-center">
           <button
@@ -790,9 +898,9 @@ function AdminScrutinyEventsPage() {
           </button>
           <div className="d-flex align-items-center gap-2">
             <span className="rounded-circle bg-secondary-subtle text-secondary d-inline-flex justify-content-center align-items-center admin-avatar">
-              A
+              {avatarInitial}
             </span>
-            <span className="text-secondary fw-medium">Admin</span>
+            <span className="text-secondary fw-medium">{currentUserEmail}</span>
             <button type="button" className="btn btn-primary btn-sm ms-2" onClick={onLogout}>Logout</button>
           </div>
         </header>
@@ -951,18 +1059,22 @@ function AdminScrutinyEventsPage() {
       {isModalOpen ? (
         <div className="offcanvas offcanvas-end show d-block admin-offcanvas" tabIndex={-1} role="dialog" aria-modal="true">
           <div className="offcanvas-header border-bottom">
-            <h5 className="offcanvas-title">{editingEventId ? 'Modifică eveniment' : 'Adaugă eveniment'}</h5>
+            <h5 className="offcanvas-title">
+              {isViewOnly ? 'Vizualizare eveniment' : editingEventId ? 'Modifică eveniment' : 'Adaugă eveniment'}
+            </h5>
             <button
               type="button"
               className="btn-close"
               onClick={() => {
                 setIsModalOpen(false);
                 setEditingEventId(null);
+                setIsViewOnly(false);
               }}
             />
           </div>
           <div className="offcanvas-body">
             <form onSubmit={saveEvent} className="admin-event-form">
+              <fieldset disabled={isViewOnly}>
               <div className="admin-event-form__section">
                 <div className="admin-event-form__section-title">
                   <i className="fa-regular fa-clipboard" aria-hidden="true" />
@@ -971,13 +1083,19 @@ function AdminScrutinyEventsPage() {
                 <div className="admin-event-form__grid">
                   <div>
                     <label className="form-label" htmlFor="admin-event-title">
-                      Titlu *
+                      Titlu <span className="text-danger">*</span>
                     </label>
-                    <InputText
-                      id="admin-event-title"
-                      size="md"
+                    <InputTextArea
+                      id="admin-event-description"
+                      rows={4}
                       value={form.title}
-                      onValueChange={(title) => setForm((p) => ({ ...p, title }))}
+                      onValueChange={(title) => {
+                        setForm((p) => ({ ...p, title }));
+                        setValidation((prev) => ({ ...prev, title: false }));
+                      }}
+                      size="md"
+                      aria-label="Titlu acțiune"
+                      className={validation.title ? 'is-invalid' : ''}
                     />
                   </div>
                 </div>
@@ -1002,29 +1120,44 @@ function AdminScrutinyEventsPage() {
                     </label>
                   </div>
                   <div>
-                    <label className="form-label">{useDateInterval ? 'Interval realizare *' : 'Data realizării *'}</label>
+                    <label className="form-label">
+                      Perioadă de realizare <span className="text-danger">*</span>
+                    </label>
                     {useDateInterval ? (
-                      <DateRangePicker value={dateRange} onChange={setDateRange} />
+                      <div className={validation.period ? 'admin-event-form__invalid-control rounded' : ''}>
+                        <DateRangePicker
+                          value={dateRange}
+                          onChange={(ranges) => {
+                            setDateRange(ranges);
+                            setValidation((prev) => ({ ...prev, period: false }));
+                          }}
+                        />
+                      </div>
                     ) : (
                       <>
                         <div className="admin-event-form__single-date-row">
                           <InputDate
                             id="admin-scrutiny-event-single-deadline-date"
                             isoValue={singleDeadlineDateInput}
-                            onIsoChange={setSingleDeadlineDateInput}
+                            onIsoChange={(iso) => {
+                              setSingleDeadlineDateInput(iso);
+                              setValidation((prev) => ({ ...prev, period: false }));
+                            }}
                             size="md"
                             wrapClassName="w-100 min-w-0"
+                            textInputClassName={validation.period ? 'is-invalid' : ''}
                             pickerAriaLabel="Selectează data realizării"
                             pickerTitle="Selectează data"
                           />
                           <button
                             type="button"
-                            className="btn btn-outline-primary"
+                            className="btn btn-outline-primary admin-event-form__inline-add-btn"
                             onClick={() => {
                               if (!singleDeadlineDateInput) return;
                               setSingleDeadlineDates((prev) =>
                                 normalizeUniqueSingleDates([...prev, singleDeadlineDateInput])
                               );
+                              setValidation((prev) => ({ ...prev, period: false }));
                             }}
                           >
                             Adaugă dată
@@ -1058,11 +1191,13 @@ function AdminScrutinyEventsPage() {
                     <label className="form-label" htmlFor="admin-event-additional-info">
                       Informații suplimentare
                     </label>
-                    <InputText
+                    <InputTextArea
                       id="admin-event-additional-info"
-                      size="md"
+                      rows={4}
                       value={form.additionalInfo}
                       onValueChange={(additionalInfo) => setForm((p) => ({ ...p, additionalInfo }))}
+                      size="md"
+                      aria-label="Informații suplimentare"
                     />
                   </div>
               </div>
@@ -1070,7 +1205,7 @@ function AdminScrutinyEventsPage() {
               <div className="admin-event-form__section">
                 <div className="admin-event-form__section-title">
                   <i className="fa-regular fa-user" aria-hidden="true" />
-                  <span>Responsabil de realizare</span>
+                  <span>Responsabil de realizare <span className="text-danger">*</span></span>
                 </div>
                 {responsibleOptions.length === 0 ? (
                   <div className="small text-secondary mb-2">Nomenclatorul nu este disponibil momentan.</div>
@@ -1080,12 +1215,15 @@ function AdminScrutinyEventsPage() {
                   allowedKeys={allowedResponsibleKeys}
                   selectedKeys={responsibles}
                   onToggle={handleResponsibleToggle}
-                  onClear={() => setResponsibles([])}
+                  onClear={() => {
+                    setResponsibles([]);
+                    setValidation((prev) => ({ ...prev, responsible: false }));
+                  }}
                   placeholder="Selectează responsabili"
                   disabled={responsibleOptions.length === 0}
                   checkboxGroupName="admin-event-responsibles"
                   clearButtonAriaLabel="Șterge selecția responsabililor"
-                  className="admin-responsible-dropdown mb-0"
+                  className={`admin-responsible-dropdown mb-0 ${validation.responsible ? 'admin-event-form__invalid-multi' : ''}`}
                   size="lg"
                 />
               </div>
@@ -1097,7 +1235,7 @@ function AdminScrutinyEventsPage() {
                 </div>
                 <InputTextArea
                   id="admin-event-description"
-                  rows={4}
+                  rows={10}
                   value={form.description}
                   onValueChange={(description) => setForm((p) => ({ ...p, description }))}
                   size="md"
@@ -1131,8 +1269,8 @@ function AdminScrutinyEventsPage() {
                     aria-label="Link regulament"
                     className="flex-grow-1 min-w-0"
                   />
-                  <button type="button" className="btn btn-primary" onClick={addRegulation}>
-                    Adaugă
+                  <button type="button" className="btn btn-outline-primary admin-event-form__inline-add-btn" onClick={addRegulation}>
+                    Adaugă link
                   </button>
                 </div>
                 <div className="admin-regulation-upload-accordion mb-2">
@@ -1213,28 +1351,43 @@ function AdminScrutinyEventsPage() {
               <div className="admin-event-form__section">
                 <div className="admin-event-form__section-title">
                   <i className="fa-solid fa-users" aria-hidden="true" />
-                  <span>Grupuri țintă</span>
+                  <span>Grupuri țintă <span className="text-danger">*</span></span>
                 </div>
                 <MultiCheckboxDropdown
                   options={targetGroupOptions}
                   allowedKeys={allowedAudienceKeys}
                   selectedKeys={selectedGroups}
                   onToggle={handleTargetGroupToggle}
-                  onClear={() => setSelectedGroups([])}
+                  onClear={() => {
+                    setSelectedGroups([]);
+                    setValidation((prev) => ({ ...prev, groups: false }));
+                  }}
                   placeholder="Selectează grupuri țintă"
                   disabled={targetGroupOptions.length === 0}
                   checkboxGroupName="admin-event-target-groups"
                   clearButtonAriaLabel="Șterge selecția grupurilor țintă"
-                  className="admin-responsible-dropdown"
+                  className={`admin-responsible-dropdown ${validation.groups ? 'admin-event-form__invalid-multi' : ''}`}
                   size="lg"
                 />
               </div>
+              </fieldset>
 
               {error ? <div className="alert alert-warning mt-3 mb-0">{error}</div> : null}
 
               <div className="admin-event-form__footer">
-                <button type="button" className="btn btn-light border" onClick={() => setIsModalOpen(false)}>Renunță</button>
-                <button type="submit" className="btn btn-primary" disabled={isSaving}>{isSaving ? 'Se salvează...' : 'Salvează'}</button>
+                <button
+                  type="button"
+                  className="btn btn-light border"
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    setIsViewOnly(false);
+                  }}
+                >
+                  {isViewOnly ? 'Închide' : 'Renunță'}
+                </button>
+                {!isViewOnly ? (
+                  <button type="submit" className="btn btn-primary" disabled={isSaving}>{isSaving ? 'Se salvează...' : 'Salvează'}</button>
+                ) : null}
               </div>
             </form>
           </div>

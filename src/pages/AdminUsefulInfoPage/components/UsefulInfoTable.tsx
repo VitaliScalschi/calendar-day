@@ -20,6 +20,7 @@ function UsefulInfoTable({ items, loading, typeLabels, onEdit, onDelete, onDragS
             <th style={{ width: 48 }} title="Drag and drop">
               <i className="fa-solid fa-grip-vertical" aria-hidden="true" />
             </th>
+            <th className="text-center" style={{ width: 64 }}>Nr.</th>
             <th>Titlu</th>
             <th>Tip</th>
             <th>Status</th>
@@ -29,7 +30,7 @@ function UsefulInfoTable({ items, loading, typeLabels, onEdit, onDelete, onDragS
           </tr>
         </thead>
         <tbody>
-          {items.map((item) => (
+          {items.map((item, index) => (
             <tr
               key={item.id}
               draggable
@@ -39,6 +40,7 @@ function UsefulInfoTable({ items, loading, typeLabels, onEdit, onDelete, onDragS
               className="admin-useful-info-row"
             >
               <td className="text-secondary"><i className="fa-solid fa-grip-vertical" aria-hidden="true" /></td>
+              <td className="text-center fw-semibold">{index + 1}</td>
               <td role="button" onClick={() => onEdit(item)}>
                 <div className="fw-semibold">{item.title}</div>
                 <div className="small text-secondary">{item.slug}</div>
@@ -75,7 +77,7 @@ function UsefulInfoTable({ items, loading, typeLabels, onEdit, onDelete, onDragS
           ))}
           {!loading && items.length === 0 ? (
             <tr>
-              <td colSpan={7} className="text-center text-secondary py-4">
+              <td colSpan={8} className="text-center text-secondary py-4">
                 Nu există elemente care să corespundă căutării.
               </td>
             </tr>

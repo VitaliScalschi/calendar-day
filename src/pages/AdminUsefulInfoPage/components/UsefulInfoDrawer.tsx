@@ -1,4 +1,5 @@
 import type { UsefulInfoType } from '../../../features/usefulInfo/services/usefulInfoService';
+import { InputUpload } from '../../../components/InputUpload';
 
 type UsefulInfoForm = {
   title: string;
@@ -13,12 +14,13 @@ type Props = {
   form: UsefulInfoForm;
   isUploading: boolean;
   uploadedFileName: string;
+  uploadFile: File | null;
   availableTypeOptions: UsefulInfoType[];
   typeLabels: Record<UsefulInfoType, string>;
   onClose: () => void;
   onSubmit: (event: React.FormEvent) => void;
   onFormChange: (updater: (previous: UsefulInfoForm) => UsefulInfoForm) => void;
-  onUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onUpload: (file: File | null) => void;
 };
 
 function UsefulInfoDrawer({
@@ -27,6 +29,7 @@ function UsefulInfoDrawer({
   form,
   isUploading,
   uploadedFileName,
+  uploadFile,
   availableTypeOptions,
   typeLabels,
   onClose,
@@ -75,27 +78,12 @@ function UsefulInfoDrawer({
             {form.type === 'document' ? (
               <div>
                 <label className="form-label fw-semibold">Document</label>
-                <label
-                  className="form-control d-flex flex-column align-items-center justify-content-center text-center py-4 border border-2 border-dashed bg-light-subtle"
-                  style={{ cursor: 'pointer', borderRadius: '6px' }}
-                >
-                  <i className="fa-solid fa-file-arrow-up mb-2 text-secondary" aria-hidden="true"></i>
-                  <span className="fw-medium">{isUploading ? 'Se încarcă...' : 'Apasă pentru a încărca PDF / DOC / DOCX'}</span>
-                  <small className="text-secondary">{uploadedFileName || 'Nu este selectat niciun fișier.'}</small>
-                  <input
-                    type="file"
-                    className="d-none"
-                    accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                    onChange={onUpload}
-                    disabled={isUploading}
-                  />
-                </label>
-                <input
-                  className="form-control form-input-size--md mt-2"
-                  value={form.slug}
-                  readOnly
-                  placeholder="URL document încărcat"
-                  required
+                <InputUpload
+                  file={uploadFile}
+                  onFileChange={onUpload}
+                  accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  disabled={isUploading}
+                  helperText={uploadedFileName || 'Nu este selectat niciun fișier.'}
                 />
               </div>
             ) : (

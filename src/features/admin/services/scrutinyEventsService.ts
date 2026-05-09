@@ -49,7 +49,7 @@ export async function fetchScrutinyEventsData(
     apiRequest<ScrutinyElection[]>('/elections', { signal }),
     apiRequest<ScrutinyElection[]>('/elections/inactive', { signal }),
     apiRequest<PagedResult<ScrutinyDeadline>>(
-      `/deadlines?electionId=${scrutinyId}&page=${Math.max(page, 1)}&pageSize=${Math.max(pageSize, 1)}`,
+      `/deadlines?electionId=${scrutinyId}&sortBy=createdAt&sort=asc&page=${Math.max(page, 1)}&pageSize=${Math.max(pageSize, 1)}`,
       { signal }
     ),
     apiRequest<ResponsibleOption[]>('/responsible-options', { signal }),

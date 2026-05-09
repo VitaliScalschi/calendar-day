@@ -14,7 +14,7 @@ namespace CalendarDay.Api.Controllers;
 [Route("api/regulations")]
 public class RegulationsController(IRegulationsService service, CalendarDayDbContext db) : ControllerBase
 {
-    [Authorize(Roles = "SuperAdmin,Editor")]
+    [Authorize(Roles = "Admin,Editor")]
     [HttpPost("upload-document")]
     public async Task<ActionResult<object>> UploadDocument([FromForm] IFormFile file, CancellationToken ct)
     {
@@ -63,7 +63,7 @@ public class RegulationsController(IRegulationsService service, CalendarDayDbCon
         });
     }
 
-    [Authorize(Roles = "SuperAdmin,Editor")]
+    [Authorize(Roles = "Admin,Editor")]
     [HttpPost]
     public async Task<ActionResult<RegulationDto>> Create([FromBody] CreateRegulationDto dto, CancellationToken ct)
     {
@@ -71,7 +71,7 @@ public class RegulationsController(IRegulationsService service, CalendarDayDbCon
         return Ok(created);
     }
 
-    [Authorize(Roles = "SuperAdmin,Editor")]
+    [Authorize(Roles = "Admin,Editor")]
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<RegulationDto>> Update(Guid id, [FromBody] UpdateRegulationDto dto, CancellationToken ct)
     {
@@ -79,7 +79,7 @@ public class RegulationsController(IRegulationsService service, CalendarDayDbCon
         return updated is null ? NotFound() : Ok(updated);
     }
 
-    [Authorize(Roles = "SuperAdmin")]
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {

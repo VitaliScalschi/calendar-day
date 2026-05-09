@@ -1,5 +1,5 @@
 import type { EventsTableProps } from './EventsTable.interface';
-import { Pagination, Table } from '../../../../components';
+import { Pagination, SearchBar, Table } from '../../../../components';
 import type { TableColumn } from '../../../../components/Table/Table';
 
 function EventsTable({
@@ -80,18 +80,11 @@ function EventsTable({
         </div>
 
         <div className="d-flex flex-column flex-xl-row gap-2 mb-3">
-          <div className="input-group">
-            <span className="input-group-text bg-white">
-              <i className="fa-solid fa-magnifying-glass text-secondary" aria-hidden="true"></i>
-            </span>
-            <input
-              type="text"
-              className="form-control form-input-size--md"
-              placeholder="Caută program..."
-              value={search}
-              onChange={(e) => onSearch(e.target.value)}
-            />
-          </div>
+          <SearchBar
+            placeholder="Caută program..."
+            value={search}
+            onSearch={onSearch}
+          />
         </div>
 
         <div className="table-responsive border rounded-3">
@@ -99,6 +92,8 @@ function EventsTable({
             rows={events}
             columns={columns}
             rowKey={(event) => event.id}
+            showRowNumber
+            rowNumberStart={from}
             className="admin-programs-table"
             emptyMessage="Nu există rezultate pentru filtrele alese."
           />

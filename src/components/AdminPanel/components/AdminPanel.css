@@ -38,6 +38,18 @@
   background: rgba(255, 255, 255, 0.12);
 }
 
+.admin-sidebar__group-label {
+  color: #d6dde8;
+  font-size: 0.92rem;
+  font-weight: 600;
+  opacity: 0.95;
+}
+
+.admin-sidebar__sublink {
+  padding-left: 1.5rem;
+  font-size: 0.9rem;
+}
+
 .admin-avatar {
   width: 28px;
   height: 28px;
@@ -316,7 +328,16 @@
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 0.5rem;
+  align-items: end;
+}
+
+.admin-event-form__inline-add-btn {
+  height: 38px;
+  min-height: 38px;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
+  white-space: nowrap;
 }
 
 .admin-event-form__single-date-list {
@@ -454,6 +475,17 @@
 }
 
 .admin-table-actions__btn--edit:hover {
+  background: #ecf2ff;
+  color: var(--color-primary);
+}
+
+.admin-table-actions__btn--view {
+  border: 1px solid #d7dfee;
+  color: var(--color-primary);
+  background: #f5f8fc;
+}
+
+.admin-table-actions__btn--view:hover {
   background: #ecf2ff;
   color: var(--color-primary);
 }

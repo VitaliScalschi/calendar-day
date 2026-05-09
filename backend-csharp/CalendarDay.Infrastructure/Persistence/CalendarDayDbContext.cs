@@ -17,6 +17,9 @@ public class CalendarDayDbContext(DbContextOptions<CalendarDayDbContext> options
     public DbSet<UsefulInfo> UsefulInfos => Set<UsefulInfo>();
     public DbSet<Audience> Audiences => Set<Audience>();
     public DbSet<ElectionType> ElectionTypes => Set<ElectionType>();
+    public DbSet<Role> Roles => Set<Role>();
+    public DbSet<UserRole> UserRoles => Set<UserRole>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -38,6 +41,41 @@ public class CalendarDayDbContext(DbContextOptions<CalendarDayDbContext> options
             u.Property(x => x.Email).IsRequired().HasMaxLength(320);
             u.Property(x => x.PasswordHash).IsRequired();
             u.HasIndex(x => x.Email).IsUnique();
+            u.HasIndex(x => new { x.IsDeleted, x.IsActive });
+            u.HasQueryFilter(x => !x.IsDeleted);
+        });
+
+        modelBuilder.Entity<Role>(r =>
+        {
+            r.ToTable("roles");
+            r.HasKey(x => x.Id);
+            r.Property(x => x.Id).HasColumnName("id");
+            r.Property(x => x.Name).HasColumnName("name");
+            r.Property(x => x.Description).HasColumnName("description");
+            r.Property(x => x.CreatedAtUtc).HasColumnName("created_at_utc");
+            r.Property(x => x.UpdatedAtUtc).HasColumnName("updated_at_utc");
+            r.Property(x => x.Name).IsRequired().HasMaxLength(50);
+            r.Property(x => x.Description).HasMaxLength(200);
+            r.HasIndex(x => x.Name).IsUnique();
+        });
+
+        modelBuilder.Entity<UserRole>(ur =>
+        {
+            ur.ToTable("user_roles");
+            ur.HasKey(x => new { x.UserId, x.RoleId });
+            ur.Property(x => x.UserId).HasColumnName("user_id");
+            ur.Property(x => x.RoleId).HasColumnName("role_id");
+            ur.Property(x => x.AssignedAtUtc).HasColumnName("assigned_at_utc");
+            ur.Property(x => x.AssignedByUserId).HasColumnName("assigned_by_user_id");
+            ur.HasIndex(x => x.RoleId);
+            ur.HasOne(x => x.User)
+                .WithMany(x => x.UserRoles)
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            ur.HasOne(x => x.Role)
+                .WithMany(x => x.UserRoles)
+                .HasForeignKey(x => x.RoleId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Deadline>(d =>
@@ -115,6 +153,7 @@ public class CalendarDayDbContext(DbContextOptions<CalendarDayDbContext> options
         {
             r.HasKey(x => x.Id);
             r.Property(x => x.Label).IsRequired().HasMaxLength(250);
+            r.Property(x => x.DisplayOrder).HasColumnName("display_order");
             r.HasIndex(x => x.Label).IsUnique();
         });
 
@@ -135,6 +174,7 @@ public class CalendarDayDbContext(DbContextOptions<CalendarDayDbContext> options
             a.Property(x => x.Id).HasColumnName("id");
             a.Property(x => x.Key).HasColumnName("key").IsRequired().HasMaxLength(200);
             a.Property(x => x.Name).HasColumnName("name").IsRequired().HasMaxLength(500);
+            a.Property(x => x.DisplayOrder).HasColumnName("display_order");
             a.Property(x => x.CreatedAt).HasColumnName("created_at");
             a.HasIndex(x => x.Key).IsUnique();
         });
@@ -145,7 +185,26 @@ public class CalendarDayDbContext(DbContextOptions<CalendarDayDbContext> options
             t.HasKey(x => x.Id);
             t.Property(x => x.Id).HasColumnName("id").ValueGeneratedNever();
             t.Property(x => x.Name).HasColumnName("name").IsRequired().HasMaxLength(200);
+            t.Property(x => x.DisplayOrder).HasColumnName("display_order");
             t.HasIndex(x => x.Name).IsUnique();
+        });
+
+        modelBuilder.Entity<AuditLog>(a =>
+        {
+            a.ToTable("audit_logs");
+            a.HasKey(x => x.Id);
+            a.Property(x => x.Id).HasColumnName("id");
+            a.Property(x => x.Username).HasColumnName("username").HasMaxLength(320);
+            a.Property(x => x.Action).HasColumnName("action").IsRequired().HasMaxLength(120);
+            a.Property(x => x.Details).HasColumnName("details").HasMaxLength(4000);
+            a.Property(x => x.Endpoint).HasColumnName("endpoint").IsRequired().HasMaxLength(1000);
+            a.Property(x => x.Method).HasColumnName("method").IsRequired().HasMaxLength(16);
+            a.Property(x => x.StatusCode).HasColumnName("status_code");
+            a.Property(x => x.IpAddress).HasColumnName("ip_address").HasMaxLength(64);
+            a.Property(x => x.CreatedAtUtc).HasColumnName("created_at_utc");
+            a.HasIndex(x => x.CreatedAtUtc);
+            a.HasIndex(x => x.Username);
+            a.HasIndex(x => x.StatusCode);
         });
     }
 }

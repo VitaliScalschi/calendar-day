@@ -34,7 +34,7 @@ public class ElectionsController(IElectionsService service, CalendarDayDbContext
         return election is null ? NotFound() : Ok(election);
     }
 
-    [Authorize(Roles = "SuperAdmin,Editor")]
+    [Authorize(Roles = "Admin,Editor")]
     [HttpPost]
     public async Task<ActionResult<ElectionDto>> Create([FromBody] CreateElectionDto dto, CancellationToken ct)
     {
@@ -42,7 +42,7 @@ public class ElectionsController(IElectionsService service, CalendarDayDbContext
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
-    [Authorize(Roles = "SuperAdmin,Editor")]
+    [Authorize(Roles = "Admin,Editor")]
     [HttpPost("{id:guid}/upload-document")]
     public async Task<ActionResult<object>> UploadDocument(Guid id, [FromForm] IFormFile file, CancellationToken ct)
     {
@@ -127,7 +127,7 @@ public class ElectionsController(IElectionsService service, CalendarDayDbContext
         return PhysicalFile(fullPath, contentType, downloadName);
     }
 
-    [Authorize(Roles = "SuperAdmin,Editor")]
+    [Authorize(Roles = "Admin,Editor")]
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<ElectionDto>> Update(Guid id, [FromBody] UpdateElectionDto dto, CancellationToken ct)
     {
@@ -135,7 +135,7 @@ public class ElectionsController(IElectionsService service, CalendarDayDbContext
         return updated is null ? NotFound() : Ok(updated);
     }
 
-    [Authorize(Roles = "SuperAdmin")]
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
         => await service.DeleteAsync(id, ct) ? NoContent() : NotFound();

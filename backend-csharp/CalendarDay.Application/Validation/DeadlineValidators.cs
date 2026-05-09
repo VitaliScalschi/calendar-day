@@ -15,7 +15,7 @@ public class CreateDeadlineDtoValidator : AbstractValidator<CreateDeadlineDto>
             .Must(x => !string.IsNullOrWhiteSpace(x.Deadline) || x.Deadlines.Count > 0)
             .WithMessage("Either deadline or deadlines is required.");
         RuleForEach(x => x.Deadlines).NotEmpty();
-        RuleFor(x => x.Description).NotEmpty();
+        RuleFor(x => x.Description).MaximumLength(4000);
         RuleForEach(x => x.Responsible).NotEmpty();
         RuleForEach(x => x.Group)
             .NotEmpty()
