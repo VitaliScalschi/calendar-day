@@ -13,3 +13,6 @@ export {default as EventFilter} from './EventFilter/EventFilter';
 export {default as ScrollToTop} from './ScrollToTop/ScrollToTop';
 export {default as ElectionInfoCard} from './ElectionInfoCard/ElectionInfoCard';
 export {default as DateRangePicker} from './DateRangePicker/DateRangePicker';
+export {default as Table} from './Table/Table';
+export {default as Pagination} from './Pagination/Pagination';
+export type {TableColumn} from './Table/Table';

@@ -39,7 +39,7 @@ public class DeadlinesController(IDeadlinesService service) : ControllerBase
     public async Task<ActionResult<IReadOnlyList<DeadlineDto>>> Overdue(CancellationToken ct)
         => Ok(await service.OverdueAsync(ct));
 
-    [Authorize(Roles = "SuperAdmin,Editor")]
+    [Authorize(Roles = "Admin,Editor")]
     [HttpPost]
     public async Task<ActionResult<DeadlineDto>> Create([FromBody] CreateDeadlineDto dto, CancellationToken ct)
     {
@@ -54,7 +54,7 @@ public class DeadlinesController(IDeadlinesService service) : ControllerBase
         }
     }
 
-    [Authorize(Roles = "SuperAdmin,Editor")]
+    [Authorize(Roles = "Admin,Editor")]
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<DeadlineDto>> Update(Guid id, [FromBody] UpdateDeadlineDto dto, CancellationToken ct)
     {
@@ -69,7 +69,7 @@ public class DeadlinesController(IDeadlinesService service) : ControllerBase
         }
     }
 
-    [Authorize(Roles = "SuperAdmin")]
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
         => await service.DeleteAsync(id, ct) ? NoContent() : NotFound();

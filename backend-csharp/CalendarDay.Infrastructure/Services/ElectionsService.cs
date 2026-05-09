@@ -9,7 +9,27 @@ namespace CalendarDay.Infrastructure.Services;
 
 public class ElectionsService(CalendarDayDbContext db) : IElectionsService
 {
-    private static bool HasDocument(Guid electionId) => ElectionDocumentFiles.HasDocument(electionId);
+    private static bool HasDocument(Election election)
+    {
+        if (string.IsNullOrWhiteSpace(election.DocumentStoredName)) return false;
+        var path = ElectionDocumentFiles.FindDocumentPath(election.Id);
+        return path is not null && File.Exists(path);
+    }
+
+    private static (string? Name, string? Url, long? SizeBytes) GetDocumentMeta(Election election)
+    {
+        var path = ElectionDocumentFiles.FindDocumentPath(election.Id);
+        if (path is null || !File.Exists(path))
+        {
+            return (null, null, null);
+        }
+        var size = election.DocumentSizeBytes ?? new FileInfo(path).Length;
+        return (
+            string.IsNullOrWhiteSpace(election.DocumentOriginalName) ? Path.GetFileName(path) : election.DocumentOriginalName,
+            $"/api/elections/{election.Id}/download-document",
+            size
+        );
+    }
 
     private static IReadOnlyList<int> TypeIdsSnapshot(Election e) =>
         e.ElectionTypeIds is { Count: > 0 } list ? list : Array.Empty<int>();
@@ -33,7 +53,11 @@ public class ElectionsService(CalendarDayDbContext db) : IElectionsService
             .Where(e => e.IsActive)
             .OrderBy(e => e.Eday)
             .ToListAsync(ct);
-        return elections.Select(e => new ElectionDto(e.Id, e.Title, e.IsActive, e.Eday, HasDocument(e.Id), TypeIdsSnapshot(e))).ToList();
+        return elections.Select(e =>
+        {
+            var doc = GetDocumentMeta(e);
+            return new ElectionDto(e.Id, e.Title, e.IsActive, e.Eday, HasDocument(e), TypeIdsSnapshot(e), doc.Name, doc.Url, doc.SizeBytes);
+        }).ToList();
     }
 
     public async Task<IReadOnlyList<ElectionDto>> GetInactiveAsync(CancellationToken ct)
@@ -42,13 +66,19 @@ public class ElectionsService(CalendarDayDbContext db) : IElectionsService
             .Where(e => !e.IsActive)
             .OrderByDescending(e => e.Eday)
             .ToListAsync(ct);
-        return elections.Select(e => new ElectionDto(e.Id, e.Title, e.IsActive, e.Eday, HasDocument(e.Id), TypeIdsSnapshot(e))).ToList();
+        return elections.Select(e =>
+        {
+            var doc = GetDocumentMeta(e);
+            return new ElectionDto(e.Id, e.Title, e.IsActive, e.Eday, HasDocument(e), TypeIdsSnapshot(e), doc.Name, doc.Url, doc.SizeBytes);
+        }).ToList();
     }
 
     public async Task<ElectionDto?> GetByIdAsync(Guid id, CancellationToken ct)
     {
         var entity = await db.Elections.FirstOrDefaultAsync(e => e.Id == id, ct);
-        return entity is null ? null : new ElectionDto(entity.Id, entity.Title, entity.IsActive, entity.Eday, HasDocument(entity.Id), TypeIdsSnapshot(entity));
+        if (entity is null) return null;
+        var doc = GetDocumentMeta(entity);
+        return new ElectionDto(entity.Id, entity.Title, entity.IsActive, entity.Eday, HasDocument(entity), TypeIdsSnapshot(entity), doc.Name, doc.Url, doc.SizeBytes);
     }
 
     public async Task<ElectionDto> CreateAsync(CreateElectionDto dto, CancellationToken ct)
@@ -65,7 +95,8 @@ public class ElectionsService(CalendarDayDbContext db) : IElectionsService
 
         db.Elections.Add(entity);
         await db.SaveChangesAsync(ct);
-        return new ElectionDto(entity.Id, entity.Title, entity.IsActive, entity.Eday, HasDocument(entity.Id), TypeIdsSnapshot(entity));
+        var createdDoc = GetDocumentMeta(entity);
+        return new ElectionDto(entity.Id, entity.Title, entity.IsActive, entity.Eday, HasDocument(entity), TypeIdsSnapshot(entity), createdDoc.Name, createdDoc.Url, createdDoc.SizeBytes);
     }
 
     public async Task<ElectionDto?> UpdateAsync(Guid id, UpdateElectionDto dto, CancellationToken ct)
@@ -80,7 +111,8 @@ public class ElectionsService(CalendarDayDbContext db) : IElectionsService
         entity.UpdatedAtUtc = DateTime.UtcNow;
 
         await db.SaveChangesAsync(ct);
-        return new ElectionDto(entity.Id, entity.Title, entity.IsActive, entity.Eday, HasDocument(entity.Id), TypeIdsSnapshot(entity));
+        var updatedDoc = GetDocumentMeta(entity);
+        return new ElectionDto(entity.Id, entity.Title, entity.IsActive, entity.Eday, HasDocument(entity), TypeIdsSnapshot(entity), updatedDoc.Name, updatedDoc.Url, updatedDoc.SizeBytes);
     }
 
     public async Task<bool> DeleteAsync(Guid id, CancellationToken ct)

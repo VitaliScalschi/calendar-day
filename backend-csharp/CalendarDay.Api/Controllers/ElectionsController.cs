@@ -1,6 +1,8 @@
 using CalendarDay.Application.Abstractions;
 using CalendarDay.Application.Contracts.Elections;
 using CalendarDay.Infrastructure.Files;
+using CalendarDay.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
@@ -10,7 +12,7 @@ namespace CalendarDay.Api.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/elections")]
-public class ElectionsController(IElectionsService service) : ControllerBase
+public class ElectionsController(IElectionsService service, CalendarDayDbContext db) : ControllerBase
 {
     /// <summary>Programe active (<c>IsActive == true</c>) pentru site și calendar.</summary>
     [AllowAnonymous]
@@ -32,7 +34,7 @@ public class ElectionsController(IElectionsService service) : ControllerBase
         return election is null ? NotFound() : Ok(election);
     }
 
-    [Authorize(Roles = "SuperAdmin,Editor")]
+    [Authorize(Roles = "Admin,Editor")]
     [HttpPost]
     public async Task<ActionResult<ElectionDto>> Create([FromBody] CreateElectionDto dto, CancellationToken ct)
     {
@@ -40,7 +42,7 @@ public class ElectionsController(IElectionsService service) : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
-    [Authorize(Roles = "SuperAdmin,Editor")]
+    [Authorize(Roles = "Admin,Editor")]
     [HttpPost("{id:guid}/upload-document")]
     public async Task<ActionResult<object>> UploadDocument(Guid id, [FromForm] IFormFile file, CancellationToken ct)
     {
@@ -72,6 +74,17 @@ public class ElectionsController(IElectionsService service) : ControllerBase
         await using (var stream = System.IO.File.Create(fullPath))
         {
             await file.CopyToAsync(stream, ct);
+        }
+
+        var entity = await db.Elections.FirstOrDefaultAsync(e => e.Id == id, ct);
+        if (entity is not null)
+        {
+            entity.DocumentOriginalName = file.FileName;
+            entity.DocumentStoredName = fileName;
+            entity.DocumentContentType = file.ContentType;
+            entity.DocumentSizeBytes = file.Length;
+            entity.DocumentUploadedAtUtc = DateTime.UtcNow;
+            await db.SaveChangesAsync(ct);
         }
 
         var relativeUrl = $"/uploads/elections/{fileName}";
@@ -114,7 +127,7 @@ public class ElectionsController(IElectionsService service) : ControllerBase
         return PhysicalFile(fullPath, contentType, downloadName);
     }
 
-    [Authorize(Roles = "SuperAdmin,Editor")]
+    [Authorize(Roles = "Admin,Editor")]
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<ElectionDto>> Update(Guid id, [FromBody] UpdateElectionDto dto, CancellationToken ct)
     {
@@ -122,7 +135,7 @@ public class ElectionsController(IElectionsService service) : ControllerBase
         return updated is null ? NotFound() : Ok(updated);
     }
 
-    [Authorize(Roles = "SuperAdmin")]
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
         => await service.DeleteAsync(id, ct) ? NoContent() : NotFound();

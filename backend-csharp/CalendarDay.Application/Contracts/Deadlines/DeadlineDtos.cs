@@ -39,6 +39,7 @@ public class DeadlineQuery
     public string? Responsible { get; set; }
     public DateOnly? From { get; set; }
     public DateOnly? To { get; set; }
+    public string SortBy { get; set; } = "deadline";
     public string Sort { get; set; } = "asc";
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 20;

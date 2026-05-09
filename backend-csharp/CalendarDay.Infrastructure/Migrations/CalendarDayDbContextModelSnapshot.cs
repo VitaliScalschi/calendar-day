@@ -170,6 +170,43 @@ namespace CalendarDay.Infrastructure.Migrations
                     b.ToTable("DeadlineResponsibles");
                 });
 
+            modelBuilder.Entity("CalendarDay.Domain.Entities.Document", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("OriginalName")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("RelativeUrl")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("StoredName")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("documents", (string)null);
+                });
+
             modelBuilder.Entity("CalendarDay.Domain.Entities.Election", b =>
                 {
                     b.Property<Guid>("Id")
@@ -177,6 +214,24 @@ namespace CalendarDay.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DocumentContentType")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("DocumentOriginalName")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<long?>("DocumentSizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("DocumentStoredName")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime?>("DocumentUploadedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateOnly>("Eday")
@@ -232,6 +287,9 @@ namespace CalendarDay.Infrastructure.Migrations
                     b.Property<Guid>("DeadlineId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("DocumentId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Link")
                         .IsRequired()
                         .HasColumnType("text");
@@ -244,6 +302,8 @@ namespace CalendarDay.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DeadlineId");
+
+                    b.HasIndex("DocumentId");
 
                     b.ToTable("Regulations");
                 });
@@ -400,7 +460,14 @@ namespace CalendarDay.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("CalendarDay.Domain.Entities.Document", "Document")
+                        .WithMany("Regulations")
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("Deadline");
+
+                    b.Navigation("Document");
                 });
 
             modelBuilder.Entity("CalendarDay.Domain.Entities.Deadline", b =>
@@ -412,6 +479,11 @@ namespace CalendarDay.Infrastructure.Migrations
                     b.Navigation("Regulations");
 
                     b.Navigation("Responsibles");
+                });
+
+            modelBuilder.Entity("CalendarDay.Domain.Entities.Document", b =>
+                {
+                    b.Navigation("Regulations");
                 });
 
             modelBuilder.Entity("CalendarDay.Domain.Entities.Election", b =>

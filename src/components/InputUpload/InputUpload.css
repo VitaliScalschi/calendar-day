@@ -177,6 +177,24 @@
   outline-offset: 2px;
 }
 
+.input-upload__open {
+  border: 0;
+  background: transparent;
+  color: #0f172a;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.input-upload__open:hover {
+  background: rgba(15, 23, 42, 0.08);
+  color: #0f172a;
+}
+
 .input-upload__helper {
   margin: 0;
   font-size: 0.8rem;

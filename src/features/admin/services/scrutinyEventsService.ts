@@ -19,7 +19,7 @@ export type ScrutinyDeadline = {
   description: string;
   responsible: string[];
   group: string[];
-  regulations?: Array<{ id: string; title: string; link: string }>;
+  regulations?: Array<{ id: string; documentId?: string | null; title: string; link: string }>;
 };
 
 export type ResponsibleOption = {
@@ -34,40 +34,33 @@ type PagedResult<T> = {
   totalCount: number;
 };
 
-export async function fetchScrutinyEventsData(scrutinyId: string, signal?: AbortSignal) {
-  const [activeElections, inactiveElections, firstDeadlinesPage, responsibleOptions] = await Promise.all([
+export type FetchScrutinyEventsParams = {
+  page: number;
+  pageSize: number;
+};
+
+export async function fetchScrutinyEventsData(
+  scrutinyId: string,
+  params: FetchScrutinyEventsParams,
+  signal?: AbortSignal
+) {
+  const { page, pageSize } = params;
+  const [activeElections, inactiveElections, deadlinesPage, responsibleOptions] = await Promise.all([
     apiRequest<ScrutinyElection[]>('/elections', { signal }),
     apiRequest<ScrutinyElection[]>('/elections/inactive', { signal }),
-    apiRequest<PagedResult<ScrutinyDeadline>>(`/deadlines?electionId=${scrutinyId}&page=1&pageSize=100`, { signal }),
+    apiRequest<PagedResult<ScrutinyDeadline>>(
+      `/deadlines?electionId=${scrutinyId}&sortBy=createdAt&sort=asc&page=${Math.max(page, 1)}&pageSize=${Math.max(pageSize, 1)}`,
+      { signal }
+    ),
     apiRequest<ResponsibleOption[]>('/responsible-options', { signal }),
   ]);
-
-  let allDeadlineItems = firstDeadlinesPage.items || [];
-  const totalCount = firstDeadlinesPage.totalCount || allDeadlineItems.length;
-  const effectivePageSize = firstDeadlinesPage.pageSize || 100;
-  const totalPages = Math.max(1, Math.ceil(totalCount / effectivePageSize));
-
-  if (totalPages > 1) {
-    const pageRequests: Promise<PagedResult<ScrutinyDeadline>>[] = [];
-    for (let page = 2; page <= totalPages; page += 1) {
-      pageRequests.push(
-        apiRequest<PagedResult<ScrutinyDeadline>>(
-          `/deadlines?electionId=${scrutinyId}&page=${page}&pageSize=${effectivePageSize}`,
-          { signal }
-        )
-      );
-    }
-
-    const nextPages = await Promise.all(pageRequests);
-    allDeadlineItems = [...allDeadlineItems, ...nextPages.flatMap((p) => p.items || [])];
-  }
 
   const byId = new Map<string, ScrutinyElection>();
   inactiveElections.forEach((e) => byId.set(e.id, e));
   activeElections.forEach((e) => byId.set(e.id, e));
   const elections = Array.from(byId.values());
 
-  const events = allDeadlineItems.map((item) => {
+  const events = (deadlinesPage.items || []).map((item) => {
     const normalized = {
       ...item,
       deadline: toLegacyDeadlineValue({
@@ -91,5 +84,8 @@ export async function fetchScrutinyEventsData(scrutinyId: string, signal?: Abort
     election: elections.find((x) => x.id === scrutinyId) || null,
     responsibleOptions: responsibleOptions || [],
     events,
+    page: deadlinesPage.page ?? Math.max(page, 1),
+    pageSize: deadlinesPage.pageSize ?? Math.max(pageSize, 1),
+    totalCount: deadlinesPage.totalCount ?? events.length,
   };
 }

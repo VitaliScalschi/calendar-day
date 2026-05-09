@@ -4,10 +4,10 @@ import { deleteElection, deleteUser, fetchAdminPanelData, upsertElection, upsert
 
 type UpsertElectionPayload = { title: string; isActive: boolean; eday: string; electionTypeIds: number[] };
 
-export function useAdminPanelQuery() {
+export function useAdminPanelQuery(includeUsers = true) {
   return useQuery({
-    queryKey: queryKeys.admin.panel(),
-    queryFn: ({ signal }) => fetchAdminPanelData(signal),
+    queryKey: queryKeys.admin.panel(includeUsers),
+    queryFn: ({ signal }) => fetchAdminPanelData({ includeUsers, signal }),
     staleTime: 20_000,
     gcTime: 10 * 60_000,
   });
@@ -19,7 +19,8 @@ export function useUpsertElectionMutation() {
     mutationFn: ({ payload, electionId, document }: { payload: { title: string; isActive: boolean; eday: string }; electionId?: string; document?: File | null }) =>
       upsertElection(payload, electionId, document),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.admin.panel() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.panel(true) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.panel(false) });
     },
   });
 }
@@ -29,7 +30,8 @@ export function useDeleteElectionMutation() {
   return useMutation({
     mutationFn: (electionId: string) => deleteElection(electionId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.admin.panel() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.panel(true) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.panel(false) });
       queryClient.invalidateQueries({ queryKey: queryKeys.elections.all });
     },
   });
@@ -41,7 +43,7 @@ export function useUpsertUserMutation() {
     mutationFn: ({ payload, userId }: { payload: { email: string; password?: string; role: string; isActive: boolean }; userId?: string }) =>
       upsertUser(payload, userId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.admin.panel() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.panel(true) });
     },
   });
 }
@@ -51,7 +53,7 @@ export function useDeleteUserMutation() {
   return useMutation({
     mutationFn: (userId: string) => deleteUser(userId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.admin.panel() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.panel(true) });
     },
   });
 }

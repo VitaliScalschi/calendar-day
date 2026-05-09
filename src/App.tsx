@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { isAdminLoggedIn } from './shared/auth/adminAuth'
+import { canAccessUsersPage, isAdminLoggedIn } from './shared/auth/adminAuth'
 import './App.css'
 
 const HomePage = lazy(() => import('./pages/HomePage/HomePage'));
@@ -9,6 +9,8 @@ const Admin = lazy(() => import('./pages/Admin/Admin'));
 const LoginPage = lazy(() => import('./pages/LoginPage/LoginPage'));
 const AdminScrutinyEventsPage = lazy(() => import('./pages/AdminScrutinyEventsPage/AdminScrutinyEventsPage'));
 const AdminUsefulInfoPage = lazy(() => import('./pages/AdminUsefulInfoPage/AdminUsefulInfoPage'));
+const AdminAuditLogsPage = lazy(() => import('./pages/AdminAuditLogsPage/AdminAuditLogsPage'));
+const AdminNomenclatoarePage = lazy(() => import('./pages/AdminNomenclatoarePage/AdminNomenclatoarePage'));
 
 function App() {
   return (
@@ -30,11 +32,55 @@ function App() {
         />
         <Route
           path="/admin/users"
-          element={isAdminLoggedIn() ? <Admin /> : <Navigate to="/login" replace state={{ from: '/admin/users' }} />}
+          element={
+            isAdminLoggedIn()
+              ? (canAccessUsersPage() ? <Admin /> : <Navigate to="/admin/events" replace />)
+              : <Navigate to="/login" replace state={{ from: '/admin/users' }} />
+          }
         />
         <Route
           path="/admin/useful-info"
           element={isAdminLoggedIn() ? <AdminUsefulInfoPage /> : <Navigate to="/login" replace state={{ from: '/admin/useful-info' }} />}
+        />
+        <Route
+          path="/admin/audit-logs"
+          element={
+            isAdminLoggedIn()
+              ? (canAccessUsersPage() ? <AdminAuditLogsPage /> : <Navigate to="/admin/events" replace />)
+              : <Navigate to="/login" replace state={{ from: '/admin/audit-logs' }} />
+          }
+        />
+        <Route
+          path="/admin/nomenclatoare"
+          element={
+            isAdminLoggedIn()
+              ? (canAccessUsersPage() ? <Navigate to="/admin/nomenclatoare/scrutine" replace /> : <Navigate to="/admin/events" replace />)
+              : <Navigate to="/login" replace state={{ from: '/admin/nomenclatoare' }} />
+          }
+        />
+        <Route
+          path="/admin/nomenclatoare/scrutine"
+          element={
+            isAdminLoggedIn()
+              ? (canAccessUsersPage() ? <AdminNomenclatoarePage /> : <Navigate to="/admin/events" replace />)
+              : <Navigate to="/login" replace state={{ from: '/admin/nomenclatoare/scrutine' }} />
+          }
+        />
+        <Route
+          path="/admin/nomenclatoare/responsabili"
+          element={
+            isAdminLoggedIn()
+              ? (canAccessUsersPage() ? <AdminNomenclatoarePage /> : <Navigate to="/admin/events" replace />)
+              : <Navigate to="/login" replace state={{ from: '/admin/nomenclatoare/responsabili' }} />
+          }
+        />
+        <Route
+          path="/admin/nomenclatoare/grupuri-tinta"
+          element={
+            isAdminLoggedIn()
+              ? (canAccessUsersPage() ? <AdminNomenclatoarePage /> : <Navigate to="/admin/events" replace />)
+              : <Navigate to="/login" replace state={{ from: '/admin/nomenclatoare/grupuri-tinta' }} />
+          }
         />
         <Route
           path="/admin/scrutiny/:scrutinyId/events"

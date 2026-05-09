@@ -1,5 +1,3 @@
-using CalendarDay.Domain.Entities;
-
 namespace CalendarDay.Application.Contracts.Auth;
 
 public class LoginRequestDto
@@ -11,7 +9,7 @@ public class LoginRequestDto
 public record AuthUserDto(
     Guid Id,
     string Email,
-    UserRole Role
+    string Role
 );
 
 public record LoginResponseDto(

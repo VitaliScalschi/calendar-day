@@ -19,6 +19,8 @@ export type InputDateProps = {
   textInputClassName?: string;
   placeholder?: string;
   title?: string;
+  clearable?: boolean;
+  clearButtonAriaLabel?: string;
 };
 
 export function InputDate({
@@ -33,6 +35,8 @@ export function InputDate({
   textInputClassName = '',
   placeholder = 'dd/mm/yyyy',
   title = 'dd/mm/yyyy',
+  clearable = true,
+  clearButtonAriaLabel = 'Șterge data',
 }: InputDateProps) {
   const nativeInputRef = useRef<HTMLInputElement | null>(null);
   const [displayValue, setDisplayValue] = useState(() => formatIsoToDisplay(isoValue));
@@ -73,6 +77,7 @@ export function InputDate({
     formSizeClass,
     formInputSizeClass(size),
     'input-date__text',
+    clearable ? 'input-date__text--clearable' : '',
     textInputClassName,
   ]
     .filter(Boolean)
@@ -104,6 +109,21 @@ export function InputDate({
       >
         <i className="fa-regular fa-calendar" aria-hidden="true" />
       </button>
+      {clearable && displayValue.trim() ? (
+        <button
+          type="button"
+          className="input-date__clear-btn"
+          disabled={disabled}
+          onClick={() => {
+            setDisplayValue('');
+            onIsoChange('');
+          }}
+          aria-label={clearButtonAriaLabel}
+          title={clearButtonAriaLabel}
+        >
+          <i className="fa-solid fa-xmark" aria-hidden="true" />
+        </button>
+      ) : null}
       <input
         ref={nativeInputRef}
         type="date"

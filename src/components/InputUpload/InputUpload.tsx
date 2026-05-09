@@ -4,6 +4,8 @@ import './InputUpload.css';
 
 export type InputUploadProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'value'> & {
   file: File | null;
+  existingFile?: { name: string; sizeBytes?: number; url?: string } | null;
+  onExistingFileClear?: () => void;
   onFileChange: (file: File | null) => void;
   helperText?: ReactNode;
   dropTitle?: string;
@@ -49,6 +51,8 @@ export const InputUpload = forwardRef<HTMLInputElement, InputUploadProps>(functi
     id,
     className = '',
     file,
+    existingFile = null,
+    onExistingFileClear,
     onFileChange,
     helperText,
     dropTitle = 'Plasează fișierul aici',
@@ -170,7 +174,7 @@ export const InputUpload = forwardRef<HTMLInputElement, InputUploadProps>(functi
         {...rest}
       />
 
-      {!file ? (
+      {!file && !existingFile ? (
         <div
           role="button"
           tabIndex={disabled ? -1 : 0}
@@ -191,7 +195,7 @@ export const InputUpload = forwardRef<HTMLInputElement, InputUploadProps>(functi
           <p className="input-upload__drop-title">{dropTitle}</p>
           <p className="input-upload__drop-sub">{dropSubtitle}</p>
         </div>
-      ) : (
+      ) : file ? (
         <div className="input-upload__file-card">
           <div className="input-upload__file-main">
             <span className={`input-upload__file-icon ${mod}`} aria-hidden="true">
@@ -217,6 +221,46 @@ export const InputUpload = forwardRef<HTMLInputElement, InputUploadProps>(functi
               disabled={disabled}
               aria-label="Elimină fișierul"
               title="Elimină fișierul"
+            >
+              <i className="fa-solid fa-xmark" />
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="input-upload__file-card">
+          <div className="input-upload__file-main">
+            <span className={`input-upload__file-icon ${fileIconClass(existingFile.name).mod}`} aria-hidden="true">
+              <i className={`fa-solid ${fileIconClass(existingFile.name).icon}`} />
+            </span>
+            <div className="input-upload__file-meta">
+              <p className="input-upload__file-name">{existingFile.name}</p>
+              <p className="input-upload__file-details">
+                {typeof existingFile.sizeBytes === 'number' ? formatFileSize(existingFile.sizeBytes) : 'Fișier existent'}
+                <span aria-hidden="true"> • </span>
+                <span className="input-upload__file-success">Încărcat anterior</span>
+              </p>
+            </div>
+          </div>
+          <div className="input-upload__file-actions">
+            {existingFile.url ? (
+              <a
+                href={existingFile.url}
+                target="_blank"
+                rel="noreferrer"
+                className="input-upload__open"
+                title="Deschide documentul"
+                aria-label="Deschide documentul"
+              >
+                <i className="fa-solid fa-arrow-up-right-from-square" />
+              </a>
+            ) : null}
+            <button
+              type="button"
+              className="input-upload__remove"
+              onClick={() => onExistingFileClear?.()}
+              disabled={disabled}
+              aria-label="Ascunde fișierul existent"
+              title="Ascunde fișierul existent"
             >
               <i className="fa-solid fa-xmark" />
             </button>

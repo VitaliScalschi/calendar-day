@@ -4,7 +4,7 @@ import { Sidebar, HeaderBar, DashboardCards } from './components/index';
 import EventsTable from './components/Table/EventsTable';
 import type { AdminEventItem } from './components/Table/EventsTable.interface';
 import Users from './components/Users/Users';
-import { logoutAdmin } from '../../shared/auth/adminAuth';
+import { canAccessUsersPage, getAdminRole, isAdministratorRole, logoutAdmin } from '../../shared/auth/adminAuth';
 import { ApiError } from '../../shared/services/apiClient';
 import {
   useAdminPanelQuery,
@@ -39,13 +39,17 @@ type ScrutinyForm = {
 type UserForm = {
   email: string;
   password: string;
-  role: 'SuperAdmin' | 'Editor' | 'Viewer';
+  role: 'Admin' | 'Editor' | 'Viewer';
   isActive: boolean;
 };
 
 function getMenuFromPath(pathname: string): AdminMenuItem {
   if (pathname.startsWith('/admin/users')) return 'Utilizatori';
   if (pathname.startsWith('/admin/useful-info')) return 'Informații Utile';
+  if (pathname.startsWith('/admin/nomenclatoare/scrutine')) return 'Nomenclatoare - Scrutine';
+  if (pathname.startsWith('/admin/nomenclatoare/responsabili')) return 'Nomenclatoare - Responsabili';
+  if (pathname.startsWith('/admin/nomenclatoare/grupuri-tinta')) return 'Nomenclatoare - Grupuri țintă';
+  if (pathname.startsWith('/admin/audit-logs')) return 'Audit Logs';
   return 'Programe';
 }
 
@@ -72,6 +76,8 @@ function AdminPanel() {
   const navigate = useNavigate();
   const location = useLocation();
   const activeMenuItem = getMenuFromPath(location.pathname);
+  const currentRole = getAdminRole();
+  const canManageUsers = canAccessUsersPage();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [loadError, setLoadError] = useState('');
@@ -101,8 +107,9 @@ function AdminPanel() {
     electionTypeIds: [],
   });
   const [scrutinyDocumentFile, setScrutinyDocumentFile] = useState<File | null>(null);
+  const [existingScrutinyDocument, setExistingScrutinyDocument] = useState<{ name: string; sizeBytes?: number; url?: string } | null>(null);
   const electionTypesQuery = useElectionTypesQuery(true);
-  const adminPanelQuery = useAdminPanelQuery();
+  const adminPanelQuery = useAdminPanelQuery(canManageUsers);
   const upsertElectionMutation = useUpsertElectionMutation();
   const deleteElectionMutation = useDeleteElectionMutation();
   const upsertUserMutation = useUpsertUserMutation();
@@ -110,6 +117,10 @@ function AdminPanel() {
   const elections = adminPanelQuery.data?.elections ?? [];
   const users = adminPanelQuery.data?.users ?? [];
   const loading = adminPanelQuery.isLoading || adminPanelQuery.isFetching;
+  const editingElection = useMemo(
+    () => elections.find((election) => election.id === scrutinyForm.id) ?? null,
+    [elections, scrutinyForm.id]
+  );
 
   useEffect(() => {
     const error = adminPanelQuery.error;
@@ -128,6 +139,12 @@ function AdminPanel() {
     setSearch('');
     setPage(1);
   }, [activeMenuItem]);
+
+  useEffect(() => {
+    if (location.pathname.startsWith('/admin/users') && !canManageUsers) {
+      navigate('/admin/events', { replace: true });
+    }
+  }, [canManageUsers, location.pathname, navigate]);
 
   const scrutinyRows = useMemo<AdminEventItem[]>(() => {
     const nameById = new Map((electionTypesQuery.data ?? []).map((t) => [t.id, t.name] as const));
@@ -188,6 +205,9 @@ function AdminPanel() {
     if (!query) return usersRows;
     return usersRows.filter((user) => [user.email, user.role, user.status, user.createdAt].join(' ').toLowerCase().includes(query));
   }, [usersRows, search]);
+  const usersTotalPages = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
+  const usersSafePage = Math.min(page, usersTotalPages);
+  const pagedUsers = filteredUsers.slice((usersSafePage - 1) * PAGE_SIZE, usersSafePage * PAGE_SIZE);
 
   const handleLogout = useCallback(() => {
     logoutAdmin();
@@ -196,6 +216,10 @@ function AdminPanel() {
 
   const handleMenuChange = useCallback((item: AdminMenuItem) => {
     if (item === 'Utilizatori') {
+      if (!canManageUsers) {
+        navigate('/admin/events');
+        return;
+      }
       navigate('/admin/users');
       return;
     }
@@ -203,13 +227,46 @@ function AdminPanel() {
       navigate('/admin/useful-info');
       return;
     }
+    if (item === 'Audit Logs') {
+      if (!canManageUsers) {
+        navigate('/admin/events');
+        return;
+      }
+      navigate('/admin/audit-logs');
+      return;
+    }
+    if (item === 'Nomenclatoare - Scrutine') {
+      if (!canManageUsers) {
+        navigate('/admin/events');
+        return;
+      }
+      navigate('/admin/nomenclatoare/scrutine');
+      return;
+    }
+    if (item === 'Nomenclatoare - Responsabili') {
+      if (!canManageUsers) {
+        navigate('/admin/events');
+        return;
+      }
+      navigate('/admin/nomenclatoare/responsabili');
+      return;
+    }
+    if (item === 'Nomenclatoare - Grupuri țintă') {
+      if (!canManageUsers) {
+        navigate('/admin/events');
+        return;
+      }
+      navigate('/admin/nomenclatoare/grupuri-tinta');
+      return;
+    }
     navigate('/admin/events');
-  }, [navigate]);
+  }, [canManageUsers, navigate]);
 
   const openCreateModal = () => {
     setFormError('');
     setScrutinyForm({ title: '', electionDay: '', isActive: true, electionTypeIds: [] });
     setScrutinyDocumentFile(null);
+    setExistingScrutinyDocument(null);
     setIsModalOpen(true);
   };
 
@@ -225,6 +282,15 @@ function AdminPanel() {
       electionTypeIds: (election.electionTypeIds ?? []).map(String),
     });
     setScrutinyDocumentFile(null);
+    setExistingScrutinyDocument(
+      election.hasDocument
+        ? {
+            name: election.documentName || `document-${election.id}`,
+            sizeBytes: election.documentSizeBytes ?? undefined,
+            url: election.documentUrl || `/api/elections/${election.id}/download-document`,
+          }
+        : null
+    );
     setIsModalOpen(true);
   };
 
@@ -263,6 +329,7 @@ function AdminPanel() {
       });
       setIsModalOpen(false);
       setScrutinyDocumentFile(null);
+      setExistingScrutinyDocument(null);
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
         logoutAdmin();
@@ -309,6 +376,11 @@ function AdminPanel() {
   const handleCreateUser = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setUserFormError('');
+
+    if (!isAdministratorRole(currentRole)) {
+      setUserFormError('Doar administratorul poate gestiona utilizatorii.');
+      return;
+    }
 
     if (!userForm.email.trim() || (!editingUserId && !userForm.password.trim())) {
       setUserFormError(editingUserId ? 'Completeaza email.' : 'Completeaza email si parola.');
@@ -395,7 +467,7 @@ function AdminPanel() {
 
   return (
     <div className="admin-layout bg-body-tertiary">
-      <Sidebar activeItem={activeMenuItem} onChange={handleMenuChange} />
+      <Sidebar activeItem={activeMenuItem} onChange={handleMenuChange} canManageUsers={canManageUsers} />
 
       <main className="admin-layout__content p-3 p-md-4">
         <HeaderBar title={activeMenuItem === 'Utilizatori' ? 'Administrare Utilizatori' : 'Administrare Programului Calendaristic'} onLogout={handleLogout} />
@@ -406,11 +478,16 @@ function AdminPanel() {
 
         {activeMenuItem === 'Utilizatori' ? (
           <Users
-            users={filteredUsers}
+            users={pagedUsers}
+            page={usersSafePage}
+            pageSize={PAGE_SIZE}
+            totalCount={filteredUsers.length}
             search={search}
             onSearch={(value) => {
               setSearch(value);
+              setPage(1);
             }}
+            onPageChange={setPage}
             onCreateUserClick={openCreateUserModal}
             onEditUserClick={openEditUserModal}
             onDeleteUserClick={requestDeleteUser}
@@ -428,6 +505,7 @@ function AdminPanel() {
             onEdit={openEditModal}
             onDelete={handleDeleteScrutiny}
             page={safePage}
+            pageSize={PAGE_SIZE}
             totalPages={totalPages}
             onPageChange={setPage}
             totalCount={filteredRows.length}
@@ -460,6 +538,7 @@ function AdminPanel() {
                     <InputText
                       id="scrutiny-title"
                       size="md"
+                      className="form-input-size--md"
                       value={scrutinyForm.title}
                       placeholder="Introduceți denumirea planului calendaristic"
                       onValueChange={(title) => setScrutinyForm((prev) => ({ ...prev, title }))}
@@ -467,7 +546,7 @@ function AdminPanel() {
                   </div>
 
                   <div className="mb-3">
-                    <Label className="d-block" variant="form">
+                    <Label htmlFor="admin-scrutiny-election-types" className="d-block" variant="form">
                       Tip scrutin
                     </Label>
                     <MultiCheckboxDropdown
@@ -488,6 +567,7 @@ function AdminPanel() {
                       disabled={scrutinyTypeOptions.length === 0 || electionTypesQuery.isLoading}
                       checkboxGroupName="admin-scrutiny-election-types"
                       clearButtonAriaLabel="Șterge selecția tipurilor de scrutin"
+                      size="md"
                     />
                   </div>
 
@@ -514,9 +594,18 @@ function AdminPanel() {
                     <InputUpload
                       id="scrutiny-calendar-file"
                       file={scrutinyDocumentFile}
+                      existingFile={!scrutinyDocumentFile ? existingScrutinyDocument : null}
+                      onExistingFileClear={() => setExistingScrutinyDocument(null)}
                       accept={CALENDAR_PROGRAM_FILE_ACCEPT}
-                      onFileChange={setScrutinyDocumentFile}
-                      helperText="Fișierul va fi disponibil la descărcare după salvarea scrutinului."
+                      onFileChange={(file) => {
+                        setScrutinyDocumentFile(file);
+                        if (file) setExistingScrutinyDocument(null);
+                      }}
+                      helperText={
+                        editingElection?.hasDocument
+                          ? 'Poți încărca un fișier nou pentru a înlocui documentul existent.'
+                          : 'Fișierul va fi disponibil la descărcare după salvarea scrutinului.'
+                      }
                     />
                   </div>
 
@@ -555,6 +644,7 @@ function AdminPanel() {
                     onClick={() => {
                       setIsModalOpen(false);
                       setScrutinyDocumentFile(null);
+                      setExistingScrutinyDocument(null);
                     }}
                   >
                     Anulează
@@ -663,7 +753,7 @@ function AdminPanel() {
                     >
                       <option value="Viewer">Viewer</option>
                       <option value="Editor">Editor</option>
-                      <option value="SuperAdmin">SuperAdmin</option>
+                      <option value="Admin">Admin</option>
                     </select>
                   </div>
 

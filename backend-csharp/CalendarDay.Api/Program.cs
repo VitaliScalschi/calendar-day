@@ -3,6 +3,7 @@ using CalendarDay.Infrastructure.Auth;
 using CalendarDay.Infrastructure;
 using CalendarDay.Infrastructure.Persistence;
 using CalendarDay.Infrastructure.Seed;
+using CalendarDay.Api.Middleware;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -39,7 +40,11 @@ builder.Services
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin", "SuperAdmin"));
+    options.AddPolicy("EditorOrAdmin", policy => policy.RequireRole("Admin", "SuperAdmin", "Editor"));
+});
 var configuredOrigins = builder.Configuration.GetValue<string>("Cors:AllowedOrigins");
 var allowedOrigins = string.IsNullOrWhiteSpace(configuredOrigins)
     ? ["http://localhost:5173", "http://localhost:5174"]
@@ -86,6 +91,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseCors("frontend");
 app.UseAuthentication();
+app.UseMiddleware<AuditLogMiddleware>();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();

@@ -2,8 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { Sidebar } from '../../components/AdminPanel/components';
+import { SearchBar } from '../../components';
 import type { AdminMenuItem } from '../../components/AdminPanel/components/Sidebar/AdminSidebar.interface';
-import { logoutAdmin } from '../../shared/auth/adminAuth';
+import { canAccessUsersPage, getAdminEmail, logoutAdmin } from '../../shared/auth/adminAuth';
 import { ApiError } from '../../shared/services/apiClient';
 import { queryKeys } from '../../shared/query/queryKeys';
 import type { UsefulInfoItem, UsefulInfoType } from '../../features/usefulInfo/services/usefulInfoService';
@@ -44,6 +45,9 @@ const buildInitialForm = (): UsefulInfoForm => ({
 
 function AdminUsefulInfoPage() {
   const navigate = useNavigate();
+  const canManageUsers = canAccessUsersPage();
+  const currentUserEmail = getAdminEmail() || 'Admin';
+  const avatarInitial = currentUserEmail.trim().charAt(0).toUpperCase() || 'A';
   const queryClient = useQueryClient();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<UsefulInfoForm>(() => buildInitialForm());
@@ -53,6 +57,7 @@ function AdminUsefulInfoPage() {
   const [search, setSearch] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<UsefulInfoItem | null>(null);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const usefulInfoQuery = useUsefulInfoListQuery(false);
   const createMutation = useCreateUsefulInfoMutation();
@@ -207,11 +212,47 @@ function AdminUsefulInfoPage() {
 
   const handleMenuChange = (item: AdminMenuItem) => {
     if (item === 'Utilizatori') {
+      if (!canManageUsers) {
+        navigate('/admin/events');
+        return;
+      }
       navigate('/admin/users');
       return;
     }
     if (item === 'Informații Utile') {
       navigate('/admin/useful-info');
+      return;
+    }
+    if (item === 'Audit Logs') {
+      if (!canManageUsers) {
+        navigate('/admin/events');
+        return;
+      }
+      navigate('/admin/audit-logs');
+      return;
+    }
+    if (item === 'Nomenclatoare - Scrutine') {
+      if (!canManageUsers) {
+        navigate('/admin/events');
+        return;
+      }
+      navigate('/admin/nomenclatoare/scrutine');
+      return;
+    }
+    if (item === 'Nomenclatoare - Responsabili') {
+      if (!canManageUsers) {
+        navigate('/admin/events');
+        return;
+      }
+      navigate('/admin/nomenclatoare/responsabili');
+      return;
+    }
+    if (item === 'Nomenclatoare - Grupuri țintă') {
+      if (!canManageUsers) {
+        navigate('/admin/events');
+        return;
+      }
+      navigate('/admin/nomenclatoare/grupuri-tinta');
       return;
     }
     navigate('/admin/events');
@@ -229,26 +270,30 @@ function AdminUsefulInfoPage() {
     setIsDrawerOpen(true);
   };
 
-  const handleDocumentUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const handleDocumentUpload = async (file: File | null) => {
+    // dacă se șterge fișierul din InputUpload
+    if (!file) {
+      setUploadFile(null);
+      setUploadedFileName('');
+      setForm((prev) => ({ ...prev, slug: '' }));
+      return;
+    }
 
     setError('');
     try {
       const result = await uploadMutation.mutateAsync(file);
       setForm((prev) => ({ ...prev, slug: result.url, type: 'document' }));
       setUploadedFileName(result.originalName);
+      setUploadFile(file);
       showSuccess('Document încărcat cu succes.');
     } catch {
       setError('Nu am putut încărca documentul.');
-    } finally {
-      event.target.value = '';
     }
   };
 
   return (
     <div className="admin-layout bg-body-tertiary">
-      <Sidebar activeItem="Informații Utile" onChange={handleMenuChange} />
+      <Sidebar activeItem="Informații Utile" onChange={handleMenuChange} canManageUsers={canManageUsers} />
 
       <main className="admin-layout__content p-3 p-md-4">
         <header className="admin-events-topbar bg-white border rounded-3 px-3 px-md-4 py-3 mb-3 d-flex justify-content-between align-items-center">
@@ -257,8 +302,8 @@ function AdminUsefulInfoPage() {
             Înapoi
           </button>
           <div className="d-flex align-items-center gap-2">
-            <span className="rounded-circle bg-secondary-subtle text-secondary d-inline-flex justify-content-center align-items-center admin-avatar">A</span>
-            <span className="text-secondary fw-medium">Admin</span>
+            <span className="rounded-circle bg-secondary-subtle text-secondary d-inline-flex justify-content-center align-items-center admin-avatar">{avatarInitial}</span>
+            <span className="text-secondary fw-medium">{currentUserEmail}</span>
             <button type="button" className="btn btn-primary btn-sm ms-2" onClick={onLogout}>Logout</button>
           </div>
         </header>
@@ -272,17 +317,16 @@ function AdminUsefulInfoPage() {
             <div className="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
               <h2 className="h4 mb-0">Informații utile</h2>
               <button type="button" className="btn btn-primary" onClick={openCreateDrawer}>
-                + Adaugă informație
+                <i className="fa-solid fa-plus me-2" aria-hidden="true"></i>
+                Adaugă informație
               </button>
             </div>
 
-            <div className="input-group mb-3">
-              <span className="input-group-text bg-white"><i className="fa-solid fa-magnifying-glass" aria-hidden="true" /></span>
-              <input
-                className="form-control form-input-size--md"
+            <div className="mb-3">
+              <SearchBar
                 placeholder="Caută după titlu, tip, status..."
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onSearch={setSearch}
               />
             </div>
 
@@ -309,6 +353,7 @@ function AdminUsefulInfoPage() {
         form={form}
         isUploading={isUploading}
         uploadedFileName={uploadedFileName}
+        uploadFile={uploadFile}
         availableTypeOptions={availableTypeOptions}
         typeLabels={TYPE_LABELS}
         onClose={resetForm}

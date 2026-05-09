@@ -6,57 +6,98 @@
   width: 100%;
 }
 
-.search-bar-container .input-group {
+.search-bar {
   display: flex;
-  flex-wrap: nowrap;
+  width: 100%;
   align-items: stretch;
+  border: 1px solid #ced4da;
   border-radius: 6px;
+  background: #fff;
   overflow: hidden;
-}
-
-.search-bar-container input {
-  border-radius: 0 !important;
-}
-
-.search-bar-container .input-group-text {
-  box-sizing: border-box;
-  height: 38px;
   min-height: 38px;
-  max-height: 38px;
-  padding-top: 0;
-  padding-bottom: 0;
+}
+
+.search-bar:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 0.18rem color-mix(in srgb, var(--color-primary) 18%, transparent);
+}
+
+.search-bar__input {
+  border: 0;
+  outline: none;
+  box-shadow: none;
+  width: 100%;
+  min-width: 0;
+  padding: 0.28rem 0.75rem;
+  font-size: 0.875rem;
+  color: #374151;
+  background: transparent;
+}
+
+.search-bar__input::placeholder {
+  color: #b8b8b8;
+}
+
+.search-bar__actions {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  align-self: stretch;
-  margin: 0;
+  gap: 0.35rem;
+  padding: 0 0.65rem 0 0.35rem;
+  flex-shrink: 0;
 }
 
-
-
-.input-group>:not(:first-child):not(.dropdown-menu):not(.valid-tooltip):not(.valid-feedback):not(.invalid-tooltip):not(.invalid-feedback) {
-  border-top-left-radius: 0 !important;
-  border-bottom-left-radius: 0 !important;
-  box-shadow: none !important;
+.search-bar__clear-btn {
+  border: 0;
+  background: transparent;
+  color: #9ca3af;
+  width: 1.2rem;
+  height: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 
-.search-bar-container .input-group > .form-control {
-  margin: 0 !important;
+.search-bar__clear-btn:hover {
+  color: #6b7280;
+}
+
+.search-bar__divider {
+  width: 1px;
   align-self: stretch;
+  background: #d1d5db;
+  margin: 0.4rem 0;
+}
+
+.search-bar__icon {
+  color: #b8b8b8;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2rem;
 }
 
 @media (max-width: 768px) {
-  .search-bar-container .input-group-text {
-    height: 48px;
-    min-height: 48px;
-    max-height: 48px;
-  }
-
   .search-bar-container {
     flex-direction: column;
   }
 
   .search-bar-container > button {
     width: 100%;
+  }
+
+  .search-bar {
+    min-height: 48px;
+  }
+
+  .search-bar__input {
+    font-size: 0.875rem;
+  }
+
+  .search-bar__icon {
+    font-size: 1rem;
+    width: 1.2rem;
   }
 }

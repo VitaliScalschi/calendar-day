@@ -1,0 +1,10 @@
+.admin-nomenclatoare-card {
+  border-radius: 12px;
+}
+
+.admin-nomenclatoare-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}

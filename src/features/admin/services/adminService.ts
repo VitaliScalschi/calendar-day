@@ -7,6 +7,9 @@ export type AdminElection = {
   eday: string;
   hasDocument?: boolean;
   electionTypeIds?: number[];
+  documentName?: string | null;
+  documentUrl?: string | null;
+  documentSizeBytes?: number | null;
 };
 
 export type AdminUser = {
@@ -22,11 +25,16 @@ type UploadDocumentResponse = {
   originalName: string;
 };
 
-export async function fetchAdminPanelData(signal?: AbortSignal) {
+export async function fetchAdminPanelData(
+  options?: { includeUsers?: boolean; signal?: AbortSignal },
+) {
+  const includeUsers = options?.includeUsers ?? true;
+  const signal = options?.signal;
+
   const [activeElections, inactiveElections, users] = await Promise.all([
     apiRequest<AdminElection[]>('/elections', { signal }),
     apiRequest<AdminElection[]>('/elections/inactive', { signal }),
-    apiRequest<AdminUser[]>('/users', { signal }),
+    includeUsers ? apiRequest<AdminUser[]>('/users', { signal }) : Promise.resolve([] as AdminUser[]),
   ]);
   const byId = new Map<string, AdminElection>();
   inactiveElections.forEach((e) => byId.set(e.id, e));

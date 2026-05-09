@@ -18,6 +18,7 @@ export interface EventsTableProps {
   onManageEvents?: (id: string) => void;
   onAddEventClick?: () => void;
   page: number;
+  pageSize: number;
   totalPages: number;
   onPageChange: (value: number) => void;
   totalCount: number;
