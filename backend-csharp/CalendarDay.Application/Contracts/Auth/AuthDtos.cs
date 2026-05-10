@@ -6,6 +6,11 @@ public class LoginRequestDto
     public string Password { get; set; } = string.Empty;
 }
 
+public class SiaSessionExchangeRequestDto
+{
+    public string SessionToken { get; set; } = string.Empty;
+}
+
 public record AuthUserDto(
     Guid Id,
     string Email,
