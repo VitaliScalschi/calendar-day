@@ -4,6 +4,7 @@ import { canAccessUsersPage, isAdminLoggedIn } from './shared/auth/adminAuth'
 import './App.css'
 
 const HomePage = lazy(() => import('./pages/HomePage/HomePage'));
+const CalendarPage = lazy(() => import('./pages/CalendarPage/CalendarPage'));
 const HistoryPage = lazy(() => import('./pages/HistoryPage/HistoryPage'));
 const Admin = lazy(() => import('./pages/Admin/Admin'));
 const LoginPage = lazy(() => import('./pages/LoginPage/LoginPage'));
@@ -27,6 +28,7 @@ function App() {
     <Suspense fallback={<div className="min-vh-100 d-flex justify-content-center align-items-center"><div className="spinner-border text-primary" role="status" aria-label="Se încarcă aplicația" /></div>}>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/history" element={<HistoryPage />} />
         <Route path="/admin" element={<AdminPortalGate />} />
         <Route

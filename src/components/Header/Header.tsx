@@ -36,6 +36,12 @@ function Header() {
             Home
           </NavLink>
           <NavLink
+            to="/calendar"
+            className={({ isActive }) => `btn btn-link header-nav-link ${isActive ? 'is-active' : ''}`}
+          >
+            Calendar
+          </NavLink>
+          <NavLink
             to="/history"
             className={({ isActive }) => `btn btn-link header-nav-link ${isActive ? 'is-active' : ''}`}
           >

@@ -12,7 +12,14 @@ import { usePagination } from '../../shared/hooks/usePagination';
 import './HistoryPage.css';
 import '../../components/EventFilter/EventFilter.css';
 
-type ApiElection = { id: string; title: string; isActive: boolean; eday: string; hasDocument?: boolean };
+type ApiElection = {
+  id: string;
+  title: string;
+  isActive: boolean;
+  eday: string;
+  hasDocument?: boolean;
+  electionTypeIds?: number[];
+};
 
 type ApiDeadline = {
   id: string;
@@ -106,17 +113,20 @@ function HistoryPage() {
     }
   }, [archiveQuery.data, archiveQuery.isError, archiveQuery.isFetching, archiveQuery.isLoading]);
 
+  const hasElectionTypesFromApi = Boolean(electionTypesQuery.data && electionTypesQuery.data.length > 0);
   const scrutinyTypeOptions = useMemo(() => {
-    if (electionTypesQuery.data && electionTypesQuery.data.length > 0) {
-      return electionTypesQuery.data.map((t) => ({ key: t.name, label: t.name }));
+    if (hasElectionTypesFromApi && electionTypesQuery.data) {
+      return electionTypesQuery.data.map((t) => ({ key: String(t.id), label: t.name }));
     }
     return FALLBACK_SCRUTINY_TYPE_NAMES.map((name) => ({ key: name, label: name }));
-  }, [electionTypesQuery.data]);
+  }, [hasElectionTypesFromApi, electionTypesQuery.data]);
 
-  const scrutinyTypeNamesForInfer = useMemo(
-    () => scrutinyTypeOptions.map((o) => o.key),
-    [scrutinyTypeOptions],
-  );
+  const scrutinyTypeNamesForInfer = useMemo(() => {
+    if (hasElectionTypesFromApi && electionTypesQuery.data) {
+      return electionTypesQuery.data.map((o) => o.name);
+    }
+    return scrutinyTypeOptions.map((o) => o.key);
+  }, [hasElectionTypesFromApi, electionTypesQuery.data, scrutinyTypeOptions]);
 
   const allowedScrutinyTypeKeys = useMemo(() => scrutinyTypeOptions.map((o) => o.key), [scrutinyTypeOptions]);
 
@@ -124,14 +134,22 @@ function HistoryPage() {
   const filterElectionPredicate = useCallback(
     (election: ApiElection) => {
       const matchesText = !normalizedElectionSearch || election.title.toLowerCase().includes(normalizedElectionSearch);
-      const inferred = inferScrutinyType(election.title, scrutinyTypeNamesForInfer);
-      const matchesType =
-        selectedScrutinyTypes.length === 0 ||
-        (inferred != null && selectedScrutinyTypes.includes(inferred)) ||
-        (inferred == null && selectedScrutinyTypes.some((s) => election.title.includes(s)));
+      let matchesType = true;
+
+      if (selectedScrutinyTypes.length > 0) {
+        if (hasElectionTypesFromApi) {
+          const electionTypeIdSet = new Set((election.electionTypeIds ?? []).map((id) => String(id)));
+          matchesType = selectedScrutinyTypes.some((selectedKey) => electionTypeIdSet.has(selectedKey));
+        } else {
+          const inferred = inferScrutinyType(election.title, scrutinyTypeNamesForInfer);
+          matchesType =
+            (inferred != null && selectedScrutinyTypes.includes(inferred)) ||
+            (inferred == null && selectedScrutinyTypes.some((s) => election.title.includes(s)));
+        }
+      }
       return matchesText && matchesType;
     },
-    [normalizedElectionSearch, selectedScrutinyTypes, scrutinyTypeNamesForInfer],
+    [hasElectionTypesFromApi, normalizedElectionSearch, selectedScrutinyTypes, scrutinyTypeNamesForInfer],
   );
   const filteredElections = useFilters(elections, filterElectionPredicate);
 
