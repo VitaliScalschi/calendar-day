@@ -341,7 +341,7 @@ function CalendarPage() {
                 eventContent={renderEventContent}
                 dayMaxEvents={4}
                 moreLinkClick="popover"
-                moreLinkText={(n) => `+${n} termene`}
+                moreLinkText={(n) => `+${n} evenim`}
               />
             </div>
           </div>
