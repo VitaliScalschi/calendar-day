@@ -1,0 +1,217 @@
+/* overflow: visible — altfel popover-ul „+N termene” (.fc-popover) e tăiat la marginea cardului */
+.calendar-page .calendar-page__card {
+  overflow: visible;
+}
+
+.calendar-page .fc .fc-popover {
+  border-color: var(--bs-primary, #0d6efd);
+  max-width: min(100vw - 1rem, 32rem);
+}
+
+/* Deschidere dinamică pe partea opusă locului unde e linkul +N */
+.calendar-page.calendar-page--more-popover-left .fc-direction-ltr .fc-more-popover {
+  transform: translateX(calc(-100% + 1.25rem));
+}
+
+.calendar-page.calendar-page--more-popover-right .fc-direction-ltr .fc-more-popover {
+  transform: none;
+}
+
+@media (max-width: 768px) {
+  .calendar-page .fc-direction-ltr .fc-more-popover {
+    transform: none;
+  }
+}
+
+/* „+N termene”: fără max-height / overflow care taie lista — se vede tot; pagina poate derula dacă sunt foarte multe */
+.calendar-page .fc .fc-more-popover .fc-popover-body {
+  max-height: none !important;
+  max-width: 100%;
+  overflow: visible !important;
+  padding: 0.5rem 0.55rem;
+}
+
+.calendar-page .fc .fc-more-popover .fc-daygrid-event {
+  margin: 0.15rem 0;
+  cursor: pointer;
+}
+
+.calendar-page .fc .fc-more-popover .calendar-fc-event-inner {
+  align-items: center;
+}
+
+.calendar-page .fc .fc-more-popover .calendar-fc-event-inner__dot {
+  margin-top: 0;
+}
+
+/* FullCalendar + themeSystem bootstrap5: păstrăm doar finețuri; butoanele folosesc clasele Bootstrap */
+.calendar-page .fc {
+  --fc-page-bg-color: transparent;
+  --fc-neutral-bg-color: var(--color-bg-secondary);
+  --fc-border-color: var(--color-border-light);
+  --fc-today-bg-color: rgba(13, 110, 253, 0.12);
+  font-size: 0.9rem;
+}
+
+.calendar-page .fc .fc-header-toolbar {
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.calendar-page .fc .fc-toolbar-chunk {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.calendar-page .fc .fc-toolbar-chunk:nth-child(2) {
+  flex: 1 1 auto;
+  justify-content: center;
+  min-width: 8rem;
+}
+
+.calendar-page .fc .fc-toolbar-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: capitalize;
+}
+
+@media (max-width: 768px) {
+  .calendar-page .fc .fc-header-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .calendar-page .fc .fc-toolbar-chunk:nth-child(2) {
+    order: -1;
+    justify-content: center;
+  }
+
+  .calendar-page .fc .fc-toolbar-chunk {
+    justify-content: center;
+  }
+}
+
+.calendar-page__loading {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+/* Evenimente: culoare primary Bootstrap + text care nu depășește chenarul */
+.calendar-page .fc .fc-daygrid-event-harness {
+  max-width: 100%;
+}
+
+.calendar-page .fc .fc-daygrid-event,
+.calendar-page .fc .fc-multimonth .fc-daygrid-event,
+.calendar-page .fc .fc-list-event {
+  border-radius: 0.25rem !important;
+  max-width: 100%;
+  cursor: pointer;
+}
+
+.calendar-page .fc .fc-daygrid-event:not(.fc-event-selected),
+.calendar-page .fc .fc-multimonth .fc-daygrid-event:not(.fc-event-selected) {
+  background-color: rgba(var(--bs-primary-rgb), 0.18) !important;
+  border-color: var(--bs-primary, #0d6efd) !important;
+}
+
+.calendar-page .fc .fc-daygrid-event .fc-event-main,
+.calendar-page .fc .fc-multimonth .fc-daygrid-event .fc-event-main {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: normal !important;
+  color: var(--bs-primary-text-emphasis, #052c65) !important;
+}
+
+.calendar-page .fc .fc-daygrid-block-event .fc-event-title,
+.calendar-page .fc .fc-multimonth .fc-daygrid-block-event .fc-event-title {
+  white-space: normal !important;
+}
+
+.calendar-page .fc .fc-list-event:hover td {
+  background-color: rgba(var(--bs-primary-rgb), 0.12);
+}
+
+/* În view-ul listă evităm punctul dublu (rămâne doar punctul din layout-ul FullCalendar) */
+.calendar-page .fc .fc-list-event .calendar-fc-event-inner__dot {
+  display: none;
+}
+
+.calendar-fc-event-inner {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.35rem;
+  line-height: 1.25;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  padding: 0.1rem 0;
+}
+
+.calendar-fc-event-inner__text {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.calendar-fc-event-inner__dot {
+  width: 7px;
+  height: 7px;
+  margin-top: 0.28rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background-color: var(--bs-primary, #0d6efd);
+}
+
+/* O singură linie de conținut: tema (termenul), același bold ca fosta linie de scrutin */
+.calendar-fc-event-inner__scrutiny {
+  font-size: 0.68rem;
+  font-weight: 700;
+  white-space: normal;
+}
+
+.calendar-page .fc-daygrid-event {
+  white-space: normal;
+}
+
+/* Evenimente expirate: roșu */
+.calendar-page .fc .fc-daygrid-event.calendar-event-expired:not(.fc-event-selected),
+.calendar-page .fc .fc-multimonth .fc-daygrid-event.calendar-event-expired:not(.fc-event-selected) {
+  background-color: rgba(220, 53, 69, 0.18) !important;
+  border-color: #dc3545 !important;
+}
+
+.calendar-page .fc .fc-daygrid-event.calendar-event-expired .fc-event-main,
+.calendar-page .fc .fc-multimonth .fc-daygrid-event.calendar-event-expired .fc-event-main {
+  color: #212529 !important;
+}
+
+.calendar-page .fc .fc-list-event.calendar-event-expired td {
+  color: #212529;
+}
+
+.calendar-page .fc .fc-list-event.calendar-event-expired:hover td {
+  background-color: rgba(220, 53, 69, 0.12);
+}
+
+.calendar-page .fc .calendar-event-expired .calendar-fc-event-inner__dot {
+  background-color: #dc3545;
+}
+
+.calendar-page__intro .calendar-page__intro-text {
+  min-width: min(100%, 280px);
+}

@@ -3,6 +3,7 @@ import './SearchBar.css'
 import type { SearchBarProps } from '../../interface/index'
 
 function SearchBar({
+  inputId,
   placeholder = 'Caută eveniment...',
   value,
   onSearch,
@@ -34,6 +35,7 @@ function SearchBar({
     <div className={`search-bar-container ${containerClassName}`.trim()} style={style}>
       <div className={`search-bar ${className}`.trim()}>
         <input
+          id={inputId}
           type="text"
           className="search-bar__input"
           placeholder={placeholder}

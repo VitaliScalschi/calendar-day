@@ -1,6 +1,7 @@
 import { apiRequest } from '../../../shared/services/apiClient';
 import type { ElectionItem } from '../../../interface';
 import { toLegacyDeadlineValue } from '../../../shared/utils/deadlineDate';
+import type { GroupedElectionBlock } from '../../../shared/utils/mapGroupedDeadlinesToCalendarEvents';
 
 type ApiElection = {
   id: string;
@@ -107,6 +108,43 @@ export async function fetchActiveElectionsWithDeadlines(signal?: AbortSignal): P
 export async function fetchInactiveElections(signal?: AbortSignal): Promise<InactiveElection[]> {
   const list = await apiRequest<InactiveElection[]>('/elections/inactive', { signal });
   return list.filter((e) => e.isActive === false);
+}
+
+/** Răspuns complet pentru calendar: include denumirea scrutinului (`electionTitle`) și câmpurile brute ale termenelor. */
+export async function fetchGroupedDeadlinesForCalendar(signal?: AbortSignal): Promise<GroupedElectionBlock[]> {
+  const [raw, elections] = await Promise.all([
+    apiRequest<
+      Array<{
+        electionId: string;
+        electionTitle?: string;
+        deadlines: Array<{
+          id: string;
+          title: string;
+          type?: string | null;
+          startDate?: string | null;
+          endDate?: string | null;
+          deadlines?: string[] | null;
+          description?: string | null;
+          additionalInfo?: string | null;
+          responsible?: string[] | null;
+          group?: string[] | null;
+        }>;
+      }>
+    >('/deadlines/grouped-by-election', { signal }),
+    apiRequest<ApiElection[]>('/elections', { signal }),
+  ]);
+
+  const activeElectionIds = new Set(
+    elections.filter((election) => election.isActive).map((election) => election.id),
+  );
+
+  return raw.map((entry) => ({
+    electionId: entry.electionId,
+    electionTitle: (entry.electionTitle ?? '').trim() || 'Scrutin fără denumire',
+    deadlines: entry.deadlines ?? [],
+  }))
+    .filter((entry) => activeElectionIds.has(entry.electionId))
+    .filter((entry) => entry.deadlines.length > 0);
 }
 
 export async function fetchGroupedDeadlines(signal?: AbortSignal): Promise<GroupedDeadlines[]> {

@@ -22,4 +22,7 @@ export const queryKeys = {
     panel: (includeUsers: boolean) => ['admin', 'panel', { includeUsers }] as const,
     scrutinyEvents: (scrutinyId: string) => ['admin', 'scrutinyEvents', scrutinyId] as const,
   },
+  calendar: {
+    groupedDeadlines: () => ['calendar', 'deadlines', 'groupedByElection'] as const,
+  },
 } as const;
