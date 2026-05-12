@@ -1,9 +1,10 @@
 import type { AdminMenuItem, SidebarProps } from './AdminSidebar.interface';
 
 const MENU: Array<{ key: AdminMenuItem; icon: string }> = [
+  { key: 'Dashboard', icon: 'fa-solid fa-gauge-high' },
   { key: 'Programe', icon: 'fa-solid fa-calendar-days' },
-  { key: 'Utilizatori', icon: 'fa-solid fa-users' },
   { key: 'Informații Utile', icon: 'fa-solid fa-circle-info' },
+  { key: 'Utilizatori', icon: 'fa-solid fa-users' },
 ];
 
 const AUDIT_MENU_ITEM: { key: AdminMenuItem; icon: string } = {

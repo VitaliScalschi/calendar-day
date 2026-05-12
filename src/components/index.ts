@@ -9,6 +9,7 @@ export {default as Calendar} from './Calendar/Calendar';
 export {default as Modal} from './Modal/Modal';
 export {default as TimelineEvent} from './TimelineEvent/TimelineEvent';
 export {default as SearchBar} from './SearchBar/SearchBar';
+export { Button } from './Button';
 export {default as EventFilter} from './EventFilter/EventFilter';
 export {default as ScrollToTop} from './ScrollToTop/ScrollToTop';
 export {default as ElectionInfoCard} from './ElectionInfoCard/ElectionInfoCard';

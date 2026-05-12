@@ -185,3 +185,41 @@ export async function fetchGroupedDeadlines(signal?: AbortSignal): Promise<Group
     })),
   }));
 }
+
+/** Blocuri pentru dashboard admin: termene grupate + flag dacă scrutinul e activ. */
+export type DashboardElectionBlock = GroupedElectionBlock & { electionIsActive: boolean };
+
+export async function fetchDashboardElectionBlocks(signal?: AbortSignal): Promise<DashboardElectionBlock[]> {
+  const [raw, activeElections] = await Promise.all([
+    apiRequest<
+      Array<{
+        electionId: string;
+        electionTitle?: string;
+        deadlines: Array<{
+          id: string;
+          title: string;
+          type?: string | null;
+          startDate?: string | null;
+          endDate?: string | null;
+          deadlines?: string[] | null;
+          description?: string | null;
+          additionalInfo?: string | null;
+          responsible?: string[] | null;
+          group?: string[] | null;
+        }>;
+      }>
+    >('/deadlines/grouped-by-election', { signal }),
+    apiRequest<ApiElection[]>('/elections', { signal }),
+  ]);
+
+  const activeSet = new Set(activeElections.map((e) => e.id));
+
+  return (raw ?? [])
+    .map((entry) => ({
+      electionId: entry.electionId,
+      electionTitle: (entry.electionTitle ?? '').trim() || 'Scrutin',
+      deadlines: entry.deadlines ?? [],
+      electionIsActive: activeSet.has(entry.electionId),
+    }))
+    .filter((b) => b.deadlines.length > 0);
+}

@@ -110,7 +110,7 @@ function MainFiltersColumn({
             aria-label={isFilterOpen ? 'Ascunde filtrele' : 'Afiseaza filtrele'}
             title={isFilterOpen ? 'Ascunde filtrele' : 'Afiseaza filtrele'}
           >
-            <i className="fa-solid fa-sliders" aria-hidden="true" />
+            <i className="fa-solid fa-filter" aria-hidden="true" />
           </button>
         ) : null}
 
@@ -124,7 +124,10 @@ function MainFiltersColumn({
               aria-hidden={!isFilterOpen}
             >
               <div className="offcanvas-header">
-                <h5 className="offcanvas-title" id="main-filters-title">Filtreaza</h5>
+                <h5 className="offcanvas-title d-flex align-items-center gap-2" id="main-filters-title">
+                  <i className="fa-solid fa-filter text-primary" aria-hidden="true" />
+                  Filtrează
+                </h5>
                 <button
                   type="button"
                   className="btn-close"

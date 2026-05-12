@@ -215,3 +215,29 @@
 .calendar-page__intro .calendar-page__intro-text {
   min-width: min(100%, 280px);
 }
+
+/* Legendă culori sub calendar */
+.calendar-page__legend {
+  background: var(--fc-page-bg-color, #fff);
+}
+
+.calendar-page__legend-list {
+  gap: 0.75rem 1.25rem;
+}
+
+.calendar-page__legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.calendar-page__legend-dot--active {
+  background-color: var(--bs-primary, #0d6efd);
+  box-shadow: 0 0 0 1px rgba(13, 110, 253, 0.35);
+}
+
+.calendar-page__legend-dot--expired {
+  background-color: #dc3545;
+  box-shadow: 0 0 0 1px rgba(220, 53, 69, 0.35);
+}

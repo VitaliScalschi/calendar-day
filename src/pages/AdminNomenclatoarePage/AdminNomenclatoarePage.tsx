@@ -1,5 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { navigateForAdminSidebarItem } from '../../shared/admin/adminSidebarNavigation';
 import Pagination from '../../components/Pagination/Pagination';
 import HeaderBar from '../../components/AdminPanel/components/Header/HeaderBar';
 import Sidebar from '../../components/AdminPanel/components/Sidebar/AdminSidebar';
@@ -115,33 +116,12 @@ function AdminNomenclatoarePage() {
     return filteredResponsibleOptions.slice(start, start + RESPONSIBLE_PAGE_SIZE);
   }, [filteredResponsibleOptions, responsiblePage, responsibleTotalPages]);
 
-  const handleMenuChange = (item: AdminMenuItem) => {
-    if (item === 'Utilizatori') {
-      navigate('/admin/users');
-      return;
-    }
-    if (item === 'Informații Utile') {
-      navigate('/admin/useful-info');
-      return;
-    }
-    if (item === 'Audit Logs') {
-      navigate('/admin/audit-logs');
-      return;
-    }
-    if (item === 'Nomenclatoare - Scrutine') {
-      navigate('/admin/nomenclatoare/scrutine');
-      return;
-    }
-    if (item === 'Nomenclatoare - Responsabili') {
-      navigate('/admin/nomenclatoare/responsabili');
-      return;
-    }
-    if (item === 'Nomenclatoare - Grupuri țintă') {
-      navigate('/admin/nomenclatoare/grupuri-tinta');
-      return;
-    }
-    navigate('/admin/events');
-  };
+  const handleMenuChange = useCallback(
+    (item: AdminMenuItem) => {
+      navigateForAdminSidebarItem(navigate, item, canManageUsers);
+    },
+    [canManageUsers, navigate],
+  );
 
   const onLogout = () => {
     logoutAdmin();

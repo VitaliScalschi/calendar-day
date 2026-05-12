@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { navigateForAdminSidebarItem } from '../../shared/admin/adminSidebarNavigation';
 import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '../../components/AdminPanel/components';
 import type { AdminMenuItem } from '../../components/AdminPanel/components/Sidebar/AdminSidebar.interface';
@@ -148,33 +149,12 @@ function AdminAuditLogsPage() {
     },
   ];
 
-  const handleMenuChange = (item: AdminMenuItem) => {
-    if (item === 'Utilizatori') {
-      navigate('/admin/users');
-      return;
-    }
-    if (item === 'Informații Utile') {
-      navigate('/admin/useful-info');
-      return;
-    }
-    if (item === 'Audit Logs') {
-      navigate('/admin/audit-logs');
-      return;
-    }
-    if (item === 'Nomenclatoare - Scrutine') {
-      navigate('/admin/nomenclatoare/scrutine');
-      return;
-    }
-    if (item === 'Nomenclatoare - Responsabili') {
-      navigate('/admin/nomenclatoare/responsabili');
-      return;
-    }
-    if (item === 'Nomenclatoare - Grupuri țintă') {
-      navigate('/admin/nomenclatoare/grupuri-tinta');
-      return;
-    }
-    navigate('/admin/events');
-  };
+  const handleMenuChange = useCallback(
+    (item: AdminMenuItem) => {
+      navigateForAdminSidebarItem(navigate, item, canManageUsers);
+    },
+    [canManageUsers, navigate],
+  );
 
   const onLogout = () => {
     logoutAdmin();
@@ -187,7 +167,7 @@ function AdminAuditLogsPage() {
 
       <main className="admin-layout__content p-3 p-md-4">
         <header className="admin-events-topbar bg-white border rounded-3 px-3 px-md-4 py-3 mb-3 d-flex justify-content-between align-items-center">
-          <button type="button" className="btn btn-link text-decoration-none fw-semibold p-0 admin-events-topbar__back" onClick={() => navigate('/admin/events')}>
+          <button type="button" className="btn btn-link text-decoration-none fw-semibold p-0 admin-events-topbar__back" onClick={() => navigate('/admin/dashboard')}>
             <span aria-hidden="true" className="me-2">←</span>
             Înapoi
           </button>

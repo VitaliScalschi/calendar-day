@@ -21,6 +21,7 @@ export function useUpsertElectionMutation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.panel(true) });
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.panel(false) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.elections.dashboardBlocks() });
     },
   });
 }
@@ -33,6 +34,7 @@ export function useDeleteElectionMutation() {
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.panel(true) });
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.panel(false) });
       queryClient.invalidateQueries({ queryKey: queryKeys.elections.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.elections.dashboardBlocks() });
     },
   });
 }

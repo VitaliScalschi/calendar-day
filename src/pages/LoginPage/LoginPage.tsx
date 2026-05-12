@@ -15,8 +15,8 @@ function LoginPage() {
     return <Navigate to="/admin" replace />;
   }
 
-  const from = (location.state as { from?: string } | null)?.from || '/admin/events';
-  const targetAfterLogin = from === '/admin' ? '/admin/events' : from;
+  const from = (location.state as { from?: string } | null)?.from || '/admin/dashboard';
+  const targetAfterLogin = from === '/admin' ? '/admin/dashboard' : from;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Sidebar } from '../../components/AdminPanel/components';
 import type { AdminMenuItem } from '../../components/AdminPanel/components/Sidebar/AdminSidebar.interface';
 import { canAccessUsersPage, getAdminEmail, logoutAdmin } from '../../shared/auth/adminAuth';
+import { navigateForAdminSidebarItem } from '../../shared/admin/adminSidebarNavigation';
 import { ApiError, apiRequest } from '../../shared/services/apiClient';
 import DateRangePicker from '../../components/DateRangePicker/DateRangePicker';
 import { InputDate } from '../../components/InputDate';
@@ -674,49 +675,12 @@ function AdminScrutinyEventsPage() {
     setSingleDeadlineDateInput(selectedDate ? toSqlDateLocal(selectedDate) : '');
   };
 
-  const handleAdminMenuChange = (item: AdminMenuItem) => {
-    if (item === 'Utilizatori') {
-      if (!canManageUsers) {
-        navigate('/admin/events');
-        return;
-      }
-      navigate('/admin/users');
-      return;
-    }
-    if (item === 'Audit Logs') {
-      if (!canManageUsers) {
-        navigate('/admin/events');
-        return;
-      }
-      navigate('/admin/audit-logs');
-      return;
-    }
-    if (item === 'Nomenclatoare - Scrutine') {
-      if (!canManageUsers) {
-        navigate('/admin/events');
-        return;
-      }
-      navigate('/admin/nomenclatoare/scrutine');
-      return;
-    }
-    if (item === 'Nomenclatoare - Responsabili') {
-      if (!canManageUsers) {
-        navigate('/admin/events');
-        return;
-      }
-      navigate('/admin/nomenclatoare/responsabili');
-      return;
-    }
-    if (item === 'Nomenclatoare - Grupuri țintă') {
-      if (!canManageUsers) {
-        navigate('/admin/events');
-        return;
-      }
-      navigate('/admin/nomenclatoare/grupuri-tinta');
-      return;
-    }
-    navigate('/admin/events');
-  };
+  const handleAdminMenuChange = useCallback(
+    (item: AdminMenuItem) => {
+      navigateForAdminSidebarItem(navigate, item, canManageUsers);
+    },
+    [canManageUsers, navigate],
+  );
 
   const fetchAllDeadlinesFromElection = async (electionId: string): Promise<ApiDeadline[]> => {
     const pageSize = 100;
@@ -891,7 +855,7 @@ function AdminScrutinyEventsPage() {
           <button
             type="button"
             className="btn btn-link text-decoration-none fw-semibold p-0 admin-events-topbar__back"
-            onClick={() => navigate('/admin')}
+            onClick={() => navigate('/admin/events')}
           >
             <span aria-hidden="true" className="me-2">←</span>
             Înapoi
