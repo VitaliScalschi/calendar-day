@@ -10,13 +10,13 @@ import ro from '@fullcalendar/core/locales/ro';
 import type { DatesSetArg, EventClickArg, EventContentArg, EventInput } from '@fullcalendar/core';
 import { addDays, format, parseISO } from 'date-fns';
 import * as XLSX from 'xlsx';
-import { Header, Footer, Modal, ScrollToTop, SearchBar } from '../../components';
+import { Header, Footer, Modal, ScrollToTop, SearchBar, Button } from '../../components';
 import type { EventDeadlineProps } from '../../interface';
 import { useCalendarDeadlinesQuery } from '../../features/elections/hooks/useCalendarDeadlinesQuery';
 import { mapGroupedDeadlinesToCalendarEvents } from '../../shared/utils/mapGroupedDeadlinesToCalendarEvents';
 import './CalendarPage.css';
 
-/** Referințe stabile — altfel FullCalendar se reinițializează la fiecare render și poate bloca pagina. */
+
 const calendarPlugins = [bootstrap5Plugin, dayGridPlugin, multiMonthPlugin, listPlugin, interactionPlugin];
 
 const calendarViews = {
@@ -254,16 +254,18 @@ function CalendarPage() {
                 {showScrutinySelector ? ' Dacă există mai multe scrutinii, alege-l pe cel dorit din listă.' : ''}
               </p>
             </div>
-            <button
-              type="button"
-              className="btn btn-outline-primary btn-sm d-inline-flex align-items-center flex-shrink-0"
+            <Button
+              variant="primary"
+              outline
+              size="sm"
+              className="d-inline-flex align-items-center flex-shrink-0"
               onClick={handleExportExcel}
               disabled={isLoading || events.length === 0}
               title="Exporta planul calendaristic"
             >
               Exporta planul calendaristic
-              <i className="fa-solid fa-download ms-2" aria-hidden="true"></i>
-            </button>
+              <i className="fa-solid fa-download ms-2" aria-hidden="true" />
+            </Button>
           </div>
 
           {isError ? (
@@ -341,8 +343,25 @@ function CalendarPage() {
                 eventContent={renderEventContent}
                 dayMaxEvents={4}
                 moreLinkClick="popover"
-                moreLinkText={(n) => `+${n} termene`}
+                moreLinkText={(n) => `+${n} evenimente`}
               />
+              <div
+                className="calendar-page__legend border-top pt-3 mt-2"
+                role="region"
+                aria-label="Legendă culori evenimente în calendar"
+              >
+                <p className="small text-secondary mb-2 mb-md-0 me-md-3 d-md-inline">Evenimentele în calendar:</p>
+                <ul className="calendar-page__legend-list list-unstyled mb-0 d-md-inline-flex flex-wrap align-items-center gap-3">
+                  <li className="calendar-page__legend-item d-inline-flex align-items-center gap-2">
+                    <span className="calendar-page__legend-dot calendar-page__legend-dot--active" aria-hidden />
+                    <span className="small">— evenimente active</span>
+                  </li>
+                  <li className="calendar-page__legend-item d-inline-flex align-items-center gap-2">
+                    <span className="calendar-page__legend-dot calendar-page__legend-dot--expired" aria-hidden />
+                    <span className="small">— evenimente expirate</span>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>

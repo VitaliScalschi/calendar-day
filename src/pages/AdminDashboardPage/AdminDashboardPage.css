@@ -1,0 +1,396 @@
+.admin-dashboard-hero {
+  background: #fff;
+  border: 1px solid #e7ebf0;
+  border-radius: 1rem;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.admin-dashboard-hero h1 {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: #1a2332;
+  letter-spacing: -0.02em;
+}
+
+.admin-dashboard-hero__greet {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #2f3743;
+  margin-bottom: 0.2rem;
+}
+
+.admin-dashboard-hero__sub {
+  color: #6c757d;
+  font-size: 0.92rem;
+  max-width: 36rem;
+}
+
+.admin-dashboard-hero__controls .form-control {
+  max-width: 11rem;
+  font-size: 0.85rem;
+}
+
+.admin-dashboard-metric-card {
+  background: #fff;
+  border: 1px solid #e7ebf0;
+  border-radius: 1rem;
+  padding: 1rem 1.1rem;
+  height: 100%;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.admin-dashboard-metric-card__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  color: #fff;
+}
+
+/* Evenimente totale — țiglă deschisă + calendar (ca referința vizuală) */
+.admin-dashboard-metric-card__icon--total-soft {
+  background: #e8f2ff;
+  color: #0d6efd;
+  border: 1px solid rgba(13, 110, 253, 0.14);
+  box-shadow: 0 1px 3px rgba(13, 110, 253, 0.07);
+}
+
+/* Viitoare — megafon pe fundal gri deschis (ca referința) */
+.admin-dashboard-metric-card__icon--viitoare-soft {
+  background: #eceff1;
+  color: #6c757d;
+  border: 1px solid rgba(73, 80, 87, 0.12);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+/* Expirate — calendar cu X pe fundal roșu foarte deschis */
+.admin-dashboard-metric-card__icon--expirate-soft {
+  background: #fce8e8;
+  color: #dc3545;
+  border: 1px solid rgba(220, 53, 69, 0.18);
+  box-shadow: 0 1px 3px rgba(220, 53, 69, 0.08);
+}
+
+/* În desfășurare — clepsidră portocalie pe fundal crem */
+.admin-dashboard-metric-card__icon--in-lucru-soft {
+  background: #fff8f0;
+  color: #fd7e14;
+  border: 1px solid rgba(253, 126, 20, 0.22);
+  box-shadow: 0 1px 3px rgba(253, 126, 20, 0.09);
+}
+
+.admin-dashboard-metric-card__value {
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #1a2332;
+}
+
+.admin-dashboard-metric-card__delta {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.admin-dashboard-metric-card__delta--muted {
+  color: #9aa5b5;
+  font-weight: 500;
+}
+
+.admin-dashboard-card {
+  background: #fff;
+  border: 1px solid #e7ebf0;
+  border-radius: 1rem;
+  padding: 1.1rem 1.25rem;
+  height: 100%;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.admin-dashboard-card__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a2332;
+}
+
+.admin-dashboard-card--donut {
+  display: flex;
+  flex-direction: column;
+  padding-top: 1.25rem;
+  padding-bottom: 1.35rem;
+}
+
+.admin-dashboard-card__title--donut {
+  text-align: center;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+  margin-bottom: 1.25rem;
+}
+
+.admin-dashboard-donut-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.75rem;
+  flex: 1;
+  width: 100%;
+  padding: 0.25rem 0 0;
+}
+
+@media (min-width: 768px) {
+  .admin-dashboard-donut-wrap {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 2.25rem 3rem;
+  }
+}
+
+.admin-dashboard-donut {
+  width: min(248px, 76vw);
+  height: min(248px, 76vw);
+  max-width: 280px;
+  max-height: 280px;
+  border-radius: 50%;
+  position: relative;
+  flex-shrink: 0;
+  /* Inel alb exterior ca în mock — separă segmentele de fundal */
+  box-shadow:
+    0 0 0 5px #fff,
+    0 10px 40px rgba(15, 23, 42, 0.08),
+    0 2px 10px rgba(15, 23, 42, 0.05);
+}
+
+.admin-dashboard-donut__hole {
+  position: absolute;
+  inset: 26%;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.05);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.admin-dashboard-donut__total {
+  font-size: clamp(1.85rem, 5.5vw, 2.35rem);
+  font-weight: 800;
+  color: #111827;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.admin-dashboard-donut__label {
+  margin-top: 0.35rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #94a3b8;
+  letter-spacing: 0.01em;
+}
+
+.admin-dashboard-donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  width: 100%;
+  max-width: 20.5rem;
+  padding: 0.45rem 0.55rem 0.55rem;
+  background: #fff;
+  border: none;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
+}
+
+.admin-dashboard-donut-legend__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.55rem 0.6rem;
+  border-radius: 0.5rem;
+}
+
+.admin-dashboard-donut-legend__label {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: #334155;
+}
+
+.admin-dashboard-donut-legend__value {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.admin-dashboard-donut-legend__num {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.admin-dashboard-donut-legend__pct {
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.admin-dashboard-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+.admin-dashboard-dot--legend {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.06);
+}
+
+/* Termene apropiate — timeline vertical (mock) */
+.admin-dashboard-deadline-tl {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Peste 10 evenimente: înălțime ~10 rânduri + scroll */
+.admin-dashboard-deadline-tl--scroll {
+  max-height: min(40rem, 58vh);
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  padding-right: 0.35rem;
+  scrollbar-gutter: stable;
+}
+
+.admin-dashboard-deadline-tl__row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.65rem;
+  min-height: 3.25rem;
+  padding-bottom: 0.85rem;
+}
+
+.admin-dashboard-deadline-tl__row:last-child {
+  padding-bottom: 0;
+}
+
+.admin-dashboard-deadline-tl__rail {
+  position: relative;
+  width: 14px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  padding-top: 0.2rem;
+}
+
+.admin-dashboard-deadline-tl__row:not(:last-child) .admin-dashboard-deadline-tl__rail::after {
+  content: '';
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  bottom: -2px;
+  background: #e2e6ea;
+  border-radius: 1px;
+}
+
+.admin-dashboard-deadline-tl__marker {
+  position: relative;
+  z-index: 1;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 0.35rem;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+.admin-dashboard-deadline-tl__marker--critical {
+  background: #dc3545;
+}
+
+.admin-dashboard-deadline-tl__marker--soon {
+  background: #fd7e14;
+}
+
+.admin-dashboard-deadline-tl__marker--normal {
+  background: #0d6efd;
+}
+
+.admin-dashboard-deadline-tl__marker--later {
+  background: #adb5bd;
+}
+
+.admin-dashboard-deadline-tl__body {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  flex: 1 1 0%;
+  min-width: 0;
+  padding-top: 0.05rem;
+}
+
+.admin-dashboard-deadline-tl__text {
+  min-width: 0;
+  flex: 1 1 0%;
+  overflow: hidden;
+}
+
+.admin-dashboard-deadline-tl__title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1a2332;
+  line-height: 1.25;
+}
+
+.admin-dashboard-deadline-tl__date {
+  font-size: 0.8rem;
+  margin-top: 0.15rem;
+}
+
+.admin-dashboard-deadline-tl__countdown {
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding-top: 0.15rem;
+}
+
+.admin-dashboard-deadline-tl__countdown--critical {
+  color: #dc3545;
+}
+
+.admin-dashboard-deadline-tl__countdown--soon {
+  color: #fd7e14;
+}
+
+.admin-dashboard-deadline-tl__countdown--normal {
+  color: #0d6efd;
+}
+
+.admin-dashboard-deadline-tl__countdown--later {
+  color: #6c757d;
+}

@@ -1,4 +1,5 @@
 export type AdminMenuItem =
+  | 'Dashboard'
   | 'Programe'
   | 'Utilizatori'
   | 'Informații Utile'

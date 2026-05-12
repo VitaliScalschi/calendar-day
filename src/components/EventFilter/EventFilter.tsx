@@ -95,7 +95,10 @@ function EventFilter({
 
   return (
     <div className="event-filter-panel border rounded p-2">
-      <h3 className="event-filter-title">Filtrează</h3>
+      <h3 className="event-filter-title">
+        <i className="fa-solid fa-filter event-filter-title__icon" aria-hidden="true" />
+        Filtrează
+      </h3>
       {
         electionOptions.length > 1 && (
         <div className="event-filter-section">

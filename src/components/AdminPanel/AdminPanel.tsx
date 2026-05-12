@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Sidebar, HeaderBar, DashboardCards } from './components/index';
+import { Sidebar, HeaderBar } from './components/index';
 import EventsTable from './components/Table/EventsTable';
 import type { AdminEventItem } from './components/Table/EventsTable.interface';
 import Users from './components/Users/Users';
@@ -25,6 +25,7 @@ import { useElectionTypesQuery } from '../../features/election-types/hooks/useEl
 import '../EventFilter/EventFilter.css';
 import './components/AdminPanel.css';
 import type { AdminMenuItem } from './components/Sidebar/AdminSidebar.interface';
+import { getAdminSidebarItemFromPath, navigateForAdminSidebarItem } from '../../shared/admin/adminSidebarNavigation';
 
 const PAGE_SIZE = 5;
 type ScrutinyForm = {
@@ -42,16 +43,6 @@ type UserForm = {
   role: 'Admin' | 'Editor' | 'Viewer';
   isActive: boolean;
 };
-
-function getMenuFromPath(pathname: string): AdminMenuItem {
-  if (pathname.startsWith('/admin/users')) return 'Utilizatori';
-  if (pathname.startsWith('/admin/useful-info')) return 'Informații Utile';
-  if (pathname.startsWith('/admin/nomenclatoare/scrutine')) return 'Nomenclatoare - Scrutine';
-  if (pathname.startsWith('/admin/nomenclatoare/responsabili')) return 'Nomenclatoare - Responsabili';
-  if (pathname.startsWith('/admin/nomenclatoare/grupuri-tinta')) return 'Nomenclatoare - Grupuri țintă';
-  if (pathname.startsWith('/admin/audit-logs')) return 'Audit Logs';
-  return 'Programe';
-}
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
@@ -75,7 +66,7 @@ function isAllowedCalendarProgramFileName(name: string): boolean {
 function AdminPanel() {
   const navigate = useNavigate();
   const location = useLocation();
-  const activeMenuItem = getMenuFromPath(location.pathname);
+  const activeMenuItem = getAdminSidebarItemFromPath(location.pathname);
   const currentRole = getAdminRole();
   const canManageUsers = canAccessUsersPage();
   const [search, setSearch] = useState('');
@@ -175,13 +166,6 @@ function AdminPanel() {
   const safePage = Math.min(page, totalPages);
   const pagedRows = filteredRows.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
-  const stats = useMemo(() => {
-    const total = scrutinyRows.length;
-    const active = scrutinyRows.filter((x) => x.status === 'Activ').length;
-    const inactive = total - active;
-    return { total, active, inactive };
-  }, [scrutinyRows]);
-
   const scrutinyTypeOptions = useMemo(
     () => (electionTypesQuery.data ?? []).map((t) => ({ key: String(t.id), label: t.name })),
     [electionTypesQuery.data],
@@ -214,53 +198,12 @@ function AdminPanel() {
     navigate('/login', { replace: true });
   }, [navigate]);
 
-  const handleMenuChange = useCallback((item: AdminMenuItem) => {
-    if (item === 'Utilizatori') {
-      if (!canManageUsers) {
-        navigate('/admin/events');
-        return;
-      }
-      navigate('/admin/users');
-      return;
-    }
-    if (item === 'Informații Utile') {
-      navigate('/admin/useful-info');
-      return;
-    }
-    if (item === 'Audit Logs') {
-      if (!canManageUsers) {
-        navigate('/admin/events');
-        return;
-      }
-      navigate('/admin/audit-logs');
-      return;
-    }
-    if (item === 'Nomenclatoare - Scrutine') {
-      if (!canManageUsers) {
-        navigate('/admin/events');
-        return;
-      }
-      navigate('/admin/nomenclatoare/scrutine');
-      return;
-    }
-    if (item === 'Nomenclatoare - Responsabili') {
-      if (!canManageUsers) {
-        navigate('/admin/events');
-        return;
-      }
-      navigate('/admin/nomenclatoare/responsabili');
-      return;
-    }
-    if (item === 'Nomenclatoare - Grupuri țintă') {
-      if (!canManageUsers) {
-        navigate('/admin/events');
-        return;
-      }
-      navigate('/admin/nomenclatoare/grupuri-tinta');
-      return;
-    }
-    navigate('/admin/events');
-  }, [canManageUsers, navigate]);
+  const handleMenuChange = useCallback(
+    (item: AdminMenuItem) => {
+      navigateForAdminSidebarItem(navigate, item, canManageUsers);
+    },
+    [canManageUsers, navigate],
+  );
 
   const openCreateModal = () => {
     setFormError('');
@@ -471,7 +414,6 @@ function AdminPanel() {
 
       <main className="admin-layout__content p-3 p-md-4">
         <HeaderBar title={activeMenuItem === 'Utilizatori' ? 'Administrare Utilizatori' : 'Administrare Programului Calendaristic'} onLogout={handleLogout} />
-        <DashboardCards total={stats.total} active={stats.active} expired={stats.inactive} users={users.length} />
 
         {loading ? <div className="alert alert-info">Se incarca datele...</div> : null}
         {loadError ? <div className="alert alert-warning">{loadError}</div> : null}

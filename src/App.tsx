@@ -13,6 +13,7 @@ const AdminScrutinyEventsPage = lazy(() => import('./pages/AdminScrutinyEventsPa
 const AdminUsefulInfoPage = lazy(() => import('./pages/AdminUsefulInfoPage/AdminUsefulInfoPage'));
 const AdminAuditLogsPage = lazy(() => import('./pages/AdminAuditLogsPage/AdminAuditLogsPage'));
 const AdminNomenclatoarePage = lazy(() => import('./pages/AdminNomenclatoarePage/AdminNomenclatoarePage'));
+const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage/AdminDashboardPage'));
 
 function toAdminGateSearch(fromPath: string) {
   return fromPath.startsWith('/admin') ? `?returnTo=${encodeURIComponent(fromPath)}` : '';
@@ -31,6 +32,14 @@ function App() {
         <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/history" element={<HistoryPage />} />
         <Route path="/admin" element={<AdminPortalGate />} />
+        <Route
+          path="/admin/dashboard"
+          element={
+            isAdminLoggedIn()
+              ? <AdminDashboardPage />
+              : <Navigate to={`/admin${toAdminGateSearch('/admin/dashboard')}`} replace />
+          }
+        />
         <Route
           path="/admin/events"
           element={isAdminLoggedIn() ? <Admin /> : <Navigate to={`/admin${toAdminGateSearch('/admin/events')}`} replace />}

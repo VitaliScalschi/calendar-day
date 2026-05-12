@@ -4,6 +4,7 @@ export const queryKeys = {
     active: () => ['elections', 'active'] as const,
     inactive: () => ['elections', 'inactive'] as const,
     groupedDeadlines: () => ['deadlines', 'groupedByElection'] as const,
+    dashboardBlocks: () => ['elections', 'dashboardBlocks'] as const,
   },
   usefulInfo: {
     all: ['usefulInfo'] as const,

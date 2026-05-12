@@ -17,7 +17,7 @@ function pickSessionToken(params: URLSearchParams): string | null {
 
 /** Accept only same-origin admin paths to avoid open redirects. */
 function sanitizeReturnPath(raw: string | null): string {
-  const fallback = '/admin/events';
+  const fallback = '/admin/dashboard';
   if (!raw?.trim()) return fallback;
   const t = raw.trim();
   if (!t.startsWith('/admin') || t.startsWith('//') || t.includes('://')) {
