@@ -10,7 +10,7 @@ import ro from '@fullcalendar/core/locales/ro';
 import type { DatesSetArg, EventClickArg, EventContentArg, EventInput } from '@fullcalendar/core';
 import { addDays, format, parseISO } from 'date-fns';
 import * as XLSX from 'xlsx';
-import { Header, Footer, Modal, ScrollToTop, SearchBar, Button } from '../../components';
+import { Header, Footer, InputSelect, type InputSelectOption, Modal, ScrollToTop, SearchBar, Button } from '../../components';
 import type { EventDeadlineProps } from '../../interface';
 import { useCalendarDeadlinesQuery } from '../../features/elections/hooks/useCalendarDeadlinesQuery';
 import { mapGroupedDeadlinesToCalendarEvents } from '../../shared/utils/mapGroupedDeadlinesToCalendarEvents';
@@ -180,6 +180,11 @@ function CalendarPage() {
       .sort((a, b) => a.title.localeCompare(b.title, 'ro'));
   }, [grouped]);
 
+  const calendarScrutinySelectOptions = useMemo<InputSelectOption<string>[]>(
+    () => scrutinyOptions.map((o) => ({ value: o.id, label: o.title })),
+    [scrutinyOptions],
+  );
+
   /** Fără „toate”: mereu un scrutin; implicit primul din listă. */
   useEffect(() => {
     if (scrutinyOptions.length === 0) {
@@ -246,26 +251,45 @@ function CalendarPage() {
         className={`main-content container-fluid my-3 flex-grow-1 calendar-page calendar-page--more-popover-${morePopoverDirection}`}
       >
         <div className="container">
-          <div className="calendar-page__intro d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
-            <div className="flex-grow-1 calendar-page__intro-text">
-              <h1 className="h5 fw-semibold mb-2">Calendar</h1>
-              <p className="text-secondary small mb-0">
-                Termenele sunt afișate pentru scrutinul curent.
-                {showScrutinySelector ? ' Dacă există mai multe scrutinii, alege-l pe cel dorit din listă.' : ''}
+          <div className="calendar-page__intro">
+            <div className="calendar-page__intro-text">
+              <h1 className="calendar-page__title">Calendar</h1>
+              <p className="calendar-page__subtitle">
+                Vizualizează termenele și evenimentele pentru scrutinul selectat.
               </p>
             </div>
-            <Button
-              variant="primary"
-              outline
-              size="sm"
-              className="d-inline-flex align-items-center flex-shrink-0"
-              onClick={handleExportExcel}
-              disabled={isLoading || events.length === 0}
-              title="Exporta planul calendaristic"
-            >
-              Exporta planul calendaristic
-              <i className="fa-solid fa-download ms-2" aria-hidden="true" />
-            </Button>
+
+            <div className="calendar-page__intro-controls">
+              {scrutinyOptions.length > 0 ? (
+                <div className="calendar-page__select-group">
+                  <InputSelect
+                    id="calendar-scrutiny-filter"
+                    label="Alege scrutinul"
+                    labelVariant="form"
+                    className="calendar-page__scrutiny-input-select"
+                    options={calendarScrutinySelectOptions}
+                    value={filterElectionId}
+                    onChange={(id) => setFilterElectionId(id)}
+                    disabled={isLoading || !filterElectionId || !showScrutinySelector}
+                    showSuffixInTrigger={false}
+                    toggleAriaLabel="Alege scrutinul pentru calendar"
+                    placeholder="—"
+                  />
+                </div>
+              ) : null}
+
+              <Button
+                variant="primary"
+                outline
+                className="calendar-page__export-btn"
+                onClick={handleExportExcel}
+                disabled={isLoading || events.length === 0}
+                title="Exportă planul calendaristic"
+              >
+                <i className="fa-solid fa-download" aria-hidden="true" />
+                <span>Exportă planul calendaristic</span>
+              </Button>
+            </div>
           </div>
 
           {isError ? (
@@ -276,29 +300,6 @@ function CalendarPage() {
               <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => refetch()} disabled={isFetching}>
                 {isFetching ? 'Se reîncearcă...' : 'Reîncearcă'}
               </button>
-            </div>
-          ) : null}
-
-          {showScrutinySelector ? (
-            <div className="row g-3 mb-3 align-items-end">
-              <div className="col-12 col-md-8 col-lg-6">
-                <label htmlFor="calendar-scrutiny-filter" className="form-label small mb-1">
-                  Afișează termenele pentru
-                </label>
-                <select
-                  id="calendar-scrutiny-filter"
-                  className="form-select form-select-sm"
-                  value={filterElectionId}
-                  onChange={(e) => setFilterElectionId(e.target.value)}
-                  disabled={isLoading || !filterElectionId}
-                >
-                  {scrutinyOptions.map((o) => (
-                    <option key={o.id} value={o.id}>
-                      {o.title}
-                    </option>
-                  ))}
-                </select>
-              </div>
             </div>
           ) : null}
 
@@ -354,11 +355,11 @@ function CalendarPage() {
                 <ul className="calendar-page__legend-list list-unstyled mb-0 d-md-inline-flex flex-wrap align-items-center gap-3">
                   <li className="calendar-page__legend-item d-inline-flex align-items-center gap-2">
                     <span className="calendar-page__legend-dot calendar-page__legend-dot--active" aria-hidden />
-                    <span className="small">— evenimente active</span>
+                    <span className="small"> - evenimente active</span>
                   </li>
                   <li className="calendar-page__legend-item d-inline-flex align-items-center gap-2">
                     <span className="calendar-page__legend-dot calendar-page__legend-dot--expired" aria-hidden />
-                    <span className="small">— evenimente expirate</span>
+                    <span className="small"> - evenimente expirate</span>
                   </li>
                 </ul>
               </div>

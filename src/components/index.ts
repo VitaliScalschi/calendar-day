@@ -17,3 +17,5 @@ export {default as DateRangePicker} from './DateRangePicker/DateRangePicker';
 export {default as Table} from './Table/Table';
 export {default as Pagination} from './Pagination/Pagination';
 export type {TableColumn} from './Table/Table';
+export {default as InputSelect} from './InputSelect/InputSelect';
+export type {InputSelectOption, InputSelectProps} from './InputSelect/InputSelect';

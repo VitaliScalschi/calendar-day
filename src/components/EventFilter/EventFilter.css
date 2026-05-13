@@ -303,17 +303,6 @@
   min-width: 0;
 }
 
-.event-filter-range__actions {
-  grid-column: 1 / -1;
-}
-
-.event-filter-range__reset-btn {
-  border-radius: 6px;
-  font-size: 0.78rem;
-  font-weight: 500;
-  height: 38px;
-}
-
 .event-filter-search-slot {
   margin-top: 0.25rem;
   min-width: 0;
@@ -452,9 +441,5 @@
 
   .event-filter-range {
     grid-template-columns: 1fr;
-  }
-
-  .event-filter-range__reset-btn {
-    height: 48px;
   }
 }

@@ -1,268 +1,474 @@
+/* ============================================================
+   Timeline event — design inspirat din mock-up:
+   [ Card dată | Linie verticală cu punct | Card eveniment ]
+   ============================================================ */
+
 .timeline-event {
-  --timeline-accent: var(--color-primary, #2563eb);
-  --timeline-accent-soft: rgba(37, 99, 235, 0.12);
-  --rail-color: var(--timeline-accent);
-  --rail-dot-fill: var(--timeline-accent);
+  /* Culorile sunt suprascrise per-status mai jos. */
+  --accent: #2563eb;
+  --accent-soft: rgba(37, 99, 235, 0.12);
+  --accent-strong: #1d4ed8;
+  --accent-border: rgba(37, 99, 235, 0.35);
 
   position: relative;
   display: grid;
-  grid-template-columns: minmax(80px, auto) 36px minmax(0, 1fr);
-  column-gap: 0.95rem;
-  align-items: start;
-  padding-bottom: 0.7rem;
+  grid-template-columns: 96px 32px minmax(0, 1fr);
+  column-gap: 0;
+  align-items: stretch;
+  padding-bottom: 1rem;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.timeline-event[data-timeline-accent='future'] {
-  --timeline-accent: #8b5cf6;
-  --timeline-accent-soft: rgba(139, 92, 246, 0.12);
-}
-
-.timeline-event[data-timeline-accent='spans_today'] {
-  --timeline-accent: #1d4ed8;
-  --timeline-accent-soft: rgba(29, 78, 216, 0.12);
-}
-
-.timeline-event[data-timeline-accent='exact_today'] {
-  --timeline-accent: #ea580c;
-  --timeline-accent-soft: rgba(234, 88, 12, 0.12);
-}
-
-.timeline-event[data-timeline-accent='expired'] {
-  --timeline-accent: #64748b;
-  --timeline-accent-soft: rgba(100, 116, 139, 0.15);
 }
 
 .timeline-event:last-child {
   padding-bottom: 0;
 }
 
-.timeline-event:hover .timeline-content {
-  transform: translateX(3px);
-  border-color: color-mix(in srgb, var(--timeline-accent) 35%, #e5e7eb);
-  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+/* Per-status accents */
+.timeline-event[data-timeline-accent='exact_today'] {
+  --accent: #f59e0b;
+  --accent-soft: #fff4e0;
+  --accent-strong: #d97706;
+  --accent-border: #fbbf24;
 }
 
-.timeline-event__left-stack {
+.timeline-event[data-timeline-accent='spans_today'] {
+  --accent: #2563eb;
+  --accent-soft: #e0ecff;
+  --accent-strong: #1d4ed8;
+  --accent-border: #93c5fd;
+}
+
+.timeline-event[data-timeline-accent='future'] {
+  --accent: #6b7280;
+  --accent-soft: #eef2f7;
+  --accent-strong: #4b5563;
+  --accent-border: #d1d5db;
+}
+
+.timeline-event[data-timeline-accent='expired'] {
+  --accent: #ef4444;
+  --accent-soft: #fee2e2;
+  --accent-strong: #dc2626;
+  --accent-border: #fca5a5;
+}
+
+/* ============================================================
+   Card dată (stânga)
+   ============================================================ */
+
+.timeline-date-card {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0.5rem 0.35rem 0.6rem;
+  border: 1.5px solid var(--accent-border);
+  border-radius: 10px;
+  background: #fff;
+  min-height: 110px;
   align-self: start;
-  min-width: 0;
+  width: 100%;
 }
 
-.timeline-event__badge-wrap {
-  display: flex;
-  justify-content: flex-start;
-}
-
-.timeline-event[data-timeline-accent='future'] .status-badge.status-upcoming {
-  background-color: #ede9fe;
-  color: #6d28d9;
-  border-color: #c4b5fd;
-}
-
-.timeline-event[data-timeline-accent='spans_today'] .status-badge.status-in-progress {
-  background-color: #dbeafe;
-  color: #1d4ed8;
-  border-color: #93c5fd;
-}
-
-.timeline-date-section {
-  text-align: left;
-}
-
-.timeline-date-range {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.05rem;
+.timeline-date-card__status {
+  font-size: 0.62rem;
   font-weight: 700;
-  color: #1f2937;
-  line-height: 1.2;
-  min-width: 0;
+  letter-spacing: 0.6px;
+  color: var(--accent-strong);
+  background: var(--accent-soft);
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.timeline-date-range-sep {
-  font-weight: 600;
-  color: #6b7280;
-}
-
-.timeline-date-day {
-  font-size: 1rem;
+.timeline-date-card__date {
+  font-size: 1.5rem;
   font-weight: 700;
   color: #111827;
-  line-height: 1.2;
+  line-height: 1.05;
+  margin-bottom: 0.15rem;
+  white-space: nowrap;
 }
 
-.timeline-date-year {
-  font-size: 0.75rem;
-  font-weight: 400;
-  color: #6b7280;
-  line-height: 1.2;
-  margin-top: 0.2rem;
+.timeline-date-card__date--solo {
+  font-size: 1.65rem;
 }
+
+.timeline-date-card__month {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.1;
+}
+
+.timeline-date-card__year {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #6b7280;
+  margin-top: 0.05rem;
+}
+
+/* ============================================================
+   Linia verticală + punctul de status
+   ============================================================ */
 
 .timeline-event__rail {
   display: flex;
   flex-direction: column;
   align-items: center;
   align-self: stretch;
-  width: 36px;
+  width: 32px;
   min-height: 100%;
 }
 
 .timeline-rail-segment {
   flex: 1 1 0;
   width: 0;
-  min-height: 6px;
-  border-left: 2px solid var(--rail-color);
+  min-height: 8px;
+  border-left: 1.5px solid #d1d5db;
   margin-left: -1px;
 }
 
+/* Linie subtilă în nuanță neutră pentru aspectul de timeline. */
 .timeline-event[data-timeline-accent='future'] .timeline-rail-segment--up {
   border-left-style: dashed;
 }
 
-.timeline-dot--rail {
+.timeline-rail-dot {
   position: relative;
   z-index: 2;
   flex: 0 0 auto;
-  width: 36px;
-  height: 36px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--rail-dot-fill);
-  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
-  border: none;
-  margin: 2px 0;
+  margin: 4px 0;
+  background: #fff;
+  border: 2px solid #d1d5db;
+  transition: transform 0.15s ease;
 }
 
-.timeline-dot--rail i {
+.timeline-rail-dot--exact_today {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.18);
+}
+
+.timeline-rail-dot--spans_today {
+  border-color: var(--accent);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.timeline-rail-dot--future {
+  border-color: #cbd5e1;
+  background: #fff;
+}
+
+.timeline-rail-dot--expired {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18);
+}
+
+.timeline-rail-dot--expired i {
   color: #fff;
-  font-size: 0.85rem;
+  font-size: 0.55rem;
   line-height: 1;
 }
 
-/* Padding moderat sus: titlul și badge-ul încep pe același „rând” vizual. */
-.timeline-content {
-  padding: 0.35rem 1.15rem 1rem;
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+/* ============================================================
+   Card eveniment (dreapta)
+   ============================================================ */
+
+.timeline-card {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0.85rem 1rem 0.7rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
   min-width: 0;
 }
 
-.timeline-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #111827;
-  line-height: 1.35;
-  margin: 0 0 0.65rem;
+.timeline-event:hover .timeline-card {
+  transform: translateX(2px);
+  border-color: color-mix(in srgb, var(--accent) 28%, #e5e7eb);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
 }
 
-.timeline-meta-row {
-  display: flex;
+.timeline-card__top {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 0.85rem;
   align-items: flex-start;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: #4b5563;
-  margin-bottom: 0.45rem;
 }
 
-.timeline-meta-row:last-of-type {
-  margin-bottom: 0;
-}
-
-.timeline-meta-icon {
+.timeline-card__icon-box {
   flex-shrink: 0;
-  margin-top: 0.12rem;
-  color: var(--timeline-accent);
-  font-size: 1rem;
-  width: 1.1rem;
-  text-align: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-strong);
+  font-size: 1.15rem;
 }
 
-.timeline-meta-text strong {
+.timeline-card__heading {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.timeline-card__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.3;
+  margin: 0;
+  word-break: break-word;
+}
+
+.timeline-card__deadline {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: #4b5563;
+}
+
+.timeline-card__deadline-label {
+  font-weight: 500;
+}
+
+.timeline-card__deadline-value {
+  font-weight: 600;
+  color: var(--accent-strong);
+}
+
+/* Pe „expirat" și „viitor" data e mai sobră (negru), accentul iese prin status. */
+.timeline-event[data-timeline-accent='expired'] .timeline-card__deadline-value,
+.timeline-event[data-timeline-accent='future'] .timeline-card__deadline-value {
+  color: #1f2937;
+}
+
+.timeline-card__status-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.15rem;
+  min-height: 1.4rem;
+}
+
+.timeline-card__pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 0.18rem 0.55rem;
+  border-radius: 4px;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  text-transform: uppercase;
+}
+
+.timeline-card__timing {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.timeline-card__timing--exact_today {
+  color: var(--accent-strong);
+}
+
+.timeline-card__timing--spans_today {
+  color: var(--accent-strong);
+}
+
+.timeline-card__timing--future {
+  color: #6b7280;
+}
+
+.timeline-card__timing--expired {
+  color: var(--accent-strong);
+}
+
+/* ============================================================
+   Footer: target group | responsable | buton
+   ============================================================ */
+
+.timeline-card__divider {
+  height: 1px;
+  background: #eef0f3;
+  margin: 0.7rem -1rem 0.65rem;
+}
+
+.timeline-card__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+.timeline-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.4rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.timeline-card__meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: #4b5563;
+  min-width: 0;
+}
+
+.timeline-card__meta-icon {
+  color: #9ca3af;
+  font-size: 0.9rem;
+  width: 1rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.timeline-card__meta-label {
+  color: #6b7280;
+}
+
+.timeline-card__meta-value {
   color: #111827;
   font-weight: 600;
 }
 
-.timeline-meta-phrase {
+.timeline-card__details-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
   font-weight: 600;
-}
-
-.timeline-meta-phrase.is-active {
-  color: var(--timeline-accent);
-}
-
-.timeline-meta-phrase.is-future {
-  color: var(--timeline-accent);
-}
-
-.timeline-meta-phrase.is-expired {
-  color: #b91c1c;
-}
-
-.timeline-card-divider {
-  height: 1px;
-  background: #e5e7eb;
-  margin: 0.65rem 0 0.75rem;
-  border: 0;
-}
-
-.timeline-footer-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 0.75rem;
-}
-
-.timeline-details-btn {
-  font-size: 0.8125rem;
   padding: 0.35rem 0.85rem;
-  min-width: 108px;
-  height: 34px;
-  line-height: 1;
+  border-radius: 6px;
+  border: 1px solid var(--accent);
+  background: #fff;
+  color: var(--accent-strong);
   white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+  cursor: pointer;
 }
 
-.timeline-details-btn:focus {
-  box-shadow: none;
+.timeline-card__details-btn:hover {
+  background: var(--accent-soft);
 }
 
-@media (max-width: 576px) {
+.timeline-card__details-btn:focus,
+.timeline-card__details-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+
+@media (max-width: 768px) {
   .timeline-event {
-    grid-template-columns: minmax(82px, auto) 28px minmax(0, 1fr);
-    column-gap: 0.5rem;
-    padding-bottom: 1.1rem;
+    grid-template-columns: 78px 24px minmax(0, 1fr);
+  }
+
+  .timeline-date-card {
+    min-height: 96px;
+    padding: 0.4rem 0.25rem 0.5rem;
+  }
+
+  .timeline-date-card__status {
+    font-size: 0.55rem;
+    padding: 0.12rem 0.35rem;
+  }
+
+  .timeline-date-card__date {
+    font-size: 1.25rem;
+  }
+
+  .timeline-date-card__date--solo {
+    font-size: 1.4rem;
+  }
+
+  .timeline-date-card__month {
+    font-size: 0.8rem;
   }
 
   .timeline-event__rail {
-    width: 28px;
+    width: 24px;
   }
 
-  .timeline-dot--rail {
-    width: 32px;
-    height: 32px;
+  .timeline-card {
+    padding: 0.7rem 0.85rem 0.6rem;
   }
 
-  .timeline-dot--rail i {
-    font-size: 0.78rem;
+  .timeline-card__icon-box {
+    width: 38px;
+    height: 38px;
+    font-size: 1rem;
   }
 
-  .timeline-content {
-    padding: 0.35rem 1rem 0.85rem;
+  .timeline-card__title {
+    font-size: 0.98rem;
   }
 
-  .timeline-title {
-    font-size: 1.02rem;
+  .timeline-card__divider {
+    margin-left: -0.85rem;
+    margin-right: -0.85rem;
   }
 
-  .timeline-meta-row,
-  .timeline-meta-phrase {
-    font-size: 0.82rem;
+  .timeline-card__meta {
+    gap: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .timeline-event {
+    grid-template-columns: 68px 20px minmax(0, 1fr);
   }
 
+  .timeline-card__top {
+    column-gap: 0.55rem;
+  }
+
+  .timeline-card__icon-box {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+
+  .timeline-card__footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .timeline-card__details-btn {
+    align-self: flex-end;
+  }
 }

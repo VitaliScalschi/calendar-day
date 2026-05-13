@@ -18,6 +18,17 @@ export type AdminUser = {
   role: string;
   isActive: boolean;
   createdAtUtc: string;
+  subdivisionId?: string | null;
+  subdivisionName?: string | null;
+  subdivisionCode?: string | null;
+};
+
+export type UpsertUserPayload = {
+  email: string;
+  password?: string;
+  role: string;
+  isActive: boolean;
+  subdivisionId?: string | null;
 };
 
 type UploadDocumentResponse = {
@@ -67,10 +78,7 @@ export async function deleteElection(electionId: string) {
   await apiRequest(`/elections/${electionId}`, { method: 'DELETE' });
 }
 
-export async function upsertUser(
-  payload: { email: string; password?: string; role: string; isActive: boolean },
-  userId?: string,
-) {
+export async function upsertUser(payload: UpsertUserPayload, userId?: string) {
   if (userId) {
     await apiRequest(`/users/${userId}`, { method: 'PUT', body: JSON.stringify(payload) });
     return;

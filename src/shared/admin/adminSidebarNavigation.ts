@@ -8,6 +8,7 @@ export function getAdminSidebarItemFromPath(pathname: string): AdminMenuItem {
   if (pathname.startsWith('/admin/nomenclatoare/scrutine')) return 'Nomenclatoare - Scrutine';
   if (pathname.startsWith('/admin/nomenclatoare/responsabili')) return 'Nomenclatoare - Responsabili';
   if (pathname.startsWith('/admin/nomenclatoare/grupuri-tinta')) return 'Nomenclatoare - Grupuri țintă';
+  if (pathname.startsWith('/admin/nomenclatoare/departamente')) return 'Nomenclatoare - Departamente';
   if (pathname.startsWith('/admin/audit-logs')) return 'Audit Logs';
   return 'Programe';
 }
@@ -63,6 +64,14 @@ export function navigateForAdminSidebarItem(
       return;
     }
     navigate('/admin/nomenclatoare/grupuri-tinta');
+    return;
+  }
+  if (item === 'Nomenclatoare - Departamente') {
+    if (!canManageUsers) {
+      navigate('/admin/events');
+      return;
+    }
+    navigate('/admin/nomenclatoare/departamente');
     return;
   }
   navigate('/admin/events');

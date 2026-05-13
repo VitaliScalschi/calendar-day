@@ -30,7 +30,8 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/calendar" element={<CalendarPage />} />
-        <Route path="/history" element={<HistoryPage />} />
+        <Route path="/arhiva" element={<HistoryPage />} />
+        <Route path="/history" element={<Navigate to="/arhiva" replace />} />
         <Route path="/admin" element={<AdminPortalGate />} />
         <Route
           path="/admin/dashboard"
@@ -98,6 +99,14 @@ function App() {
             isAdminLoggedIn()
               ? (canAccessUsersPage() ? <AdminNomenclatoarePage /> : <Navigate to="/admin/events" replace />)
               : <Navigate to={`/admin${toAdminGateSearch('/admin/nomenclatoare/grupuri-tinta')}`} replace />
+          }
+        />
+        <Route
+          path="/admin/nomenclatoare/departamente"
+          element={
+            isAdminLoggedIn()
+              ? (canAccessUsersPage() ? <AdminNomenclatoarePage /> : <Navigate to="/admin/events" replace />)
+              : <Navigate to={`/admin${toAdminGateSearch('/admin/nomenclatoare/departamente')}`} replace />
           }
         />
         <Route

@@ -52,6 +52,19 @@ export interface DeadlineTodayVisual {
   endKey: string | null;
 }
 
+export interface DeadlineStatusPresentation {
+  label: string;
+  iconClass: string;
+}
+
+/** Mapare comună status -> etichetă + iconiță, folosită de TimelineEvent și Modal. */
+export const DEADLINE_STATUS_INFO: Record<DeadlineTodayVisualKind, DeadlineStatusPresentation> = {
+  exact_today: { label: 'URMEAZĂ', iconClass: 'fa-solid fa-circle-info' },
+  spans_today: { label: 'ÎN DESFĂȘURARE', iconClass: 'bi bi-clipboard2-check' },
+  future: { label: 'VIITOR', iconClass: 'fa-solid fa-bullhorn' },
+  expired: { label: 'EXPIRAT', iconClass: 'bi bi-calendar2-x' },
+};
+
 /** Single-day deadline that falls on today (not a multi-day window). */
 export function getDeadlineTodayVisual(deadline?: string): DeadlineTodayVisual {
   const todayKey = getTodayDateKey();

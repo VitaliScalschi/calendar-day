@@ -27,7 +27,6 @@ export interface EventFilterProps {
   dateRangeEnd: string;
   onDateRangeStartChange: (value: string) => void;
   onDateRangeEndChange: (value: string) => void;
-  onDateRangeReset: () => void;
   calendarSlot?: ReactNode;
   searchSlot?: ReactNode;
 }

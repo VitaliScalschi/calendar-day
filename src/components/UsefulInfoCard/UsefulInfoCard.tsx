@@ -7,8 +7,34 @@ import {
 } from '../../features/usefulInfo/services/usefulInfoService';
 
 const TITLE_CARD = 'Informații Utile';
+const HINT_TEXT = 'Găsești aici toate documentele și informațiile importante pentru o bună informare.';
 
 const API_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, '');
+
+/** Alege o iconiță Bootstrap Icons pe baza titlului (sau a câmpului `icon` dacă e setat). */
+function resolveItemIcon(item: UsefulInfoItem): string {
+  if (item.icon?.trim()) return item.icon.trim();
+
+  const title = item.title.toLowerCase();
+  if (title.includes('contact')) return 'bi bi-headset';
+  if (
+    title.includes('cadru normativ') ||
+    title.includes('legisla') ||
+    title.includes('cod electoral')
+  ) {
+    return 'bi bi-bank';
+  }
+  if (title.includes('instruc') || title.includes('ghid')) return 'bi bi-clipboard-check';
+  if (title.includes('regulament')) return 'bi bi-file-earmark-text';
+  if (title.includes('hot') && title.includes('rare')) return 'bi bi-file-earmark-ruled';
+  if (title.includes('comunicat') || title.includes('știri') || title.includes('stiri')) {
+    return 'bi bi-megaphone';
+  }
+  if (title.includes('raport')) return 'bi bi-file-bar-graph';
+
+  if (item.type === 'external-link') return 'bi bi-link-45deg';
+  return 'bi bi-file-earmark-text';
+}
 
 function UsefulInfoCard() {
   const [items, setItems] = useState<UsefulInfoItem[]>([]);
@@ -47,27 +73,41 @@ function UsefulInfoCard() {
   };
 
   return (
-    <aside className="useful-info-card p-3 mt-3 border rounded">
-      <div className="d-flex justify-content-start align-items-center gap-2 pb-2">
-        <i className="fa-brands fa-readme icon"></i>
-        <h3 className="useful-info-card__title">{TITLE_CARD}</h3>
-      </div>
-      <div className="card-body bg-white">
-        <div className="border rounded p-2 bg-white">
-          <ul className="info-list list-unstyled mb-0">
+    <aside className="useful-info-card" aria-label={TITLE_CARD}>
+      <h3 className="useful-info-card__heading">{TITLE_CARD}</h3>
+
+      <div className="useful-info-card__list-wrap">
+        {visibleItems.length > 0 ? (
+          <ul className="useful-info-card__list" role="list">
             {visibleItems.map((item) => (
-              <li key={item.id} className="info-item d-flex align-items-center gap-2 p-2 border-bottom">
-                <span className="info-item-dot" aria-hidden="true">•</span>
-                <a href={resolveItemUrl(item)} target="_blank" rel="noopener noreferrer" className="text-decoration-none">
-                  {item.title}
+              <li key={item.id} className="useful-info-card__item">
+                <a
+                  href={resolveItemUrl(item)}
+                  target={item.type === 'external-link' ? '_blank' : undefined}
+                  rel={item.type === 'external-link' ? 'noopener noreferrer' : undefined}
+                  className="useful-info-card__link"
+                  aria-label={item.title}
+                >
+                  <span className="useful-info-card__item-icon" aria-hidden>
+                    <i className={resolveItemIcon(item)} />
+                  </span>
+                  <span className="useful-info-card__item-title">{item.title}</span>
+                  <i
+                    className="bi bi-chevron-right useful-info-card__item-chevron"
+                    aria-hidden
+                  />
                 </a>
               </li>
             ))}
-            {visibleItems.length === 0 ? (
-              <li className="info-item p-2 text-secondary">Nu există informații active.</li>
-            ) : null}
           </ul>
-        </div>
+        ) : (
+          <p className="useful-info-card__empty">Nu există informații active.</p>
+        )}
+      </div>
+
+      <div className="useful-info-card__hint" role="note">
+        <i className="bi bi-info-circle useful-info-card__hint-icon" aria-hidden />
+        <span className="useful-info-card__hint-text">{HINT_TEXT}</span>
       </div>
     </aside>
   );

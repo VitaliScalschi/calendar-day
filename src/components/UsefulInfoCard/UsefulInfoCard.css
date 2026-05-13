@@ -1,35 +1,158 @@
+/* ============================================================
+   UsefulInfoCard — etichetă „INFORMAȚII UTILE” + listă documente.
+   Variantă compactă, fără card-header și fără hint banner.
+   ============================================================ */
+
 .useful-info-card {
-  background: #f6f8fb;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  background: transparent;
+  padding: 0;
+  border: none;
 }
 
-.icon {
-  color: var(--color-primary);
-}
+/* ---------- Header (label uppercase) ---------- */
 
-.useful-info-card__title {
-  font-size: 1.05rem;
+.useful-info-card__heading {
+  margin: 0;
+  padding: 0 0.2rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  color: #1f2937;
+  letter-spacing: 1px;
+  color: #6b7280;
+  text-transform: uppercase;
+  line-height: 1.2;
 }
 
-.info-item {
-  font-size: 0.92rem;
-  color: #4b5563;
-  transition: color 0.2s;
+/* ---------- Listă documente ---------- */
+
+.useful-info-card__list-wrap {
+  background: #ffffff;
+  border: 1px solid #e7ebf3;
+  border-radius: 10px;
+  padding: 0.15rem 0.55rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
 }
 
-.info-item:last-child {
+.useful-info-card__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.useful-info-card__item {
+  border-bottom: 1px solid #eef0f5;
+}
+
+.useful-info-card__item:last-child {
   border-bottom: none;
 }
 
-.info-item-dot {
-  color: var(--color-primary);
-  font-weight: bold;
-  font-size: 1.2rem;
-  line-height: 1;
+.useful-info-card__link {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.5rem 0.35rem;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 8px;
+  transition: background-color 0.15s ease;
 }
 
-.info-item:hover {
-  color: var(--color-primary);
-  cursor: pointer;
+.useful-info-card__link:hover,
+.useful-info-card__link:focus-visible {
+  background: #f5f8ff;
+  text-decoration: none;
+  color: inherit;
+}
+
+.useful-info-card__link:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 35%, transparent);
+}
+
+.useful-info-card__item-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: #eaf1ff;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.useful-info-card__item-title {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #111827;
+  line-height: 1.25;
+  word-break: break-word;
+}
+
+.useful-info-card__item-chevron {
+  font-size: 0.85rem;
+  color: var(--color-primary, #2563eb);
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.useful-info-card__link:hover .useful-info-card__item-chevron,
+.useful-info-card__link:focus-visible .useful-info-card__item-chevron {
+  transform: translateX(2px);
+}
+
+.useful-info-card__empty {
+  margin: 0;
+  padding: 0.7rem 0.4rem;
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* ---------- Hint banner („Găsești aici…") ---------- */
+
+.useful-info-card__hint {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.65rem;
+  align-items: flex-start;
+  padding: 0.7rem 0.9rem;
+  background: #e8f0ff;
+  border: 1px solid #d4e0fb;
+  border-radius: 10px;
+}
+
+.useful-info-card__hint-icon {
+  color: #2563eb;
+  font-size: 1.05rem;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+
+.useful-info-card__hint-text {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #1f2937;
+  line-height: 1.4;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 575.98px) {
+  .useful-info-card__item-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 0.85rem;
+  }
+
+  .useful-info-card__item-title {
+    font-size: 0.8rem;
+  }
 }

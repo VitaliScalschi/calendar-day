@@ -14,6 +14,7 @@ import {
   useUpsertUserMutation,
 } from '../../features/admin/hooks/useAdminPanelQueries';
 import { Button } from '../Button';
+import InputSelect, { type InputSelectOption } from '../InputSelect/InputSelect';
 import { InputDate } from '../InputDate';
 import { InputText } from '../InputText';
 import { InputUpload } from '../InputUpload';
@@ -22,6 +23,7 @@ import { RadioButton } from '../RadioButton';
 import { MultiCheckboxDropdown } from '../MultiCheckboxDropdown';
 import { PasswordInput } from '../PasswordInput';
 import { useElectionTypesQuery } from '../../features/election-types/hooks/useElectionTypesQuery';
+import { useSubdivisionsQuery } from '../../features/subdivisions/hooks/useSubdivisionsQuery';
 import '../EventFilter/EventFilter.css';
 import './components/AdminPanel.css';
 import type { AdminMenuItem } from './components/Sidebar/AdminSidebar.interface';
@@ -37,11 +39,31 @@ type ScrutinyForm = {
   electionTypeIds: string[];
 };
 
+type UserRole = 'Admin' | 'Editor' | 'Viewer';
+
 type UserForm = {
   email: string;
   password: string;
-  role: 'Admin' | 'Editor' | 'Viewer';
+  role: '' | UserRole;
   isActive: boolean;
+  subdivisionId: string;
+};
+
+/** Valoare sentință pentru InputSelect când rolul nu e încă ales (nu apare în listă). */
+const USER_ROLE_UNSELECTED = '__user_role_unselected__';
+
+const USER_ROLE_OPTIONS: InputSelectOption<UserRole>[] = [
+  { value: 'Viewer', label: 'Viewer' },
+  { value: 'Editor', label: 'Editor' },
+  { value: 'Admin', label: 'Admin' },
+];
+
+const EMPTY_USER_FORM: UserForm = {
+  email: '',
+  password: '',
+  role: '',
+  isActive: true,
+  subdivisionId: '',
 };
 
 function formatDate(dateStr: string): string {
@@ -85,12 +107,7 @@ function AdminPanel() {
   const [pendingDeleteUserId, setPendingDeleteUserId] = useState<string | null>(null);
   const [isDeletingUser, setIsDeletingUser] = useState(false);
   const [userFormError, setUserFormError] = useState('');
-  const [userForm, setUserForm] = useState<UserForm>({
-    email: '',
-    password: '',
-    role: 'Viewer',
-    isActive: true,
-  });
+  const [userForm, setUserForm] = useState<UserForm>(EMPTY_USER_FORM);
   const [scrutinyForm, setScrutinyForm] = useState<ScrutinyForm>({
     title: '',
     electionDay: '',
@@ -100,6 +117,7 @@ function AdminPanel() {
   const [scrutinyDocumentFile, setScrutinyDocumentFile] = useState<File | null>(null);
   const [existingScrutinyDocument, setExistingScrutinyDocument] = useState<{ name: string; sizeBytes?: number; url?: string } | null>(null);
   const electionTypesQuery = useElectionTypesQuery(true);
+  const subdivisionsQuery = useSubdivisionsQuery(canManageUsers);
   const adminPanelQuery = useAdminPanelQuery(canManageUsers);
   const upsertElectionMutation = useUpsertElectionMutation();
   const deleteElectionMutation = useDeleteElectionMutation();
@@ -172,7 +190,47 @@ function AdminPanel() {
   );
   const allowedScrutinyTypeKeys = useMemo(() => scrutinyTypeOptions.map((o) => o.key), [scrutinyTypeOptions]);
 
-  const usersRows = useMemo<Array<{ id: string; email: string; role: string; status: 'Activ' | 'Inactiv'; createdAt: string }>>(
+  const subdivisionOptions = useMemo(
+    () =>
+      (subdivisionsQuery.data ?? [])
+        .filter((sub) => sub.isActive)
+        .slice()
+        .sort((a, b) => a.name.localeCompare(b.name, 'ro')),
+    [subdivisionsQuery.data],
+  );
+
+  const userSubdivisionSelectOptions = useMemo<InputSelectOption<string>[]>(() => {
+    const byId = new Map(subdivisionOptions.map((sub) => [sub.id, sub] as const));
+    const rows: InputSelectOption<string>[] = [
+      { value: '', label: '— Fără departament —' },
+      ...subdivisionOptions.map((sub) => ({
+        value: sub.id,
+        label: `${sub.code} — ${sub.name}`,
+      })),
+    ];
+    const sid = userForm.subdivisionId.trim();
+    if (sid && !byId.has(sid)) {
+      const u = editingUserId ? users.find((x) => x.id === editingUserId) : undefined;
+      const orphanLabel =
+        u?.subdivisionCode || u?.subdivisionName
+          ? [u.subdivisionCode, u.subdivisionName].filter(Boolean).join(' — ')
+          : sid;
+      rows.push({ value: sid, label: orphanLabel });
+    }
+    return rows;
+  }, [subdivisionOptions, userForm.subdivisionId, editingUserId, users]);
+
+  const usersRows = useMemo<
+    Array<{
+      id: string;
+      email: string;
+      role: string;
+      status: 'Activ' | 'Inactiv';
+      createdAt: string;
+      department: string;
+      departmentCode: string;
+    }>
+  >(
     () =>
       users.map((user) => ({
         id: user.id,
@@ -180,6 +238,8 @@ function AdminPanel() {
         role: user.role,
         status: user.isActive ? 'Activ' : 'Inactiv',
         createdAt: formatDate(user.createdAtUtc),
+        department: user.subdivisionName ?? '',
+        departmentCode: user.subdivisionCode ?? '',
       })),
     [users]
   );
@@ -187,7 +247,12 @@ function AdminPanel() {
   const filteredUsers = useMemo(() => {
     const query = search.trim().toLowerCase();
     if (!query) return usersRows;
-    return usersRows.filter((user) => [user.email, user.role, user.status, user.createdAt].join(' ').toLowerCase().includes(query));
+    return usersRows.filter((user) =>
+      [user.email, user.role, user.status, user.createdAt, user.department, user.departmentCode]
+        .join(' ')
+        .toLowerCase()
+        .includes(query),
+    );
   }, [usersRows, search]);
   const usersTotalPages = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
   const usersSafePage = Math.min(page, usersTotalPages);
@@ -307,12 +372,7 @@ function AdminPanel() {
   const openCreateUserModal = () => {
     setUserFormError('');
     setEditingUserId(null);
-    setUserForm({
-      email: '',
-      password: '',
-      role: 'Viewer',
-      isActive: true,
-    });
+    setUserForm(EMPTY_USER_FORM);
     setIsUserModalOpen(true);
   };
 
@@ -329,17 +389,26 @@ function AdminPanel() {
       setUserFormError(editingUserId ? 'Completeaza email.' : 'Completeaza email si parola.');
       return;
     }
+    if (!userForm.role) {
+      setUserFormError('Selectează un rol pentru utilizator.');
+      return;
+    }
+
+    const role = userForm.role;
+    const isActive = userForm.isActive;
 
     setIsCreatingUser(true);
     try {
+      const subdivisionId = userForm.subdivisionId.trim() ? userForm.subdivisionId.trim() : null;
       if (editingUserId) {
         await upsertUserMutation.mutateAsync({
           userId: editingUserId,
           payload: {
             email: userForm.email.trim().toLowerCase(),
             password: userForm.password.trim() || undefined,
-            role: userForm.role,
-            isActive: userForm.isActive,
+            role,
+            isActive,
+            subdivisionId,
           },
         });
       } else {
@@ -347,8 +416,9 @@ function AdminPanel() {
           payload: {
             email: userForm.email.trim().toLowerCase(),
             password: userForm.password,
-            role: userForm.role,
-            isActive: userForm.isActive,
+            role,
+            isActive,
+            subdivisionId,
           },
         });
       }
@@ -375,8 +445,9 @@ function AdminPanel() {
     setUserForm({
       email: user.email,
       password: '',
-      role: user.role as UserForm['role'],
+      role: user.role as UserRole,
       isActive: user.isActive,
+      subdivisionId: user.subdivisionId ?? '',
     });
     setIsUserModalOpen(true);
   };
@@ -647,7 +718,7 @@ function AdminPanel() {
       {activeMenuItem === 'Utilizatori' && isUserModalOpen ? (
         <div className="modal fade show d-block" tabIndex={-1} role="dialog">
           <div className="modal-dialog modal-dialog-centered admin-confirm-modal" role="document">
-            <div className="modal-content admin-confirm-modal__content">
+            <div className="modal-content admin-confirm-modal__content admin-confirm-modal__content--overflow-visible">
               <div className="modal-header">
                 <h5 className="modal-title">{editingUserId ? 'Modifica utilizator' : 'Creaza utilizator'}</h5>
                 <button type="button" className="btn-close" onClick={() => setIsUserModalOpen(false)} />
@@ -662,6 +733,11 @@ function AdminPanel() {
                     <input
                       id="user-email"
                       type="email"
+                      name="admin-new-user-email"
+                      autoComplete="off"
+                      autoCorrect="off"
+                      autoCapitalize="off"
+                      spellCheck={false}
                       className="form-control form-input-size--md"
                       value={userForm.email}
                       onChange={(e) => setUserForm((prev) => ({ ...prev, email: e.target.value }))}
@@ -674,6 +750,11 @@ function AdminPanel() {
                     </Label>
                     <PasswordInput
                       id="user-password"
+                      name="admin-new-user-password"
+                      autoComplete="new-password"
+                      autoCorrect="off"
+                      autoCapitalize="off"
+                      spellCheck={false}
                       className="form-control form-input-size--md"
                       value={userForm.password}
                       onChange={(e) => setUserForm((prev) => ({ ...prev, password: e.target.value }))}
@@ -682,21 +763,37 @@ function AdminPanel() {
                   </div>
 
                   <div className="mb-3">
-                    <Label htmlFor="user-role" variant="form">
-                      Rol
-                    </Label>
-                    <select
+                    <InputSelect
                       id="user-role"
-                      className="form-select form-input-size--md"
-                      value={userForm.role}
-                      onChange={(e) =>
-                        setUserForm((prev) => ({ ...prev, role: e.target.value as UserForm['role'] }))
-                      }
-                    >
-                      <option value="Viewer">Viewer</option>
-                      <option value="Editor">Editor</option>
-                      <option value="Admin">Admin</option>
-                    </select>
+                      label="Rol"
+                      labelVariant="form"
+                      className="admin-user-role-input-select"
+                      options={USER_ROLE_OPTIONS}
+                      value={userForm.role === '' ? USER_ROLE_UNSELECTED : userForm.role}
+                      onChange={(v) => {
+                        if (v === USER_ROLE_UNSELECTED) return;
+                        setUserForm((prev) => ({ ...prev, role: v as UserRole }));
+                      }}
+                      placeholder="— Selectează rolul —"
+                      showSuffixInTrigger={false}
+                      toggleAriaLabel="Selectează rolul utilizatorului"
+                    />
+                  </div>
+
+                  <div className="mb-3">
+                    <InputSelect
+                      id="user-subdivision"
+                      label="Departament"
+                      labelVariant="form"
+                      className="admin-user-subdivision-input-select"
+                      options={userSubdivisionSelectOptions}
+                      value={userForm.subdivisionId}
+                      onChange={(v) => setUserForm((prev) => ({ ...prev, subdivisionId: v }))}
+                      showSuffixInTrigger={false}
+                      toggleAriaLabel="Selectează departamentul utilizatorului"
+                      disabled={subdivisionsQuery.isLoading}
+                      placeholder="— Fără departament —"
+                    />
                   </div>
 
                   <div>

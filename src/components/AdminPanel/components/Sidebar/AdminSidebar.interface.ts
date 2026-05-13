@@ -6,6 +6,7 @@ export type AdminMenuItem =
   | 'Nomenclatoare - Scrutine'
   | 'Nomenclatoare - Responsabili'
   | 'Nomenclatoare - Grupuri țintă'
+  | 'Nomenclatoare - Departamente'
   | 'Audit Logs';
 
 export interface SidebarProps {

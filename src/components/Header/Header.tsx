@@ -26,26 +26,29 @@ function Header() {
           </div>
         </Link>
 
-        <nav className="header-nav d-flex align-items-center gap-3" aria-label="Navigare principală">
+        <nav className="header-nav d-flex align-items-center gap-2" aria-label="Navigare principală">
           <NavLink
             to="/"
-            className={({ isActive }) => `btn btn-link header-nav-link ${isActive ? 'is-active' : ''}`}
+            className={({ isActive }) => `header-nav-link ${isActive ? 'is-active' : ''}`}
             end
             onClick={handleHomeClick}
           >
-            Home
+            <i className="bi bi-house header-nav-link__icon" aria-hidden />
+            <span className="header-nav-link__label">Acasă</span>
           </NavLink>
           <NavLink
             to="/calendar"
-            className={({ isActive }) => `btn btn-link header-nav-link ${isActive ? 'is-active' : ''}`}
+            className={({ isActive }) => `header-nav-link ${isActive ? 'is-active' : ''}`}
           >
-            Calendar
+            <i className="bi bi-calendar3 header-nav-link__icon" aria-hidden />
+            <span className="header-nav-link__label">Calendar</span>
           </NavLink>
           <NavLink
-            to="/history"
-            className={({ isActive }) => `btn btn-link header-nav-link ${isActive ? 'is-active' : ''}`}
+            to="/arhiva"
+            className={({ isActive }) => `header-nav-link ${isActive ? 'is-active' : ''}`}
           >
-            Arhiva
+            <i className="bi bi-folder2 header-nav-link__icon" aria-hidden />
+            <span className="header-nav-link__label">Arhivă</span>
           </NavLink>
         </nav>
       </div>

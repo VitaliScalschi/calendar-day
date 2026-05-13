@@ -1,5 +1,7 @@
+import { useMemo } from 'react';
 import type { UsefulInfoType } from '../../../features/usefulInfo/services/usefulInfoService';
 import { InputUpload } from '../../../components/InputUpload';
+import InputSelect, { type InputSelectOption } from '../../../components/InputSelect/InputSelect';
 
 type UsefulInfoForm = {
   title: string;
@@ -37,6 +39,11 @@ function UsefulInfoDrawer({
   onFormChange,
   onUpload,
 }: Props) {
+  const typeSelectOptions = useMemo<InputSelectOption<UsefulInfoType>[]>(
+    () => availableTypeOptions.map((type) => ({ value: type, label: typeLabels[type] })),
+    [availableTypeOptions, typeLabels],
+  );
+
   if (!isOpen) {
     return null;
   }
@@ -61,18 +68,17 @@ function UsefulInfoDrawer({
             </div>
 
             <div>
-              <label className="form-label fw-semibold">Tip conținut</label>
-              <select
-                className="form-select form-input-size--md"
+              <InputSelect<UsefulInfoType>
+                id="useful-info-content-type"
+                label="Tip conținut"
+                labelVariant="form"
+                className="useful-info-drawer__type-select"
+                options={typeSelectOptions}
                 value={form.type}
-                onChange={(e) => onFormChange((previous) => ({ ...previous, type: e.target.value as UsefulInfoType }))}
-              >
-                {availableTypeOptions.map((type) => (
-                  <option key={type} value={type}>
-                    {typeLabels[type]}
-                  </option>
-                ))}
-              </select>
+                onChange={(type) => onFormChange((previous) => ({ ...previous, type }))}
+                showSuffixInTrigger={false}
+                toggleAriaLabel="Selectează tipul conținutului"
+              />
             </div>
 
             {form.type === 'document' ? (

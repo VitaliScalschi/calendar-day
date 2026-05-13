@@ -16,6 +16,18 @@ public class UsersController(IUsersService service) : ControllerBase
     public async Task<ActionResult<IReadOnlyList<UserDto>>> GetAll(CancellationToken ct)
         => Ok(await service.GetAllAsync(ct));
 
+    [HttpGet("me")]
+    public async Task<ActionResult<UserDto>> GetMe(CancellationToken ct)
+    {
+        var actorId = GetActorUserId();
+        if (actorId is null)
+        {
+            return Unauthorized();
+        }
+        var user = await service.GetByIdAsync(actorId.Value, ct);
+        return user is null ? NotFound() : Ok(user);
+    }
+
     [Authorize(Policy = "AdminOnly")]
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<UserDto>> GetById(Guid id, CancellationToken ct)
@@ -28,16 +40,30 @@ public class UsersController(IUsersService service) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<UserDto>> Create([FromBody] CreateUserDto dto, CancellationToken ct)
     {
-        var created = await service.CreateAsync(dto, ct);
-        return Ok(created);
+        try
+        {
+            var created = await service.CreateAsync(dto, ct);
+            return Ok(created);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [Authorize(Policy = "AdminOnly")]
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<UserDto>> Update(Guid id, [FromBody] UpdateUserDto dto, CancellationToken ct)
     {
-        var updated = await service.UpdateAsync(id, dto, ct);
-        return updated is null ? NotFound() : Ok(updated);
+        try
+        {
+            var updated = await service.UpdateAsync(id, dto, ct);
+            return updated is null ? NotFound() : Ok(updated);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [Authorize(Policy = "AdminOnly")]

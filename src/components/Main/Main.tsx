@@ -317,10 +317,6 @@ function Main({
         draftDateRangeEnd={draftDateRangeEnd}
         onDateRangeStartChange={setDraftDateRangeStart}
         onDateRangeEndChange={setDraftDateRangeEnd}
-        onDateRangeReset={() => {
-          setDraftDateRangeStart(DEFAULT_DATE_RANGE_START);
-          setDraftDateRangeEnd(DEFAULT_DATE_RANGE_END);
-        }}
         selectedElection={selectedElection}
         draftDateKey={draftDateKey}
         onSelectDateKey={setDraftDateKey}
@@ -347,6 +343,7 @@ function Main({
         remainingActions={selectedElectionRemainingStages}
         activeCurrentDay={selectedElectionActiveOnCurrentDay}
         currentDayLabel={currentDayLabel}
+        isActive={selectedElection?.is_active ?? false}
       />
     </div>
   );

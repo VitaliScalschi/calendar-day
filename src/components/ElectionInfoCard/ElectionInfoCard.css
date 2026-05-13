@@ -1,55 +1,368 @@
-.election-info-card {
-  background: #f6f8fb;
+/* ============================================================
+   ElectionInfoCard — coloana din dreapta.
+   Trei carduri: hero (titlu + ACTIV), stats (data + progrese),
+   authority (emitent CEC).
+   ============================================================ */
+
+.election-info-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-.election-info-card__title {
+.election-info-wrap > .useful-info-card {
+  margin-top: 0 !important;
+}
+
+/* ---------- Hero card (titlu scrutin) ---------- */
+
+.election-info-hero {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.7rem;
+  background: #ffffff;
+  border: 1px solid #e7ebf3;
+  border-radius: 10px;
+  padding: 0.7rem 0.85rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.election-info-hero__icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  background: #eaf1ff;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 1.05rem;
-  font-weight: 700;
-  color: #1f2937;
+  flex-shrink: 0;
 }
 
-.election-info-card__subtitle {
-  font-size: 0.85rem;
+.election-info-hero__text {
+  min-width: 0;
+}
+
+.election-info-hero__title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.election-info-hero__subtitle {
+  margin: 0.1rem 0 0;
+  font-size: 0.78rem;
   font-weight: 500;
   color: #6b7280;
-  margin-bottom: 0;
+  line-height: 1.25;
 }
 
-.election-info-card__date {
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: #1f2937;
-  border-bottom: 1px solid #edf1f7;
-}
-
-.election-info-card__row {
-  border-bottom: 1px solid #edf1f7;
-  font-size: 0.92rem;
-  color: #4b5563;
-}
-
-.election-info-card__row:last-child {
-  border-bottom: none;
-}
-
-.election-info-card__badge {
+.election-info-hero__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.22rem 0.55rem;
   border-radius: 999px;
-  font-size: 0.74rem;
+  font-size: 0.65rem;
   font-weight: 700;
-  padding: 0.08rem 0.5rem;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
 }
 
-.election-info-card__badge--days {
-  background: #f4ead6;
-  color: #b97811;
+.election-info-hero__pill--active {
+  background: #e0ecff;
+  color: #1d4ed8;
 }
 
-.election-info-card__badge--active {
-  background: #d9e7f7;
-  color: #2b6cb0;
+.election-info-hero__pill--inactive {
+  background: #f1f3f7;
+  color: #6b7280;
 }
 
-.election-info-card__badge--done {
-  background: #d8f1ea;
-  color: #1e7f6d;
+.election-info-hero__pill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  display: inline-block;
+}
+
+/* ---------- Stats card ---------- */
+
+.election-info-stats {
+  background: #ffffff;
+  border: 1px solid #e7ebf3;
+  border-radius: 10px;
+  padding: 0.85rem 0.9rem 0.9rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.election-info-stats__date-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.election-info-stats__date-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.election-info-stats__date-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.election-info-stats__date-value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.15;
+  letter-spacing: 0.3px;
+}
+
+.election-info-stats__divider {
+  height: 1px;
+  background: #eef0f5;
+  margin: 0.1rem 0 0.25rem;
+}
+
+/* ---------- Stat row (icon | label | bar | value all inline) ---------- */
+
+.election-info-stat {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 30px;
+}
+
+.election-info-stat__icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.election-info-stat__icon--date {
+  background: #eaf1ff;
+  color: #2563eb;
+}
+
+.election-info-stat__icon--orange {
+  background: #fff1de;
+  color: #d97706;
+}
+
+.election-info-stat__icon--green {
+  background: #d8f5e1;
+  color: #16a34a;
+}
+
+.election-info-stat__icon--blue {
+  background: #e0ecff;
+  color: #2563eb;
+}
+
+.election-info-stat__icon--blue i.bi-circle-fill {
+  font-size: 0.7rem;
+}
+
+.election-info-stat__label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #1f2937;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.election-info-stat__bar {
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #eef0f5;
+  min-width: 40px;
+}
+
+.election-info-stat__bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.25s ease;
+}
+
+.election-info-stat__bar--orange .election-info-stat__bar-fill {
+  background: #f59e0b;
+}
+
+.election-info-stat__bar--green .election-info-stat__bar-fill {
+  background: #22c55e;
+}
+
+.election-info-stat__bar--blue .election-info-stat__bar-fill {
+  background: #2563eb;
+}
+
+.election-info-stat__value {
+  min-width: 26px;
+  text-align: center;
+  padding: 0.18rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.election-info-stat__value--orange {
+  background: #fff3df;
+  color: #b45309;
+}
+
+.election-info-stat__value--green {
+  background: #d8f5e1;
+  color: #15803d;
+}
+
+.election-info-stat__value--blue {
+  background: #e0ecff;
+  color: #1d4ed8;
+}
+
+/* ---------- Authority card (CEC) ---------- */
+
+.election-info-authority {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.7rem;
+  background: #ffffff;
+  border: 1px solid #e7ebf3;
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.election-info-authority:hover,
+.election-info-authority:focus-visible {
+  border-color: color-mix(in srgb, var(--color-primary) 35%, #e7ebf3);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  transform: translateY(-1px);
+  text-decoration: none;
+  color: inherit;
+}
+
+.election-info-authority:hover .election-info-authority__chevron,
+.election-info-authority:focus-visible .election-info-authority__chevron {
+  color: var(--color-primary);
+  transform: translateX(2px);
+}
+
+.election-info-authority:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 22%, transparent),
+    0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+.election-info-authority__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: #eaf1ff;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.election-info-authority__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.election-info-authority__label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.election-info-authority__name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.25;
+  word-break: break-word;
+}
+
+.election-info-authority__chevron {
+  font-size: 0.9rem;
+  color: #9ca3af;
+  flex-shrink: 0;
+  transition: color 0.18s ease, transform 0.18s ease;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 575.98px) {
+  .election-info-hero,
+  .election-info-stats,
+  .election-info-authority {
+    padding: 0.75rem 0.8rem;
+  }
+
+  .election-info-stats__date-value {
+    font-size: 1.15rem;
+  }
+
+  .election-info-hero__icon,
+  .election-info-authority__icon {
+    width: 34px;
+    height: 34px;
+    font-size: 0.95rem;
+  }
+
+  .election-info-stat {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 0.5rem;
+  }
+
+  .election-info-stat__bar {
+    grid-column: 1 / -1;
+    margin-top: 0.15rem;
+  }
+
+  .election-info-stat__icon {
+    width: 26px;
+    height: 26px;
+    font-size: 0.8rem;
+  }
 }

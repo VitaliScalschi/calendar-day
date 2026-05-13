@@ -19,9 +19,15 @@ export const queryKeys = {
   responsibleOptions: {
     list: () => ['responsible-options', 'list'] as const,
   },
+  subdivisions: {
+    list: () => ['subdivisions', 'list'] as const,
+  },
   admin: {
     panel: (includeUsers: boolean) => ['admin', 'panel', { includeUsers }] as const,
     scrutinyEvents: (scrutinyId: string) => ['admin', 'scrutinyEvents', scrutinyId] as const,
+  },
+  currentUser: {
+    me: () => ['currentUser', 'me'] as const,
   },
   calendar: {
     groupedDeadlines: () => ['calendar', 'deadlines', 'groupedByElection'] as const,

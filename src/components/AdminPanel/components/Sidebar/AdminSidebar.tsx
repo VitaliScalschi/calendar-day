@@ -16,6 +16,7 @@ const NOMENCLATOARE_MENU: Array<{ key: AdminMenuItem; label: string }> = [
   { key: 'Nomenclatoare - Scrutine', label: 'Scrutine' },
   { key: 'Nomenclatoare - Responsabili', label: 'Responsabili' },
   { key: 'Nomenclatoare - Grupuri țintă', label: 'Grupuri țintă' },
+  { key: 'Nomenclatoare - Departamente', label: 'Departamente' },
 ];
 
 function Sidebar({ activeItem, onChange, canManageUsers = true }: SidebarProps) {
