@@ -1,8 +1,7 @@
-import StatusBadge from '../StatusBadge/StatusBadge'
 import { calculateDaysRemaining, formatDateTime } from '../../utils/dateUtils'
 import type { TimelineEventProps } from '../../interface/index'
-import { StatusDeadline } from '../../enum/index'
 import {
+  DEADLINE_STATUS_INFO,
   diffCalendarDays,
   getDeadlineRangeFromString,
   getDeadlineTodayVisual,
@@ -20,6 +19,10 @@ const GroupLabel = new Map<string, string>([
   ['observers', 'Observatori'],
   ['public_authorities', 'Autorități publice'],
 ])
+
+const RO_MONTHS_SHORT = ['Ian', 'Feb', 'Mar', 'Apr', 'Mai', 'Iun', 'Iul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+type AccentKind = 'future' | 'spans_today' | 'exact_today' | 'expired'
 
 function TimelineEvent({
   group,
@@ -66,35 +69,24 @@ function TimelineEvent({
 
   const todayVisual = getDeadlineTodayVisual(primaryDeadline)
   const todayKey = getTodayDateKey()
+  const accentAttr: AccentKind = todayVisual.kind
+  const statusInfo = DEADLINE_STATUS_INFO[accentAttr]
 
-  const formatEventDate = (dateStr: string): { dayMonth: string; year: string } => {
+  const formatEventDate = (dateStr: string): { day: string; month: string; year: string } => {
     try {
       const key = parseDateKey(dateStr) ?? dateStr
       const [y, m, d] = key.split('-').map(Number)
       const date = new Date(y, m - 1, d)
       if (Number.isNaN(date.getTime())) {
-        return { dayMonth: dateStr, year: '' }
+        return { day: dateStr, month: '', year: '' }
       }
-      const months = [
-        'Ian',
-        'Feb',
-        'Mar',
-        'Apr',
-        'Mai',
-        'Iun',
-        'Iul',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dec',
-      ]
       return {
-        dayMonth: `${date.getDate()} ${months[date.getMonth()]}`,
+        day: String(date.getDate()),
+        month: RO_MONTHS_SHORT[date.getMonth()],
         year: String(date.getFullYear()),
       }
     } catch {
-      return { dayMonth: dateStr, year: '' }
+      return { day: dateStr, month: '', year: '' }
     }
   }
 
@@ -102,32 +94,18 @@ function TimelineEvent({
     ? formatEventDate(normalizedRange.start)
     : primaryDeadline
       ? formatEventDate(primaryDeadline)
-      : { dayMonth: 'Data necunoscută', year: '' }
+      : { day: '?', month: '', year: '' }
   const dateEndParts = normalizedRange ? formatEventDate(normalizedRange.end) : null
   const displayTitle = title || 'Eveniment electoral'
   const deadlineFormatted = formatDeadlineDisplay(primaryDeadline)
 
-  const accentAttr: 'future' | 'spans_today' | 'exact_today' | 'expired' = todayVisual.kind
-
-  const badgeConfig = (() => {
-    switch (todayVisual.kind) {
-      case 'future':
-        return { status: StatusDeadline.Upcoming as const, label: 'Viitor' }
-      case 'spans_today':
-        return { status: StatusDeadline.InProgress as const, label: 'În curs' }
-      case 'exact_today':
-        return { status: StatusDeadline.Urgent as const, label: 'Astăzi' }
-      default:
-        return { status: StatusDeadline.Expired as const, label: 'Expirat' }
-    }
-  })()
-
-  const railIconClass =
-    todayVisual.kind === 'future'
-      ? 'fa-solid fa-bullhorn'
-      : todayVisual.kind === 'expired'
-        ? 'fa-solid fa-circle-xmark'
-        : 'fa-solid fa-clock'
+  // Pe cardul de dată: pentru perioade afișăm intervalul, altfel doar ziua singulară.
+  const dateCardDayText = dateEndParts ? `${dateStartParts.day} - ${dateEndParts.day}` : dateStartParts.day
+  const dateCardMonth = dateEndParts?.month && dateEndParts.month !== dateStartParts.month
+    ? `${dateStartParts.month} - ${dateEndParts.month}`
+    : dateStartParts.month
+  const dateCardYear = dateEndParts?.year || dateStartParts.year
+  const dateCardAriaLabel = [statusInfo.label, dateCardDayText, dateCardMonth, dateCardYear].filter(Boolean).join(' ')
 
   const timingPhrase = (() => {
     if (!todayVisual.startKey || !todayVisual.endKey) return null
@@ -142,110 +120,113 @@ function TimelineEvent({
       if (n === 0) return 'Ultima zi a perioadei'
       return n === 1 ? '1 zi până la finalul perioadei' : `${n} zile până la finalul perioadei`
     }
-    if (todayVisual.kind === 'exact_today') {
-      return 'Termen în curs'
+    if (todayVisual.kind === 'expired') {
+      const n = Math.abs(diffCalendarDays(todayVisual.endKey, todayKey))
+      if (n === 0) return 'Expirat astăzi'
+      return n === 1 ? 'Expirat acum 1 zi' : `Expirat acum ${n} zile`
     }
-    return 'Perioada a expirat'
+    return null
   })()
 
-  const timingPhraseClass =
-    todayVisual.kind === 'expired' ? 'is-expired' : todayVisual.kind === 'future' ? 'is-future' : 'is-active'
+  const showTodayPill = accentAttr === 'exact_today'
+
+  const renderRailIcon = () => {
+    if (accentAttr === 'expired') {
+      return <i className="fa-solid fa-check" aria-hidden />
+    }
+    return null
+  }
 
   return (
     <div className="timeline-event" data-timeline-accent={accentAttr} onClick={onClick}>
-      <div className="timeline-event__left-stack">
-        <div className="timeline-event__badge-wrap">
-          <StatusBadge status={badgeConfig.status} label={badgeConfig.label} />
+      <aside className="timeline-date-card" aria-label={dateCardAriaLabel}>
+        <span className="timeline-date-card__status">{statusInfo.label}</span>
+        <div
+          className={`timeline-date-card__date${!dateEndParts ? ' timeline-date-card__date--solo' : ''}`}
+        >
+          {dateCardDayText}
         </div>
-        <div className="timeline-date-section">
-          {dateEndParts ? (
-            <div className="timeline-date-range">
-              <div className="timeline-date-day">{dateStartParts.dayMonth}</div>
-              <div className="timeline-date-day">
-                <span className="timeline-date-range-sep">- </span>
-                {dateEndParts.dayMonth}
-              </div>
-            </div>
-          ) : (
-            <div className="timeline-date-day">{dateStartParts.dayMonth}</div>
-          )}
-          {(dateEndParts?.year || dateStartParts.year) && (
-            <div className="timeline-date-year">{dateEndParts?.year ?? dateStartParts.year}</div>
-          )}
-        </div>
-      </div>
+        {dateCardMonth && <div className="timeline-date-card__month">{dateCardMonth}</div>}
+        {dateCardYear && <div className="timeline-date-card__year">{dateCardYear}</div>}
+      </aside>
 
       <div className="timeline-event__rail" aria-hidden>
         <div className="timeline-rail-segment timeline-rail-segment--up" />
-        <div className={`timeline-dot timeline-dot--rail timeline-dot--${accentAttr}`}>
-          <i className={railIconClass} aria-hidden />
-        </div>
+        <div className={`timeline-rail-dot timeline-rail-dot--${accentAttr}`}>{renderRailIcon()}</div>
         <div className="timeline-rail-segment timeline-rail-segment--down" />
       </div>
 
-      <div className="timeline-content border rounded border-gray-200 shadow-sm bg-white">
-        <h4 className="timeline-title">{displayTitle}</h4>
-
-        {deadlineFormatted && (
-          <div className="timeline-meta-row">
-            <i className="fa-regular fa-calendar timeline-meta-icon" aria-hidden />
-            <span className="timeline-meta-text">
-              {isRangeDeadline ? 'Perioada: ' : 'Până la: '}
-              <strong>{deadlineFormatted}</strong>
-            </span>
+      <article className="timeline-card">
+        <div className="timeline-card__top">
+          <div className="timeline-card__icon-box" aria-hidden>
+            <i className={statusInfo.iconClass} />
           </div>
-        )}
+          <div className="timeline-card__heading">
+            <h4 className="timeline-card__title">{displayTitle}</h4>
 
-        {timingPhrase && (
-          <div className="timeline-meta-row">
-            <i className="fa-regular fa-hourglass-half timeline-meta-icon" aria-hidden />
-            <span className={`timeline-meta-phrase ${timingPhraseClass}`}>{timingPhrase}</span>
-          </div>
-        )}
+            {deadlineFormatted && (
+              <div className="timeline-card__deadline">
+                <span className="timeline-card__deadline-label">
+                  {isRangeDeadline ? 'Perioada:' : 'Până la:'}
+                </span>
+                <span className="timeline-card__deadline-value">{deadlineFormatted}</span>
+              </div>
+            )}
 
-        {!timingPhrase && daysRemaining !== null && (
-          <div className="timeline-meta-row">
-            <i className="fa-regular fa-hourglass-half timeline-meta-icon" aria-hidden />
-            <span className="timeline-meta-phrase is-active">
-              {daysRemaining > 0 ? (
-                <>
-                  {daysRemaining} {daysRemaining === 1 ? 'zi rămasă' : 'zile rămase'}
-                </>
-              ) : daysRemaining === 0 ? (
-                'Astăzi'
-              ) : (
-                'Expirat'
+            <div className="timeline-card__status-row">
+              {showTodayPill && <span className="timeline-card__pill">ASTĂZI</span>}
+              {timingPhrase && (
+                <span className={`timeline-card__timing timeline-card__timing--${accentAttr}`}>
+                  {timingPhrase}
+                </span>
               )}
-            </span>
+              {!timingPhrase && !showTodayPill && daysRemaining !== null && (
+                <span className={`timeline-card__timing timeline-card__timing--${accentAttr}`}>
+                  {daysRemaining > 0
+                    ? `${daysRemaining} ${daysRemaining === 1 ? 'zi rămasă' : 'zile rămase'}`
+                    : daysRemaining === 0
+                      ? 'Astăzi'
+                      : 'Expirat'}
+                </span>
+              )}
+            </div>
           </div>
-        )}
+        </div>
 
-        <div className="timeline-card-divider" />
+        <div className="timeline-card__divider" />
 
-        {group && group.length > 0 && (
-          <div className="timeline-meta-row">
-            <i className="fa-solid fa-crosshairs timeline-meta-icon" aria-hidden />
-            <span className="timeline-meta-text">
-              Grupul țintă: <strong>{group.map((g) => GroupLabel.get(g) || g).join(', ')}</strong>
-            </span>
+        <div className="timeline-card__footer">
+          <div className="timeline-card__meta">
+            {group && group.length > 0 && (
+              <div className="timeline-card__meta-item">
+                <i className="fa-solid fa-users timeline-card__meta-icon" aria-hidden />
+                <span className="timeline-card__meta-label">Grupul țintă:</span>
+                <span className="timeline-card__meta-value">
+                  {group.map((g) => GroupLabel.get(g) || g).join(', ')}
+                </span>
+              </div>
+            )}
+
+            {responsible && responsible.length > 0 && (
+              <div className="timeline-card__meta-item">
+                <i className="fa-regular fa-user timeline-card__meta-icon" aria-hidden />
+                <span className="timeline-card__meta-label">Responsabil:</span>
+                <span className="timeline-card__meta-value">
+                  {responsible.map((g) => GroupLabel.get(g) || g).join(', ')}
+                </span>
+              </div>
+            )}
           </div>
-        )}
 
-        {responsible && responsible.length > 0 && (
-          <div className="timeline-meta-row">
-            <i className="fa-regular fa-user timeline-meta-icon" aria-hidden />
-            <span className="timeline-meta-text">
-              Responsabil: <strong>{responsible.map((g) => GroupLabel.get(g) || g).join(', ')}</strong>
-            </span>
-          </div>
-        )}
-
-        <div className="timeline-footer-actions">
-          <button type="button" className="btn btn-sm btn-outline-primary timeline-details-btn" tabIndex={-1}>
+          <button
+            type="button"
+            className={`timeline-card__details-btn timeline-card__details-btn--${accentAttr}`}
+            tabIndex={-1}
+          >
             Vezi detalii <span aria-hidden>&gt;</span>
           </button>
         </div>
-      </div>
+      </article>
     </div>
   )
 }

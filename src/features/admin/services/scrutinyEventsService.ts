@@ -39,6 +39,31 @@ export type FetchScrutinyEventsParams = {
   pageSize: number;
 };
 
+/**
+ * Preia un deadline după id și aplică aceeași normalizare a câmpului `deadline`
+ * folosită de listare (RANGE / MULTIPLE / SINGLE + meta din additionalInfo).
+ * Folosit pentru deep-link `?edit=<id>` / `?view=<id>` când evenimentul nu e pe pagina curentă.
+ */
+export async function fetchScrutinyDeadlineById(id: string, signal?: AbortSignal): Promise<ScrutinyDeadline> {
+  const item = await apiRequest<ScrutinyDeadline>(`/deadlines/${id}`, { signal });
+  const normalized: ScrutinyDeadline = {
+    ...item,
+    deadline: toLegacyDeadlineValue({
+      type: item.type,
+      startDate: item.startDate,
+      endDate: item.endDate,
+      deadlines: item.deadlines,
+    }),
+  };
+  const rangeMeta = extractRangeMeta(item.additionalInfo);
+  if (!rangeMeta) return normalized;
+  return {
+    ...normalized,
+    deadline: `${rangeMeta.start} - ${rangeMeta.end}`,
+    additionalInfo: rangeMeta.cleanInfo || undefined,
+  };
+}
+
 export async function fetchScrutinyEventsData(
   scrutinyId: string,
   params: FetchScrutinyEventsParams,

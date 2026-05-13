@@ -27,6 +27,14 @@
   max-width: 36rem;
 }
 
+/* Etichetă „Scrutin activ” (InputSelect): ca vechiul form-label small + secondary */
+.admin-dashboard-scrutin-select label.form-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6c757d;
+  margin-bottom: 0.35rem !important;
+}
+
 .admin-dashboard-hero__controls .form-control {
   max-width: 11rem;
   font-size: 0.85rem;
@@ -393,4 +401,327 @@
 
 .admin-dashboard-deadline-tl__countdown--later {
   color: #6c757d;
+}
+
+/* ===== Department deadlines section ===== */
+.admin-dashboard-department {
+  height: auto;
+  padding: 1.1rem 1.25rem;
+}
+
+.admin-dashboard-department__search {
+  max-width: 520px;
+}
+
+.admin-dashboard-department__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.1rem 0.55rem;
+  background: color-mix(in srgb, var(--color-primary, #0d6efd) 12%, transparent);
+  color: var(--color-primary, #0d6efd);
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.admin-dashboard-department__stats .admin-dashboard-department__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+.admin-dashboard-department__badge--in-lucru {
+  background: #fff8e1;
+  border-color: #f1c40f;
+  color: #8a6d00;
+}
+
+.admin-dashboard-department__badge--urmatoare {
+  background: #e6f0ff;
+  border-color: #b8d3ff;
+  color: #1d4fb8;
+}
+
+.admin-dashboard-department__badge--viitoare {
+  background: #e9f7ef;
+  border-color: #b9e2c8;
+  color: #176c3b;
+}
+
+.admin-dashboard-department__badge--expirate {
+  background: #fdecec;
+  border-color: #f5b8b8;
+  color: #a02121;
+}
+
+.admin-dashboard-department__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.65rem;
+}
+
+.admin-dashboard-department__item {
+  position: relative;
+  background: #f8fafc;
+  border: 1px solid #e7ebf0;
+  border-radius: 12px;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.admin-dashboard-department__item:hover {
+  background: #f1f5fb;
+  border-color: #d6e0ee;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
+}
+
+.admin-dashboard-department__item--clickable:hover {
+  transform: translateY(-1px);
+}
+
+.admin-dashboard-department__item--clickable:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+/* Cardul cu meniul deschis devine "deasupra" celorlalte din grid
+   astfel încât popoverul să nu fie acoperit de cardurile vecine. */
+.admin-dashboard-department__item--menu-open {
+  z-index: 1080;
+}
+
+.admin-dashboard-department__item-button {
+  display: grid;
+  grid-template-columns: 4px minmax(0, 1fr);
+  gap: 0.65rem;
+  align-items: stretch;
+  width: 100%;
+  padding: 0.6rem 2.5rem 0.6rem 0.5rem;
+  background: transparent;
+  border: none;
+  border-radius: 12px;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.admin-dashboard-department__item-button:focus-visible {
+  outline: 2px solid var(--color-primary, #0d6efd);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.18);
+}
+
+.admin-dashboard-department__menu-anchor {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+}
+
+.admin-dashboard-department__menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: #475569;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.admin-dashboard-department__menu-trigger:hover,
+.admin-dashboard-department__menu-trigger[aria-expanded='true'] {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #1a2332;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.admin-dashboard-department__menu-trigger:focus-visible {
+  outline: 2px solid var(--color-primary, #0d6efd);
+  outline-offset: 2px;
+}
+
+.admin-dashboard-department__menu-trigger i {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.admin-dashboard-department__popover {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 1080;
+  min-width: 180px;
+  padding: 0.35rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.admin-dashboard-department__popover-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.5rem 0.7rem;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #1a2332;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.admin-dashboard-department__popover-item:hover,
+.admin-dashboard-department__popover-item:focus-visible {
+  background: #eef2f7;
+  outline: none;
+}
+
+.admin-dashboard-department__popover-icon {
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--color-primary, #0d6efd);
+}
+
+.admin-dashboard-department__urgency {
+  border-radius: 4px;
+  align-self: stretch;
+  background: #94a3b8;
+}
+
+.admin-dashboard-department__urgency--critical {
+  background: #dc3545;
+}
+
+.admin-dashboard-department__urgency--soon {
+  background: #fd7e14;
+}
+
+.admin-dashboard-department__urgency--normal {
+  background: #0d6efd;
+}
+
+.admin-dashboard-department__urgency--later {
+  background: #94a3b8;
+}
+
+.admin-dashboard-department__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+/* Titlu eveniment: text static; vizualizare doar din coloana Acțiuni */
+.admin-dashboard-department__title-cell {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  max-width: 100%;
+}
+
+.admin-dashboard-department__title {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1a2332;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.admin-dashboard-department__title-cell .admin-dashboard-department__urgency {
+  width: 4px;
+  flex-shrink: 0;
+  min-height: 2.4em;
+  border-radius: 3px;
+}
+
+.admin-dashboard-department__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.6rem;
+  font-size: 0.78rem;
+}
+
+.admin-dashboard-department__pill {
+  padding: 0.12rem 0.55rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.admin-dashboard-department__pill--in_lucru {
+  background: #fff8e1;
+  color: #8a6d00;
+}
+
+.admin-dashboard-department__pill--urmatoare {
+  background: #e6f0ff;
+  color: #1d4fb8;
+}
+
+.admin-dashboard-department__pill--viitoare {
+  background: #e9f7ef;
+  color: #176c3b;
+}
+
+.admin-dashboard-department__pill--expirate {
+  background: #fdecec;
+  color: #a02121;
+}
+
+.admin-dashboard-department__pill--finalizate {
+  background: #eef2f7;
+  color: #475569;
+}
+
+.admin-dashboard-department__date {
+  color: #475569;
+  font-weight: 500;
+}
+
+/* Aceleași clase de celulă ca în „Acțiuni în program” (componenta Table din AdminScrutinyEventsPage) */
+.admin-dashboard-department__table .admin-events-table__action-title {
+  font-weight: 500;
+}
+
+.admin-dashboard-department__table .admin-events-table__deadline {
+  font-weight: 600;
+  font-size: 0.86rem;
+}
+
+.admin-dashboard-department__table .admin-events-table__deadline.is-late {
+  color: #dc2626;
+}
+
+.admin-dashboard-department__table .admin-events-table__deadline.is-soon {
+  color: #d97706;
+}
+
+.admin-dashboard-department__table .admin-events-table__deadline.is-muted {
+  color: #6b7280;
 }

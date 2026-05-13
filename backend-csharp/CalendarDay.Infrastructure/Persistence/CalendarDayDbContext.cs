@@ -20,6 +20,7 @@ public class CalendarDayDbContext(DbContextOptions<CalendarDayDbContext> options
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<UserRole> UserRoles => Set<UserRole>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<Subdivision> Subdivisions => Set<Subdivision>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -40,8 +41,14 @@ public class CalendarDayDbContext(DbContextOptions<CalendarDayDbContext> options
             u.HasKey(x => x.Id);
             u.Property(x => x.Email).IsRequired().HasMaxLength(320);
             u.Property(x => x.PasswordHash).IsRequired();
+            u.Property(x => x.SubdivisionId).HasColumnName("subdivision_id");
             u.HasIndex(x => x.Email).IsUnique();
             u.HasIndex(x => new { x.IsDeleted, x.IsActive });
+            u.HasIndex(x => x.SubdivisionId);
+            u.HasOne(x => x.Subdivision)
+                .WithMany()
+                .HasForeignKey(x => x.SubdivisionId)
+                .OnDelete(DeleteBehavior.SetNull);
             u.HasQueryFilter(x => !x.IsDeleted);
         });
 
@@ -205,6 +212,20 @@ public class CalendarDayDbContext(DbContextOptions<CalendarDayDbContext> options
             a.HasIndex(x => x.CreatedAtUtc);
             a.HasIndex(x => x.Username);
             a.HasIndex(x => x.StatusCode);
+        });
+
+        modelBuilder.Entity<Subdivision>(s =>
+        {
+            s.ToTable("subdivisions");
+            s.HasKey(x => x.Id);
+            s.Property(x => x.Id).HasColumnName("id");
+            s.Property(x => x.Name).HasColumnName("name").IsRequired().HasMaxLength(250);
+            s.Property(x => x.Code).HasColumnName("code").IsRequired().HasMaxLength(50);
+            s.Property(x => x.IsActive).HasColumnName("is_active").HasDefaultValue(true);
+            s.Property(x => x.CreatedAtUtc).HasColumnName("created_at_utc");
+            s.Property(x => x.UpdatedAtUtc).HasColumnName("updated_at_utc");
+            s.HasIndex(x => x.Code).IsUnique();
+            s.HasIndex(x => x.Name);
         });
     }
 }

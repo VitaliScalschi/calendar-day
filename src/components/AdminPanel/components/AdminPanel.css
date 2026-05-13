@@ -278,6 +278,10 @@
   background: #f8fafc;
 }
 
+.admin-offcanvas .input-select__menu {
+  z-index: 1085;
+}
+
 .admin-event-form {
   display: flex;
   flex-direction: column;
@@ -528,6 +532,15 @@
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.2);
+}
+
+/* Modal utilizator: meniul InputSelect nu trebuie tăiat de overflow:hidden */
+.admin-confirm-modal__content--overflow-visible {
+  overflow: visible;
+}
+
+.admin-confirm-modal .input-select__menu {
+  z-index: 1080;
 }
 
 .admin-confirm-modal__header {

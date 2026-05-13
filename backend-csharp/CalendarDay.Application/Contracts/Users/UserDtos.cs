@@ -6,7 +6,10 @@ public record UserDto(
     string Role,
     IReadOnlyList<string> Roles,
     bool IsActive,
-    DateTime CreatedAtUtc
+    DateTime CreatedAtUtc,
+    Guid? SubdivisionId,
+    string? SubdivisionName,
+    string? SubdivisionCode
 );
 
 public class CreateUserDto
@@ -15,6 +18,7 @@ public class CreateUserDto
     public string Password { get; set; } = string.Empty;
     public string Role { get; set; } = "Viewer";
     public bool IsActive { get; set; } = true;
+    public Guid? SubdivisionId { get; set; }
 }
 
 public class UpdateUserDto
@@ -23,6 +27,7 @@ public class UpdateUserDto
     public string? Password { get; set; }
     public string Role { get; set; } = "Viewer";
     public bool IsActive { get; set; } = true;
+    public Guid? SubdivisionId { get; set; }
 }
 
 public class AssignRoleDto

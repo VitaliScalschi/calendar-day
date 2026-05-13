@@ -1,6 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../../../shared/query/queryKeys';
-import { deleteElection, deleteUser, fetchAdminPanelData, upsertElection, upsertUser } from '../services/adminService';
+import {
+  deleteElection,
+  deleteUser,
+  fetchAdminPanelData,
+  upsertElection,
+  upsertUser,
+  type UpsertUserPayload,
+} from '../services/adminService';
 
 type UpsertElectionPayload = { title: string; isActive: boolean; eday: string; electionTypeIds: number[] };
 
@@ -42,7 +49,7 @@ export function useDeleteElectionMutation() {
 export function useUpsertUserMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ payload, userId }: { payload: { email: string; password?: string; role: string; isActive: boolean }; userId?: string }) =>
+    mutationFn: ({ payload, userId }: { payload: UpsertUserPayload; userId?: string }) =>
       upsertUser(payload, userId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.panel(true) });

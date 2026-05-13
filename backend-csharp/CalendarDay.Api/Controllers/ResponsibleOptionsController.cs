@@ -39,10 +39,15 @@ public class ResponsibleOptionsController(CalendarDayDbContext db) : ControllerB
             return BadRequest(new { message = "Denumirea responsabilului este obligatorie." });
         }
 
-        var exists = await db.ResponsibleOptions.AnyAsync(x => x.Label == label, ct);
-        if (exists)
+        var duplicate = await db.ResponsibleOptions
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Label.ToLower() == label.ToLower(), ct);
+        if (duplicate is not null)
         {
-            return BadRequest(new { message = "Acest responsabil există deja." });
+            return BadRequest(new
+            {
+                message = $"Există deja un responsabil cu denumirea „{duplicate.Label}”. Modifică sau șterge mai întâi intrarea existentă.",
+            });
         }
 
         var nextOrder = (await db.ResponsibleOptions.MaxAsync(x => (int?)x.DisplayOrder, ct) ?? 0) + 1;
@@ -75,10 +80,15 @@ public class ResponsibleOptionsController(CalendarDayDbContext db) : ControllerB
             return BadRequest(new { message = "Denumirea responsabilului este obligatorie." });
         }
 
-        var exists = await db.ResponsibleOptions.AnyAsync(x => x.Id != id && x.Label == label, ct);
-        if (exists)
+        var duplicate = await db.ResponsibleOptions
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id != id && x.Label.ToLower() == label.ToLower(), ct);
+        if (duplicate is not null)
         {
-            return BadRequest(new { message = "Acest responsabil există deja." });
+            return BadRequest(new
+            {
+                message = $"Există deja un alt responsabil cu denumirea „{duplicate.Label}”. Șterge sau redenumește acea intrare înainte de a o folosi aici.",
+            });
         }
 
         entity.Label = label;
@@ -128,12 +138,6 @@ public class ResponsibleOptionsController(CalendarDayDbContext db) : ControllerB
         if (entity is null)
         {
             return NotFound();
-        }
-
-        var isUsed = await db.DeadlineResponsibles.AnyAsync(x => x.Value == entity.Label, ct);
-        if (isUsed)
-        {
-            return BadRequest(new { message = "Responsabilul este folosit în acțiuni existente și nu poate fi șters." });
         }
 
         db.ResponsibleOptions.Remove(entity);

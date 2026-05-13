@@ -1,0 +1,117 @@
+/* Aliniat vizual cu dropdown-ul „Perioada evenimentului” din EventFilter */
+
+.input-select {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+
+.input-select__dropdown {
+  position: relative;
+}
+
+.input-select__control {
+  position: relative;
+}
+
+.input-select__button {
+  justify-content: space-between;
+  text-align: left;
+  background: #fff !important;
+  min-width: 0;
+  width: 100%;
+  height: 38px;
+  border-radius: 6px;
+  border: 1px solid #cfd6e2 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #2f3743;
+  padding-top: 0.2rem;
+  padding-bottom: 0.2rem;
+}
+
+.input-select__button:hover:not(:disabled) {
+  background-color: #fff !important;
+}
+
+.input-select__button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.input-select__button:focus-visible {
+  border-color: var(--color-primary, #0677c3) !important;
+  box-shadow: 0 0 0 0.2rem rgba(6, 127, 195, 0.15);
+}
+
+.input-select__trigger-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.input-select__menu {
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-height: var(--input-select-menu-max-height, 220px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin-top: 0.4rem;
+  border: 1px solid #d7dbe2;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+}
+
+.input-select__option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border: 0;
+  border-top: 1px solid #d7dbe2;
+  background: #fff;
+  color: #3c4656;
+  font-size: 0.82rem;
+  padding: 0.35rem 0.55rem;
+  text-align: left;
+}
+
+.input-select__menu .input-select__option:first-child {
+  border-top: 0;
+}
+
+.input-select__option:hover:not(:disabled) {
+  background: var(--color-primary, #0677c3);
+  color: #fff;
+}
+
+.input-select__option.is-active {
+  background: var(--color-primary, #0677c3);
+  color: #fff;
+}
+
+.input-select__option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.input-select__after {
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .input-select__button {
+    height: 48px;
+  }
+}

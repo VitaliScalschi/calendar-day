@@ -45,7 +45,27 @@ public class UsersService(CalendarDayDbContext db) : IUsersService
     {
         var roles = user.UserRoles.Select(ur => ur.Role.Name).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
         if (roles.Count == 0) roles.Add(AppRoles.Viewer);
-        return new UserDto(user.Id, user.Email, PickPrimaryRole(roles), roles, user.IsActive, user.CreatedAtUtc);
+        return new UserDto(
+            user.Id,
+            user.Email,
+            PickPrimaryRole(roles),
+            roles,
+            user.IsActive,
+            user.CreatedAtUtc,
+            user.SubdivisionId,
+            user.Subdivision?.Name,
+            user.Subdivision?.Code);
+    }
+
+    private async Task<Guid?> ResolveSubdivisionIdAsync(Guid? subdivisionId, CancellationToken ct)
+    {
+        if (subdivisionId is null || subdivisionId == Guid.Empty) return null;
+        var exists = await db.Subdivisions.AnyAsync(s => s.Id == subdivisionId, ct);
+        if (!exists)
+        {
+            throw new InvalidOperationException("Departamentul selectat nu există.");
+        }
+        return subdivisionId;
     }
 
     public async Task<IReadOnlyList<UserDto>> GetAllAsync(CancellationToken ct)
@@ -53,6 +73,7 @@ public class UsersService(CalendarDayDbContext db) : IUsersService
         var users = await db.Users
             .Include(u => u.UserRoles)
             .ThenInclude(ur => ur.Role)
+            .Include(u => u.Subdivision)
             .OrderBy(u => u.Email)
             .ToListAsync(ct);
         return users.Select(ToDto).ToList();
@@ -63,6 +84,7 @@ public class UsersService(CalendarDayDbContext db) : IUsersService
         var user = await db.Users
             .Include(u => u.UserRoles)
             .ThenInclude(ur => ur.Role)
+            .Include(u => u.Subdivision)
             .FirstOrDefaultAsync(u => u.Id == id, ct);
         return user is null ? null : ToDto(user);
     }
@@ -71,6 +93,7 @@ public class UsersService(CalendarDayDbContext db) : IUsersService
     {
         var roleEntity = await GetRoleEntityAsync(dto.Role, ct)
             ?? throw new InvalidOperationException($"Role '{dto.Role}' does not exist.");
+        var subdivisionId = await ResolveSubdivisionIdAsync(dto.SubdivisionId, ct);
         var now = DateTime.UtcNow;
 
         var user = new User
@@ -79,6 +102,7 @@ public class UsersService(CalendarDayDbContext db) : IUsersService
             Email = dto.Email.Trim().ToLowerInvariant(),
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
             IsActive = dto.IsActive,
+            SubdivisionId = subdivisionId,
             CreatedAtUtc = now,
             UpdatedAtUtc = now,
         };
@@ -100,14 +124,17 @@ public class UsersService(CalendarDayDbContext db) : IUsersService
         var user = await db.Users
             .Include(u => u.UserRoles)
             .ThenInclude(ur => ur.Role)
+            .Include(u => u.Subdivision)
             .FirstOrDefaultAsync(u => u.Id == id, ct);
         if (user is null) return null;
 
         var roleEntity = await GetRoleEntityAsync(dto.Role, ct)
             ?? throw new InvalidOperationException($"Role '{dto.Role}' does not exist.");
+        var subdivisionId = await ResolveSubdivisionIdAsync(dto.SubdivisionId, ct);
 
         user.Email = dto.Email.Trim().ToLowerInvariant();
         user.IsActive = dto.IsActive;
+        user.SubdivisionId = subdivisionId;
         if (!string.IsNullOrWhiteSpace(dto.Password))
         {
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
@@ -122,7 +149,7 @@ public class UsersService(CalendarDayDbContext db) : IUsersService
         user.UpdatedAtUtc = DateTime.UtcNow;
 
         await db.SaveChangesAsync(ct);
-        return ToDto(user);
+        return await GetByIdAsync(user.Id, ct) ?? ToDto(user);
     }
 
     public async Task<bool> AssignRoleAsync(Guid id, AssignRoleDto dto, Guid? assignedByUserId, CancellationToken ct)

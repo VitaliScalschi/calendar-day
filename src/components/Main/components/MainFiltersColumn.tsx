@@ -22,7 +22,6 @@ type MainFiltersColumnProps = {
   draftDateRangeEnd: string;
   onDateRangeStartChange: (value: string) => void;
   onDateRangeEndChange: (value: string) => void;
-  onDateRangeReset: () => void;
   selectedElection: ElectionItem | null;
   draftDateKey: string | null;
   onSelectDateKey: (key: string | null) => void;
@@ -46,7 +45,6 @@ function MainFiltersColumn({
   draftDateRangeEnd,
   onDateRangeStartChange,
   onDateRangeEndChange,
-  onDateRangeReset,
   selectedElection,
   draftDateKey,
   onSelectDateKey,
@@ -154,7 +152,6 @@ function MainFiltersColumn({
                   dateRangeEnd={draftDateRangeEnd}
                   onDateRangeStartChange={onDateRangeStartChange}
                   onDateRangeEndChange={onDateRangeEndChange}
-                  onDateRangeReset={onDateRangeReset}
                   calendarSlot={
                     <Calendar
                       eday={selectedElection?.eday}
@@ -192,7 +189,6 @@ function MainFiltersColumn({
               dateRangeEnd={draftDateRangeEnd}
               onDateRangeStartChange={onDateRangeStartChange}
               onDateRangeEndChange={onDateRangeEndChange}
-              onDateRangeReset={onDateRangeReset}
               calendarSlot={
                 <Calendar
                   eday={selectedElection?.eday}

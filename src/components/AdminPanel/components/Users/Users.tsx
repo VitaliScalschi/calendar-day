@@ -8,6 +8,8 @@ type UserRow = {
   role: string;
   status: 'Activ' | 'Inactiv';
   createdAt: string;
+  department?: string;
+  departmentCode?: string;
 };
 
 type UsersProps = {
@@ -50,6 +52,21 @@ function Users({
       key: 'role',
       header: 'Rol',
       render: (user) => user.role,
+    },
+    {
+      key: 'department',
+      header: 'Departament',
+      render: (user) =>
+        user.department ? (
+          <span title={user.department}>
+            {user.departmentCode ? (
+              <span className="fw-semibold text-muted me-1">{user.departmentCode}</span>
+            ) : null}
+            {user.department}
+          </span>
+        ) : (
+          <span className="text-muted">—</span>
+        ),
     },
     {
       key: 'status',
@@ -100,7 +117,7 @@ function Users({
             <SearchBar
               value={search}
               onSearch={onSearch}
-              placeholder="Cauta dupa email, rol sau status..."
+              placeholder="Cauta dupa email, rol, departament sau status..."
               className="w-100"
               containerClassName="w-100"
               style={{ maxWidth: 320 }}

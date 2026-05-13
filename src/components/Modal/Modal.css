@@ -1,28 +1,63 @@
+/* ============================================================
+   Modal "Detalii Eveniment" — design cu secțiuni cu iconițe pastel.
+   ============================================================ */
+
 .modal-overlay {
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: var(--color-bg-overlay);
-  /* Peste FullCalendar (popover / more-link) și alte UI-uri din pagină */
+  background-color: rgba(15, 23, 42, 0.45);
+  /* Peste FullCalendar (popover / more-link) și alte UI-uri din pagină. */
   z-index: 2147483000;
   padding: 1rem;
 }
 
 .modal-content {
+  --accent: #2563eb;
+  --accent-soft: #e6efff;
+  --accent-strong: #1d4ed8;
+
   position: relative;
   z-index: 1;
   max-width: 760px;
   width: 100%;
-  max-height: 90vh;
-  animation: modalSlideIn 0.3s ease-out;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
   border-radius: 16px;
+  overflow: hidden;
+  animation: modalSlideIn 0.25s ease-out;
+}
+
+.modal-content[data-accent='exact_today'] {
+  --accent: #f59e0b;
+  --accent-soft: #fff4e0;
+  --accent-strong: #d97706;
+}
+
+.modal-content[data-accent='spans_today'] {
+  --accent: #2563eb;
+  --accent-soft: #e0ecff;
+  --accent-strong: #1d4ed8;
+}
+
+.modal-content[data-accent='future'] {
+  --accent: #6b7280;
+  --accent-soft: #eef2f7;
+  --accent-strong: #4b5563;
+}
+
+.modal-content[data-accent='expired'] {
+  --accent: #ef4444;
+  --accent-soft: #fee2e2;
+  --accent-strong: #dc2626;
 }
 
 @keyframes modalSlideIn {
   from {
     opacity: 0;
-    transform: translateY(-50px);
+    transform: translateY(-24px);
   }
   to {
     opacity: 1;
@@ -30,59 +65,203 @@
   }
 }
 
+/* ---------- Header ---------- */
+
 .modal-header {
-  background-color: var(--color-primary);
-  color: #ffffff;
-}
-
-/* .modal-header-icon {
-  font-size: 1.35rem;
-} */
-
-.card-body {
-  overflow-y: auto;
+  background: var(--color-primary);
+  border-bottom: 1px solid var(--color-primary);
+  flex: 0 0 auto;
 }
 
 .modal-title {
   margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.2px;
 }
 
 .modal-close-btn {
   filter: invert(1) grayscale(100%);
   opacity: 0.85;
+  transition: opacity 0.15s ease;
 }
 
-.modal-card {
-  background: #f5f7fb;
-  border: 1px solid #e3e8f2;
-  border-radius: 14px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+.modal-close-btn:hover {
+  opacity: 1;
 }
 
-.modal-label {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #5f6775;
+/* ---------- Body wrapper ---------- */
+
+.modal-body--scroll {
+  padding: 1.25rem 1.5rem;
+  overflow-y: auto;
+  flex: 1 1 auto;
 }
 
-.modal-main-date {
-  font-size: 1rem;
+/* ---------- Conținut secțiune „Subiectul evenimentului” ---------- */
+
+.modal-subject {
+  margin: 0;
+  font-size: 1.15rem;
   font-weight: 700;
-  line-height: 1.2;
-  color: #2b303b;
+  color: #111827;
+  line-height: 1.35;
+  word-break: break-word;
 }
 
-.modal-text {
-  font-size: 1rem;
-  color: #2b303b;
-  line-height: 1.45;
+/* ---------- Conținut secțiune „Termen limită” ---------- */
+
+.modal-deadline {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.55rem;
+}
+
+.modal-deadline__date {
+  margin: 0;
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.1;
+}
+
+.modal-deadline__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: #fff3df;
+  color: #b45309;
+  border: 1px solid #fcd9a0;
+  white-space: nowrap;
+}
+
+.modal-deadline__pill i {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.modal-deadline__pill--exact_today {
+  background: #fff3df;
+  color: #b45309;
+  border-color: #fcd9a0;
+}
+
+.modal-deadline__pill--spans_today {
+  background: #e0ecff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+
+.modal-deadline__pill--future {
+  background: #fff3df;
+  color: #b45309;
+  border-color: #fcd9a0;
+}
+
+.modal-deadline__pill--expired {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-color: #fca5a5;
+}
+
+.modal-deadline__additional {
+  margin: 0.15rem 0 0;
+  font-size: 0.92rem;
+  font-style: italic;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+/* ---------- Sections list ---------- */
+
+.modal-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.modal-section {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  column-gap: 1rem;
+  align-items: flex-start;
+  background: #fff;
+  border: 1px solid #e9ecf2;
+  border-radius: 12px;
+  padding: 1rem 1.1rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.modal-section:hover {
+  border-color: #dde3ee;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+}
+
+.modal-section__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #eef3ff;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+/* Variantă „accent" — folosește culoarea statusului (pentru SUBIECTUL EVENIMENTULUI). */
+.modal-section--accent .modal-section__icon {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.modal-section__body {
+  min-width: 0;
+}
+
+.modal-section__title {
+  margin: 0 0 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.7px;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.modal-section__content {
+  font-size: 0.95rem;
+  color: #1f2937;
+  line-height: 1.5;
+}
+
+/* ---------- Conținut secțiuni ---------- */
+
+.modal-bullet-list {
+  list-style: disc;
+  padding-left: 1.15rem;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.modal-bullet-list li {
+  color: #1f2937;
+}
+
+.modal-bullet-list li::marker {
+  color: var(--accent);
 }
 
 .modal-link {
-  color: #2d6cdf;
-  font-size: 1rem;
+  color: var(--accent-strong);
   text-decoration: none;
 }
 
@@ -90,63 +269,89 @@
   text-decoration: underline;
 }
 
-.modal-time-badge {
-  background: #f4ead6;
-  color: #b97811;
-  font-size: 0.875rem;
-  font-weight: 600;
-  padding: 0.55rem 1rem;
+.modal-paragraph {
+  margin: 0;
+  white-space: pre-line;
 }
 
-.modal-time-badge--expired {
-  background: #fce6e6;
-  color: #c62828;
+.modal-empty {
+  margin: 0;
+  color: #6b7280;
+  font-style: italic;
 }
 
-.modal-responsible-badge {
-  background: #d9e7f7;
-  color: #2b6cb0;
-  font-size: 0.875rem;
+.modal-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.modal-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  background: #e6efff;
+  color: #1d4ed8;
+  font-size: 0.85rem;
   font-weight: 500;
-  padding: 0.55rem 1rem;
-  display: inline-block;
-  max-width: calc(100% - 1rem);
+  line-height: 1.2;
   white-space: normal;
-  overflow-wrap: anywhere;
   word-break: break-word;
-  line-height: 1.35;
-  text-align: left;
 }
+
+/* ---------- Footer ---------- */
 
 .modal-footer {
-  border-top: 1px solid #e3e8f2;
-  background: #f7f8fc;
+  border-top: 1px solid #eef0f3;
+  background: #fafbfd;
+  flex: 0 0 auto;
 }
 
-@media (max-width: 768px) {
+/* ---------- Responsive ---------- */
+
+@media (max-width: 640px) {
   .modal-content {
     max-width: 100%;
     border-radius: 12px;
+    max-height: 95vh;
   }
-  
-  .modal-label,
-  .modal-main-date,
-  .modal-title {
+
+  .modal-body--scroll {
+    padding: 1rem;
+  }
+
+  .modal-subject {
     font-size: 1rem;
   }
 
-  .modal-time-badge,
-  .modal-responsible-badge {
-    font-size: 0.95rem;
+  .modal-deadline__date {
+    font-size: 1.3rem;
   }
 
-  .modal-responsible-badge,
-  .modal-regulation-item a,
-  .modal-time-badge {
-    font-size: 12px;
+  .modal-section {
+    grid-template-columns: 44px minmax(0, 1fr);
+    column-gap: 0.7rem;
+    padding: 0.85rem 0.9rem;
   }
 
-  .card-body {
-    padding: 1rem !important;
+  .modal-section__icon {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+    border-radius: 8px;
+  }
+
+  .modal-section__title {
+    font-size: 0.72rem;
+  }
+
+  .modal-section__content {
+    font-size: 0.9rem;
+  }
+
+  .modal-chip {
+    font-size: 0.82rem;
+    padding: 0.32rem 0.7rem;
   }
 }

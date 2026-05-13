@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Sidebar } from '../../components/AdminPanel/components';
 import type { AdminMenuItem } from '../../components/AdminPanel/components/Sidebar/AdminSidebar.interface';
 import { canAccessUsersPage, getAdminEmail, logoutAdmin } from '../../shared/auth/adminAuth';
@@ -14,6 +14,7 @@ import type { SelectionRange } from '../../interface';
 import { formatDeadlineLabel, toLegacyDeadlineValue, toRoDateLocal } from '../../shared/utils/deadlineDate';
 import { getDeadlineRangeFromString, parseDateKey } from '../../shared/utils/deadlineTodayKind';
 import { useScrutinyEventsQuery } from '../../features/admin/hooks/useScrutinyEventsQuery';
+import { fetchScrutinyDeadlineById } from '../../features/admin/services/scrutinyEventsService';
 import { useAudiencesQuery } from '../../features/audiences/hooks/useAudiencesQuery';
 import { MultiCheckboxDropdown } from '../../components/MultiCheckboxDropdown';
 import { FALLBACK_TARGET_GROUP_OPTIONS } from '../../utils/electionFilters';
@@ -84,6 +85,8 @@ function AdminScrutinyEventsPage() {
   const PAGE_SIZE = 15;
   const { scrutinyId } = useParams();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const autoOpenedDeadlineRef = useRef<string | null>(null);
   const canManageUsers = canAccessUsersPage();
   const currentUserEmail = getAdminEmail() || 'Admin';
   const avatarInitial = currentUserEmail.trim().charAt(0).toUpperCase() || 'A';
@@ -437,6 +440,7 @@ function AdminScrutinyEventsPage() {
       setResponsibles([]);
       setSelectedGroups([]);
       setEditingEventId(null);
+      clearEventQueryParam();
       await loadData();
     } catch (e) {
       if (e instanceof ApiError) {
@@ -632,6 +636,96 @@ function AdminScrutinyEventsPage() {
     setIsModalOpen(true);
   };
 
+  /**
+   * Sincronizare URL ↔ modal de eveniment:
+   * - `?edit=<deadlineId>` deschide modal-ul în mod editare;
+   * - `?view=<deadlineId>` deschide modal-ul în mod doar-vizualizare.
+   * URL-ul rămâne sincronizat: la închiderea modalului parametrul e eliminat,
+   * iar la click pe edit/view din tabel este setat (vezi handler-ele).
+   * Dacă evenimentul nu este pe pagina curentă (paginare server-side), îl preluăm direct după id.
+   */
+  useEffect(() => {
+    const editId = searchParams.get('edit');
+    const viewId = searchParams.get('view');
+    const targetId = editId || viewId;
+    if (!targetId) {
+      autoOpenedDeadlineRef.current = null;
+      return;
+    }
+    if (autoOpenedDeadlineRef.current === targetId) return;
+
+    const openTarget = (target: ApiDeadline) => {
+      autoOpenedDeadlineRef.current = targetId;
+      if (editId) editEvent(target);
+      else viewEvent(target);
+    };
+
+    const local = events.find((e) => e.id === targetId);
+    if (local) {
+      openTarget(local);
+      return;
+    }
+
+    // Fallback: deadline-ul nu e pe pagina paginată curentă, îl iau direct.
+    let cancelled = false;
+    fetchScrutinyDeadlineById(targetId)
+      .then((deadline) => {
+        if (cancelled || autoOpenedDeadlineRef.current === targetId) return;
+        openTarget(deadline as ApiDeadline);
+      })
+      .catch((err) => {
+        if (err instanceof ApiError && err.status === 404) {
+          // id invalid în URL – curățăm parametrul ca să nu rămână blocat
+          const next = new URLSearchParams(searchParams);
+          next.delete('edit');
+          next.delete('view');
+          setSearchParams(next, { replace: true });
+          autoOpenedDeadlineRef.current = null;
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [events, searchParams]);
+
+  const openEditViaUrl = useCallback(
+    (eventId: string) => {
+      const next = new URLSearchParams(searchParams);
+      next.delete('view');
+      next.set('edit', eventId);
+      setSearchParams(next, { replace: false });
+    },
+    [searchParams, setSearchParams]
+  );
+
+  const openViewViaUrl = useCallback(
+    (eventId: string) => {
+      const next = new URLSearchParams(searchParams);
+      next.delete('edit');
+      next.set('view', eventId);
+      setSearchParams(next, { replace: false });
+    },
+    [searchParams, setSearchParams]
+  );
+
+  const clearEventQueryParam = useCallback(() => {
+    const next = new URLSearchParams(searchParams);
+    let changed = false;
+    if (next.has('edit')) {
+      next.delete('edit');
+      changed = true;
+    }
+    if (next.has('view')) {
+      next.delete('view');
+      changed = true;
+    }
+    if (changed) {
+      setSearchParams(next, { replace: true });
+    }
+    autoOpenedDeadlineRef.current = null;
+  }, [searchParams, setSearchParams]);
+
   const requestDeleteEvent = (eventId: string) => {
     setPendingDeleteEventId(eventId);
     setIsDeleteModalOpen(true);
@@ -821,7 +915,7 @@ function AdminScrutinyEventsPage() {
               type="button"
               title="Vizualizează"
               className="btn admin-table-actions__btn admin-table-actions__btn--view"
-              onClick={() => viewEvent(row)}
+              onClick={() => openViewViaUrl(row.id)}
             >
               <i className="fa-solid fa-eye" aria-hidden="true"></i>
             </button>
@@ -829,7 +923,7 @@ function AdminScrutinyEventsPage() {
               type="button"
               title="Editează"
               className="btn admin-table-actions__btn admin-table-actions__btn--edit"
-              onClick={() => editEvent(row)}
+              onClick={() => openEditViaUrl(row.id)}
             >
               <i className="fa-solid fa-pen" aria-hidden="true"></i>
             </button>
@@ -844,7 +938,7 @@ function AdminScrutinyEventsPage() {
         ),
       },
     ],
-    [editEvent, requestDeleteEvent, targetGroupLabelByKey]
+    [openEditViaUrl, openViewViaUrl, requestDeleteEvent, targetGroupLabelByKey]
   );
 
   return (
@@ -1033,6 +1127,7 @@ function AdminScrutinyEventsPage() {
                 setIsModalOpen(false);
                 setEditingEventId(null);
                 setIsViewOnly(false);
+                clearEventQueryParam();
               }}
             />
           </div>
@@ -1345,6 +1440,7 @@ function AdminScrutinyEventsPage() {
                   onClick={() => {
                     setIsModalOpen(false);
                     setIsViewOnly(false);
+                    clearEventQueryParam();
                   }}
                 >
                   {isViewOnly ? 'Închide' : 'Renunță'}
