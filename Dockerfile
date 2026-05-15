@@ -8,11 +8,10 @@ COPY . .
 ARG VITE_API_BASE_URL=/api
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
-# Dacă pe server package-lock.json e vechi dar main.tsx importă deja react-query,
-# npm ci nu instalează pachetul — instalăm explicit doar dacă lipsește.
-RUN npm ci --no-audit --no-fund \
-  && ([ -f node_modules/@tanstack/react-query/package.json ] \
-      || npm install @tanstack/react-query@^5.100.5 --no-save --no-audit --no-fund) \
+# Folosim `npm install` (nu `npm ci`): dacă pe server package-lock.json lipsește sau e dezlipit
+# de package.json, `npm ci` eșuează cu EUSAGE; `npm install` reconciliază și instalează.
+RUN npm install --no-audit --no-fund \
+  && test -f node_modules/bootstrap-icons/font/bootstrap-icons.css \
   && npm run build
 
 FROM nginx:1.27-alpine AS final
