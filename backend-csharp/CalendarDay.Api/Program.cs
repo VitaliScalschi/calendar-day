@@ -22,6 +22,13 @@ builder.Services.AddValidatorsFromAssemblyContaining<CreateElectionDtoValidator>
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
 
 var jwt = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? new JwtOptions();
+if (string.IsNullOrWhiteSpace(jwt.SecretKey) || jwt.SecretKey.Length < 32)
+{
+    throw new InvalidOperationException(
+        "Jwt:SecretKey is missing or too short. Set JWT_SECRET_KEY in .env (minimum 32 characters) " +
+        "and start with: docker compose -f docker-compose.prod.yml --env-file .env up -d");
+}
+
 var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SecretKey));
 
 builder.Services
@@ -88,6 +95,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseCors("frontend");
