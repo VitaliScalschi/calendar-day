@@ -109,10 +109,10 @@ function AdminScrutinyEventsPage() {
   } = useAdminScrutinyEvents();
 
   const onEventFormRequestClose = useCallback(() => {
-    setIsModalOpen(false);
-    setEditingEventId(null);
+      setIsModalOpen(false);
+      setEditingEventId(null);
     setIsViewOnly(false);
-    clearEventQueryParam();
+      clearEventQueryParam();
   }, [clearEventQueryParam, setEditingEventId, setIsModalOpen, setIsViewOnly]);
 
   const eventFormProps = useMemo((): AdminScrutinyEventFormOffcanvasProps => {
@@ -225,9 +225,9 @@ function AdminScrutinyEventsPage() {
           isFetching={scrutinyQuery.isFetching}
           error={error}
           onOpenImport={() => {
-            setSelectedSourceElectionId('');
-            setIsImportModalOpen(true);
-          }}
+                    setSelectedSourceElectionId('');
+                    setIsImportModalOpen(true);
+                  }}
           onAddEvent={openCreateEvent}
           isFilterOpen={isFilterOpen}
           setIsFilterOpen={setIsFilterOpen}
@@ -272,9 +272,9 @@ function AdminScrutinyEventsPage() {
         open={isDeleteModalOpen}
         isDeleting={isDeleting}
         onClose={() => {
-          setIsDeleteModalOpen(false);
-          setPendingDeleteEventId(null);
-        }}
+                    setIsDeleteModalOpen(false);
+                    setPendingDeleteEventId(null);
+                  }}
         onConfirm={confirmDeleteEvent}
       />
     </div>

@@ -1,12 +1,25 @@
+import { createRequire } from 'module'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import path from 'path'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const require = createRequire(import.meta.url)
+
+/** Absolute path from Node resolution (works with hoisting / different layouts). */
+const bootstrapIconsCss = path.join(
+  path.dirname(require.resolve('bootstrap-icons/package.json')),
+  'font',
+  'bootstrap-icons.css',
+)
 
 export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      'bootstrap-icons/font/bootstrap-icons.css': bootstrapIconsCss,
     },
   },
   /** Evită 504 „Outdated Optimize Dep” la lazy-load pe /calendar (FullCalendar + locale). */
