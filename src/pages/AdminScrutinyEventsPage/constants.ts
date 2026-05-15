@@ -1,0 +1,1 @@
+export const ADMIN_SCRUTINY_EVENTS_PAGE_SIZE = 15;

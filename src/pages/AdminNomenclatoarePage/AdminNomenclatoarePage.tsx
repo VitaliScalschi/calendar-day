@@ -1,779 +1,108 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { navigateForAdminSidebarItem } from '../../shared/admin/adminSidebarNavigation';
-import Pagination from '../../components/Pagination/Pagination';
 import HeaderBar from '../../components/AdminPanel/components/Header/HeaderBar';
 import Sidebar from '../../components/AdminPanel/components/Sidebar/AdminSidebar';
-import type { AdminMenuItem } from '../../components/AdminPanel/components/Sidebar/AdminSidebar.interface';
-import { canAccessUsersPage, logoutAdmin } from '../../shared/auth/adminAuth';
-import { ApiError } from '../../shared/services/apiClient';
-import { SearchBar } from '../../components';
-import {
-  useCreateElectionTypeMutation,
-  useDeleteElectionTypeMutation,
-  useElectionTypesQuery,
-  useReorderElectionTypesMutation,
-  useUpdateElectionTypeMutation,
-} from '../../features/election-types/hooks/useElectionTypesQuery';
-import {
-  useAudiencesQuery,
-  useCreateAudienceMutation,
-  useDeleteAudienceMutation,
-  useReorderAudiencesMutation,
-  useUpdateAudienceMutation,
-} from '../../features/audiences/hooks/useAudiencesQuery';
-import {
-  useCreateResponsibleOptionMutation,
-  useDeleteResponsibleOptionMutation,
-  useReorderResponsibleOptionsMutation,
-  useResponsibleOptionsQuery,
-  useUpdateResponsibleOptionMutation,
-} from '../../features/responsible-options/hooks/useResponsibleOptionsQuery';
-import {
-  useCreateSubdivisionMutation,
-  useDeleteSubdivisionMutation,
-  useSubdivisionsQuery,
-  useUpdateSubdivisionMutation,
-} from '../../features/subdivisions/hooks/useSubdivisionsQuery';
+import { canAccessUsersPage } from '../../shared/auth/adminAuth';
 import '../../components/AdminPanel/components/AdminPanel.css';
 import './AdminNomenclatoarePage.css';
-
-function getNomenclatorConfig(pathname: string): { activeItem: AdminMenuItem; title: string } {
-  if (pathname.startsWith('/admin/nomenclatoare/responsabili')) {
-    return { activeItem: 'Nomenclatoare - Responsabili', title: 'Nomenclatoare - Responsabili' };
-  }
-  if (pathname.startsWith('/admin/nomenclatoare/grupuri-tinta')) {
-    return { activeItem: 'Nomenclatoare - Grupuri țintă', title: 'Nomenclatoare - Grupuri țintă' };
-  }
-  if (pathname.startsWith('/admin/nomenclatoare/departamente')) {
-    return { activeItem: 'Nomenclatoare - Departamente', title: 'Nomenclatoare - Departamente' };
-  }
-  return { activeItem: 'Nomenclatoare - Scrutine', title: 'Nomenclatoare - Scrutine' };
-}
+import {
+  NomenclatoareCrudTable,
+  NomenclatoareDeleteModals,
+  NomenclatoareFormModal,
+  NomenclatoarePlaceholderCard,
+} from './components';
+import { useAdminNomenclatoareCrud } from './hooks';
 
 function AdminNomenclatoarePage() {
   const navigate = useNavigate();
   const location = useLocation();
   const canManageUsers = canAccessUsersPage();
-  const nomenclatorConfig = getNomenclatorConfig(location.pathname);
-  const isScrutineTab = nomenclatorConfig.activeItem === 'Nomenclatoare - Scrutine';
-  const isResponsibleTab = nomenclatorConfig.activeItem === 'Nomenclatoare - Responsabili';
-  const isGroupsTab = nomenclatorConfig.activeItem === 'Nomenclatoare - Grupuri țintă';
-  const isSubdivisionsTab = nomenclatorConfig.activeItem === 'Nomenclatoare - Departamente';
-  const isTableTab = isScrutineTab || isGroupsTab || isResponsibleTab || isSubdivisionsTab;
-  const [name, setName] = useState('');
-  const [code, setCode] = useState('');
-  const [search, setSearch] = useState('');
-  const [editingId, setEditingId] = useState<number | string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [error, setError] = useState('');
-  const [draggedId, setDraggedId] = useState<number | string | null>(null);
-  const [responsiblePage, setResponsiblePage] = useState(1);
-  const RESPONSIBLE_PAGE_SIZE = 15;
-  const [scrutineDeleteTarget, setScrutineDeleteTarget] = useState<{ id: number; name: string } | null>(null);
-  const [responsibleDeleteTarget, setResponsibleDeleteTarget] = useState<{ id: string; label: string } | null>(null);
-  const [audienceDeleteTarget, setAudienceDeleteTarget] = useState<{ id: number; name: string } | null>(null);
-  const [subdivisionDeleteTarget, setSubdivisionDeleteTarget] = useState<{ id: string; name: string } | null>(null);
-
-  useEffect(() => {
-    if (!isScrutineTab) setScrutineDeleteTarget(null);
-    if (!isResponsibleTab) setResponsibleDeleteTarget(null);
-    if (!isGroupsTab) setAudienceDeleteTarget(null);
-    if (!isSubdivisionsTab) setSubdivisionDeleteTarget(null);
-  }, [isScrutineTab, isResponsibleTab, isGroupsTab, isSubdivisionsTab]);
-  const electionTypesQuery = useElectionTypesQuery(canManageUsers && isScrutineTab);
-  const responsibleOptionsQuery = useResponsibleOptionsQuery(canManageUsers && isResponsibleTab);
-  const audiencesQuery = useAudiencesQuery(canManageUsers && isGroupsTab);
-  const subdivisionsQuery = useSubdivisionsQuery(canManageUsers && isSubdivisionsTab);
-  const createMutation = useCreateElectionTypeMutation();
-  const deleteMutation = useDeleteElectionTypeMutation();
-  const updateMutation = useUpdateElectionTypeMutation();
-  const reorderMutation = useReorderElectionTypesMutation();
-  const createAudienceMutation = useCreateAudienceMutation();
-  const updateAudienceMutation = useUpdateAudienceMutation();
-  const deleteAudienceMutation = useDeleteAudienceMutation();
-  const reorderAudiencesMutation = useReorderAudiencesMutation();
-  const createResponsibleMutation = useCreateResponsibleOptionMutation();
-  const updateResponsibleMutation = useUpdateResponsibleOptionMutation();
-  const deleteResponsibleMutation = useDeleteResponsibleOptionMutation();
-  const reorderResponsibleMutation = useReorderResponsibleOptionsMutation();
-  const createSubdivisionMutation = useCreateSubdivisionMutation();
-  const updateSubdivisionMutation = useUpdateSubdivisionMutation();
-  const deleteSubdivisionMutation = useDeleteSubdivisionMutation();
-  const electionTypes = useMemo(
-    () => [...(electionTypesQuery.data ?? [])].sort((a, b) => a.displayOrder - b.displayOrder || a.id - b.id),
-    [electionTypesQuery.data]
-  );
-  const audiences = useMemo(
-    () => [...(audiencesQuery.data ?? [])].sort((a, b) => a.displayOrder - b.displayOrder || a.id - b.id),
-    [audiencesQuery.data]
-  );
-  const responsibleOptions = useMemo(
-    () => [...(responsibleOptionsQuery.data ?? [])].sort((a, b) => a.displayOrder - b.displayOrder || a.label.localeCompare(b.label)),
-    [responsibleOptionsQuery.data]
-  );
-  const subdivisions = useMemo(
-    () => [...(subdivisionsQuery.data ?? [])].sort((a, b) => a.name.localeCompare(b.name, 'ro')),
-    [subdivisionsQuery.data]
-  );
-  const filteredElectionTypes = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return electionTypes;
-    return electionTypes.filter((item) => item.name.toLowerCase().includes(q));
-  }, [electionTypes, search]);
-  const filteredAudiences = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return audiences;
-    return audiences.filter((item) => item.name.toLowerCase().includes(q) || item.key.toLowerCase().includes(q));
-  }, [audiences, search]);
-  const filteredResponsibleOptions = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return responsibleOptions;
-    return responsibleOptions.filter((item) => item.label.toLowerCase().includes(q));
-  }, [responsibleOptions, search]);
-  const filteredSubdivisions = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return subdivisions;
-    return subdivisions.filter((item) => item.name.toLowerCase().includes(q) || item.code.toLowerCase().includes(q));
-  }, [subdivisions, search]);
-  const responsibleTotalPages = Math.max(1, Math.ceil(filteredResponsibleOptions.length / RESPONSIBLE_PAGE_SIZE));
-  const pagedResponsibleOptions = useMemo(() => {
-    const currentPage = Math.min(Math.max(responsiblePage, 1), responsibleTotalPages);
-    const start = (currentPage - 1) * RESPONSIBLE_PAGE_SIZE;
-    return filteredResponsibleOptions.slice(start, start + RESPONSIBLE_PAGE_SIZE);
-  }, [filteredResponsibleOptions, responsiblePage, responsibleTotalPages]);
-
-  const handleMenuChange = useCallback(
-    (item: AdminMenuItem) => {
-      navigateForAdminSidebarItem(navigate, item, canManageUsers);
-    },
-    [canManageUsers, navigate],
-  );
-
-  const onLogout = () => {
-    logoutAdmin();
-    navigate('/login', { replace: true });
-  };
-
-  const resetForm = () => {
-    setName('');
-    setCode('');
-    setEditingId(null);
-    setIsModalOpen(false);
-  };
-
-  const openCreateModal = () => {
-    setEditingId(null);
-    setName('');
-    setCode('');
-    setError('');
-    setIsModalOpen(true);
-  };
-
-  const onSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    const value = name.trim();
-    const codeValue = code.trim();
-    if (!value) {
-      setError(
-        isSubdivisionsTab
-          ? 'Completează denumirea departamentului.'
-          : isGroupsTab
-            ? 'Completează denumirea grupului țintă.'
-            : isResponsibleTab
-              ? 'Completează denumirea responsabilului.'
-              : 'Completează denumirea scrutinului.'
-      );
-      return;
-    }
-    if (isSubdivisionsTab && !codeValue) {
-      setError('Completează codul departamentului.');
-      return;
-    }
-    setError('');
-    try {
-      if (isSubdivisionsTab) {
-        if (editingId) {
-          await updateSubdivisionMutation.mutateAsync({
-            id: String(editingId),
-            payload: { name: value, code: codeValue },
-          });
-        } else {
-          await createSubdivisionMutation.mutateAsync({ name: value, code: codeValue });
-        }
-      } else if (isResponsibleTab) {
-        if (editingId) {
-          await updateResponsibleMutation.mutateAsync({ id: String(editingId), label: value });
-        } else {
-          await createResponsibleMutation.mutateAsync(value);
-        }
-      } else if (isGroupsTab) {
-        if (editingId) {
-          await updateAudienceMutation.mutateAsync({ id: editingId, name: value });
-        } else {
-          await createAudienceMutation.mutateAsync(value);
-        }
-      } else {
-        if (editingId) {
-          await updateMutation.mutateAsync({ id: editingId, name: value });
-        } else {
-          await createMutation.mutateAsync(value);
-        }
-      }
-      resetForm();
-    } catch (err) {
-      console.error('[Nomenclatoare] save error', err);
-      const apiMessage = err instanceof ApiError ? err.message : '';
-      if (err instanceof ApiError && err.status === 401) {
-        setError('Sesiunea a expirat. Te rugăm să te autentifici din nou.');
-        return;
-      }
-      if (err instanceof ApiError && err.status === 403) {
-        setError('Nu ai drepturi pentru această acțiune. Doar administratorii pot modifica nomenclatoarele.');
-        return;
-      }
-      const isDuplicate = err instanceof ApiError && err.status === 400 && /există deja/i.test(err.message ?? '');
-      if (isDuplicate && isResponsibleTab) {
-        setSearch(value);
-        setResponsiblePage(1);
-      }
-      const fallback = isSubdivisionsTab
-        ? (editingId ? 'Nu am putut modifica departamentul.' : 'Nu am putut crea departamentul.')
-        : isResponsibleTab
-          ? (editingId ? 'Nu am putut modifica responsabilul.' : 'Nu am putut crea responsabilul.')
-          : isGroupsTab
-            ? (editingId ? 'Nu am putut modifica grupul țintă.' : 'Nu am putut crea grupul țintă.')
-            : (editingId ? 'Nu am putut modifica tipul de scrutin.' : 'Nu am putut crea tipul de scrutin.');
-      setError(apiMessage || fallback);
-    }
-  };
-
-  const handleEdit = (id: number | string, currentName: string, currentCode?: string) => {
-    setEditingId(id);
-    setName(currentName);
-    setCode(currentCode ?? '');
-    setError('');
-    setIsModalOpen(true);
-  };
-
-  const handleDrop = async (targetId: number | string) => {
-    if (!draggedId || draggedId === targetId) return;
-    const ids = (isResponsibleTab ? responsibleOptions : isGroupsTab ? audiences : electionTypes).map((x) => x.id);
-    const draggedIndex = ids.indexOf(draggedId);
-    const targetIndex = ids.indexOf(targetId);
-    if (draggedIndex < 0 || targetIndex < 0) return;
-
-    ids.splice(draggedIndex, 1);
-    ids.splice(targetIndex, 0, draggedId);
-    const payload = ids.map((id, index) => ({ id, displayOrder: index + 1 }));
-    try {
-      if (isResponsibleTab) {
-        await reorderResponsibleMutation.mutateAsync(payload.map((x) => ({ id: String(x.id), displayOrder: x.displayOrder })));
-      } else if (isGroupsTab) {
-        await reorderAudiencesMutation.mutateAsync(payload);
-      } else {
-        await reorderMutation.mutateAsync(payload);
-      }
-    } catch {
-      setError(
-        isResponsibleTab
-          ? 'Nu am putut salva ordinea responsabililor.'
-          : isGroupsTab
-            ? 'Nu am putut salva ordinea grupurilor țintă.'
-            : 'Nu am putut salva ordinea tipurilor de scrutin.'
-      );
-    } finally {
-      setDraggedId(null);
-    }
-  };
-
-  const confirmAudienceDelete = async () => {
-    if (!audienceDeleteTarget) return;
-    const { id } = audienceDeleteTarget;
-    setError('');
-    try {
-      await deleteAudienceMutation.mutateAsync(id);
-      setAudienceDeleteTarget(null);
-      if (editingId === id) {
-        resetForm();
-      }
-    } catch {
-      setError('Nu am putut șterge grupul țintă. Verifică dacă este folosit în acțiuni.');
-    }
-  };
-
-  const confirmResponsibleDelete = async () => {
-    if (!responsibleDeleteTarget) return;
-    const { id } = responsibleDeleteTarget;
-    setError('');
-    try {
-      await deleteResponsibleMutation.mutateAsync(id);
-      setResponsibleDeleteTarget(null);
-      if (editingId === id) {
-        resetForm();
-      }
-    } catch {
-      setError('Nu am putut șterge responsabilul. Verifică dacă este folosit în acțiuni.');
-    }
-  };
-
-  const confirmScrutineDelete = async () => {
-    if (!scrutineDeleteTarget) return;
-    const { id } = scrutineDeleteTarget;
-    setError('');
-    try {
-      await deleteMutation.mutateAsync(id);
-      setScrutineDeleteTarget(null);
-      if (editingId === id) {
-        resetForm();
-      }
-    } catch {
-      setError('Nu am putut șterge tipul de scrutin. Verifică dacă este folosit în programe.');
-    }
-  };
-
-  const confirmSubdivisionDelete = async () => {
-    if (!subdivisionDeleteTarget) return;
-    const { id } = subdivisionDeleteTarget;
-    setError('');
-    try {
-      await deleteSubdivisionMutation.mutateAsync(id);
-      setSubdivisionDeleteTarget(null);
-      if (editingId === id) {
-        resetForm();
-      }
-    } catch {
-      setError('Nu am putut șterge departamentul.');
-    }
-  };
+  const nomenclatoare = useAdminNomenclatoareCrud({ pathname: location.pathname, canManageUsers, navigate });
 
   return (
     <div className="admin-layout bg-body-tertiary">
-      <Sidebar activeItem={nomenclatorConfig.activeItem} onChange={handleMenuChange} canManageUsers={canManageUsers} />
+      <Sidebar activeItem={nomenclatoare.nomenclatorConfig.activeItem} onChange={nomenclatoare.handleMenuChange} canManageUsers={canManageUsers} />
 
       <main className="admin-layout__content p-3 p-md-4">
-        <HeaderBar title={nomenclatorConfig.title} onLogout={onLogout} />
+        <HeaderBar title={nomenclatoare.nomenclatorConfig.title} onLogout={nomenclatoare.onLogout} />
         <section className="card border-0 shadow-sm admin-nomenclatoare-card">
           <div className="card-body p-4">
-            {isTableTab ? (
-              <>
-                <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-                  <h5 className="mb-0">{nomenclatorConfig.title}</h5>
-                  <div className="d-flex align-items-center gap-2">
-                    <button
-                      type="button"
-                      className="btn btn-primary"
-                      onClick={openCreateModal}
-                    >
-                      <i className="fa-solid fa-plus me-2" aria-hidden="true" />
-                      {isSubdivisionsTab
-                        ? 'Adaugă departament'
-                        : isResponsibleTab
-                          ? 'Adaugă responsabil'
-                          : isGroupsTab
-                            ? 'Adaugă grup țintă'
-                            : 'Adaugă scrutin'}
-                    </button>
-                  </div>
-                </div>
-                {error ? <div className="alert alert-warning py-2">{error}</div> : null}
-                <div className="mb-3">
-                  <SearchBar
-                    placeholder={
-                      isSubdivisionsTab
-                        ? 'Caută departament (denumire sau cod)...'
-                        : isResponsibleTab
-                          ? 'Caută responsabil...'
-                          : isGroupsTab
-                            ? 'Caută grup țintă...'
-                            : 'Caută tip de scrutin...'
-                    }
-                    value={search}
-                    onSearch={(value) => {
-                      setSearch(value);
-                      if (isResponsibleTab) setResponsiblePage(1);
-                    }}
-                  />
-                </div>
-                {isSubdivisionsTab ? null : (
-                  <span className="small text-secondary">Trage rândurile pentru reordonare</span>
-                )}
-                <div className="table-responsive border rounded-3">
-                  <table className="table align-middle mb-0">
-                    <thead className="table-light">
-                      <tr>
-                        {isSubdivisionsTab ? null : (
-                          <th style={{ width: 48 }} title="Drag and drop">
-                            <i className="fa-solid fa-grip-vertical" aria-hidden="true" />
-                          </th>
-                        )}
-                        <th className="text-center" style={{ width: 64 }}>Nr.</th>
-                        <th>
-                          {isSubdivisionsTab
-                            ? 'Denumire departament'
-                            : isResponsibleTab
-                              ? 'Denumire responsabil'
-                              : isGroupsTab
-                                ? 'Denumire grup țintă'
-                                : 'Denumire scrutin'}
-                        </th>
-                        {isGroupsTab ? <th>Cheie</th> : null}
-                        {isSubdivisionsTab ? <th style={{ width: 180 }}>Cod</th> : null}
-                        <th className="text-end">Acțiuni</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(isSubdivisionsTab
-                        ? filteredSubdivisions
-                        : isResponsibleTab
-                          ? pagedResponsibleOptions
-                          : isGroupsTab
-                            ? filteredAudiences
-                            : filteredElectionTypes
-                      ).map((item, index) => (
-                        <tr
-                          key={item.id}
-                          draggable={!isSubdivisionsTab}
-                          onDragStart={isSubdivisionsTab ? undefined : () => setDraggedId(item.id)}
-                          onDragOver={isSubdivisionsTab ? undefined : (e) => e.preventDefault()}
-                          onDrop={isSubdivisionsTab ? undefined : () => handleDrop(item.id)}
-                          className="admin-useful-info-row"
-                        >
-                          {isSubdivisionsTab ? null : (
-                            <td className="text-secondary">
-                              <i className="fa-solid fa-grip-vertical" aria-hidden="true" />
-                            </td>
-                          )}
-                          <td className="text-center fw-semibold">
-                            {isResponsibleTab ? (responsiblePage - 1) * RESPONSIBLE_PAGE_SIZE + index + 1 : index + 1}
-                          </td>
-                          <td className="fw-semibold">{isResponsibleTab ? item.label : item.name}</td>
-                          {isGroupsTab ? <td className="text-secondary">{item.key}</td> : null}
-                          {isSubdivisionsTab ? (
-                            <td className="text-secondary"><code>{(item as { code: string }).code}</code></td>
-                          ) : null}
-                          <td className="text-end">
-                            <div className="admin-nomenclatoare-actions">
-                              <button
-                                type="button"
-                                className="btn admin-table-actions__btn admin-table-actions__btn--edit"
-                                onClick={() =>
-                                  handleEdit(
-                                    item.id,
-                                    isResponsibleTab ? (item as { label: string }).label : (item as { name: string }).name,
-                                    isSubdivisionsTab ? (item as { code: string }).code : undefined
-                                  )
-                                }
-                                aria-label="Editează"
-                              >
-                                <i className="fa-solid fa-pen" aria-hidden="true" />
-                              </button>
-                              <button
-                                type="button"
-                                className="btn admin-table-actions__btn admin-table-actions__btn--delete"
-                                onClick={() => {
-                                  if (isScrutineTab) {
-                                    setScrutineDeleteTarget({
-                                      id: item.id as number,
-                                      name: (item as { name: string }).name,
-                                    });
-                                  } else if (isResponsibleTab) {
-                                    setResponsibleDeleteTarget({
-                                      id: String(item.id),
-                                      label: (item as { label: string }).label,
-                                    });
-                                  } else if (isGroupsTab) {
-                                    setAudienceDeleteTarget({
-                                      id: item.id as number,
-                                      name: (item as { name: string }).name,
-                                    });
-                                  } else if (isSubdivisionsTab) {
-                                    setSubdivisionDeleteTarget({
-                                      id: String(item.id),
-                                      name: (item as { name: string }).name,
-                                    });
-                                  }
-                                }}
-                                aria-label="Șterge"
-                              >
-                                <i className="fa-solid fa-trash" aria-hidden="true" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                      {!(isSubdivisionsTab
-                        ? subdivisionsQuery.isLoading
-                        : isResponsibleTab
-                          ? responsibleOptionsQuery.isLoading
-                          : isGroupsTab
-                            ? audiencesQuery.isLoading
-                            : electionTypesQuery.isLoading) &&
-                      (isSubdivisionsTab
-                        ? filteredSubdivisions.length === 0
-                        : isResponsibleTab
-                          ? filteredResponsibleOptions.length === 0
-                          : isGroupsTab
-                            ? filteredAudiences.length === 0
-                            : filteredElectionTypes.length === 0) ? (
-                        <tr>
-                          <td colSpan={isSubdivisionsTab ? 4 : isGroupsTab ? 5 : 4} className="text-center text-secondary py-4">
-                            {isSubdivisionsTab
-                              ? 'Nu există departamente care corespund căutării.'
-                              : isResponsibleTab
-                                ? 'Nu există responsabili care corespund căutării.'
-                                : isGroupsTab
-                                  ? 'Nu există grupuri țintă care corespund căutării.'
-                                  : 'Nu există tipuri de scrutin care corespund căutării.'}
-                          </td>
-                        </tr>
-                      ) : null}
-                    </tbody>
-                  </table>
-                </div>
-                {isResponsibleTab && filteredResponsibleOptions.length > RESPONSIBLE_PAGE_SIZE ? (
-                  <div className="mt-3 d-flex justify-content-end">
-                    <Pagination page={responsiblePage} totalPages={responsibleTotalPages} onPageChange={setResponsiblePage} compact />
-                  </div>
-                ) : null}
-              </>
+            {nomenclatoare.isTableTab ? (
+              <NomenclatoareCrudTable
+                title={nomenclatoare.nomenclatorConfig.title}
+                error={nomenclatoare.error}
+                isSubdivisionsTab={nomenclatoare.isSubdivisionsTab}
+                isResponsibleTab={nomenclatoare.isResponsibleTab}
+                isGroupsTab={nomenclatoare.isGroupsTab}
+                isScrutineTab={nomenclatoare.isScrutineTab}
+                search={nomenclatoare.search}
+                onSearchChange={(value) => {
+                  nomenclatoare.setSearch(value);
+                  if (nomenclatoare.isResponsibleTab) nomenclatoare.setResponsiblePage(1);
+                }}
+                onAddClick={nomenclatoare.openCreateModal}
+                rows={nomenclatoare.nomenclatoareTableRows}
+                isLoading={nomenclatoare.nomenclatoareTableLoading}
+                rowOrdinalBase={nomenclatoare.rowOrdinalBase}
+                showResponsiblePagination={nomenclatoare.showResponsiblePagination}
+                responsiblePage={nomenclatoare.responsiblePage}
+                responsibleTotalPages={nomenclatoare.responsibleTotalPages}
+                onResponsiblePageChange={nomenclatoare.setResponsiblePage}
+                onEdit={nomenclatoare.handleEdit}
+                onRequestDelete={(tab, id, displayLabel) => {
+                  if (tab === 'scrutine') nomenclatoare.setScrutineDeleteTarget({ id: Number(id), name: displayLabel });
+                  else if (tab === 'responsible') nomenclatoare.setResponsibleDeleteTarget({ id: String(id), label: displayLabel });
+                  else if (tab === 'audience') nomenclatoare.setAudienceDeleteTarget({ id: Number(id), name: displayLabel });
+                  else nomenclatoare.setSubdivisionDeleteTarget({ id: String(id), name: displayLabel });
+                }}
+                onDragStart={nomenclatoare.setDraggedId}
+                onDropOnRow={nomenclatoare.handleDrop}
+              />
             ) : (
-              <>
-                <h5 className="mb-2">{nomenclatorConfig.title}</h5>
-                <p className="text-muted mb-0">
-                  Secțiunea este pregătită în meniu și poate fi completată cu nomenclatoarele necesare.
-                </p>
-              </>
+              <NomenclatoarePlaceholderCard title={nomenclatoare.nomenclatorConfig.title} />
             )}
           </div>
         </section>
       </main>
 
-      {isTableTab && isModalOpen ? (
-        <div className="modal fade show d-block" tabIndex={-1} role="dialog" aria-modal="true">
-          <div className="modal-dialog modal-dialog-centered" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">
-                  {isSubdivisionsTab
-                    ? (editingId ? 'Modifică departament' : 'Adaugă departament')
-                    : isGroupsTab
-                      ? (editingId ? 'Modifică grup țintă' : 'Adaugă grup țintă')
-                      : isResponsibleTab
-                        ? (editingId ? 'Modifică responsabil' : 'Adaugă responsabil')
-                        : (editingId ? 'Modifică scrutin' : 'Adaugă scrutin')}
-                </h5>
-                <button type="button" className="btn-close" onClick={resetForm} />
-              </div>
-              <form onSubmit={onSubmit}>
-                <div className="modal-body">
-                  <label className="form-label fw-semibold mb-1">
-                    {isSubdivisionsTab
-                      ? 'Denumire departament'
-                      : isResponsibleTab
-                        ? 'Denumire responsabil'
-                        : isGroupsTab
-                          ? 'Denumire grup țintă'
-                          : 'Denumire scrutin'}
-                  </label>
-                  <input
-                    className="form-control form-input-size--md"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder={
-                      isSubdivisionsTab
-                        ? 'Ex: Direcţiei management alegeri'
-                        : isResponsibleTab
-                          ? 'Ex: Președinte CEC'
-                          : isGroupsTab
-                            ? 'Ex: Partidele Politice'
-                            : 'Ex: Alegeri locale'
-                    }
-                    maxLength={isSubdivisionsTab ? 250 : undefined}
-                    required
-                  />
-                  {isSubdivisionsTab ? (
-                    <div className="mt-3">
-                      <label className="form-label fw-semibold mb-1">Cod</label>
-                      <input
-                        className="form-control form-input-size--md"
-                        value={code}
-                        onChange={(e) => setCode(e.target.value)}
-                        placeholder="Ex: CEC(DMA)"
-                        maxLength={50}
-                        required
-                      />
-                      <div className="form-text small">Cod unic pentru departament (max. 50 caractere).</div>
-                    </div>
-                  ) : null}
-                  {error ? <div className="alert alert-danger mt-3 mb-0 py-2">{error}</div> : null}
-                </div>
-                <div className="modal-footer">
-                  <button type="button" className="btn btn-light border" onClick={resetForm}>
-                    Renunță
-                  </button>
-                  <button
-                    type="submit"
-                    className="btn btn-primary"
-                    disabled={
-                      isSubdivisionsTab
-                        ? (createSubdivisionMutation.isPending || updateSubdivisionMutation.isPending)
-                        : isResponsibleTab
-                          ? (createResponsibleMutation.isPending || updateResponsibleMutation.isPending)
-                          : isGroupsTab
-                            ? (createAudienceMutation.isPending || updateAudienceMutation.isPending)
-                            : (createMutation.isPending || updateMutation.isPending)
-                    }
-                  >
-                    {isSubdivisionsTab
-                      ? (editingId ? 'Salvează modificarea' : 'Adaugă departament')
-                      : isResponsibleTab
-                        ? (editingId ? 'Salvează modificarea' : 'Adaugă responsabil')
-                        : isGroupsTab
-                          ? (editingId ? 'Salvează modificarea' : 'Adaugă grup țintă')
-                          : (editingId ? 'Salvează modificarea' : 'Adaugă scrutin')}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      ) : null}
-      {isScrutineTab && scrutineDeleteTarget ? (
-        <div className="modal fade show d-block" tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="scrutine-delete-title">
-          <div className="modal-dialog modal-dialog-centered" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title" id="scrutine-delete-title">
-                  Șterge scrutin
-                </h5>
-                <button type="button" className="btn-close" onClick={() => setScrutineDeleteTarget(null)} aria-label="Închide" />
-              </div>
-              <div className="modal-body">
-                <p className="mb-0">
-                  Dorești să ștergi scrutinul <span className="fw-semibold">{scrutineDeleteTarget.name}</span>? Acțiunea nu poate fi anulată.
-                </p>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-light border" onClick={() => setScrutineDeleteTarget(null)}>
-                  Renunță
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-danger"
-                  onClick={() => void confirmScrutineDelete()}
-                  disabled={deleteMutation.isPending}
-                >
-                  Șterge scrutin
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : null}
-      {isResponsibleTab && responsibleDeleteTarget ? (
-        <div className="modal fade show d-block" tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="responsible-delete-title">
-          <div className="modal-dialog modal-dialog-centered" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title" id="responsible-delete-title">
-                  Șterge responsabil
-                </h5>
-                <button type="button" className="btn-close" onClick={() => setResponsibleDeleteTarget(null)} aria-label="Închide" />
-              </div>
-              <div className="modal-body">
-                <p className="mb-0">
-                  Dorești să ștergi responsabilul <span className="fw-semibold">{responsibleDeleteTarget.label}</span>? Acțiunea nu poate fi anulată.
-                </p>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-light border" onClick={() => setResponsibleDeleteTarget(null)}>
-                  Renunță
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-danger"
-                  onClick={() => void confirmResponsibleDelete()}
-                  disabled={deleteResponsibleMutation.isPending}
-                >
-                  Șterge responsabil
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : null}
-      {isGroupsTab && audienceDeleteTarget ? (
-        <div className="modal fade show d-block" tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="audience-delete-title">
-          <div className="modal-dialog modal-dialog-centered" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title" id="audience-delete-title">
-                  Șterge grup țintă
-                </h5>
-                <button type="button" className="btn-close" onClick={() => setAudienceDeleteTarget(null)} aria-label="Închide" />
-              </div>
-              <div className="modal-body">
-                <p className="mb-0">
-                  Dorești să ștergi grupul țintă <span className="fw-semibold">{audienceDeleteTarget.name}</span>? Acțiunea nu poate fi anulată.
-                </p>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-light border" onClick={() => setAudienceDeleteTarget(null)}>
-                  Renunță
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-danger"
-                  onClick={() => void confirmAudienceDelete()}
-                  disabled={deleteAudienceMutation.isPending}
-                >
-                  Șterge grup țintă
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : null}
-      {isSubdivisionsTab && subdivisionDeleteTarget ? (
-        <div className="modal fade show d-block" tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="subdivision-delete-title">
-          <div className="modal-dialog modal-dialog-centered" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title" id="subdivision-delete-title">
-                  Șterge departament
-                </h5>
-                <button type="button" className="btn-close" onClick={() => setSubdivisionDeleteTarget(null)} aria-label="Închide" />
-              </div>
-              <div className="modal-body">
-                <p className="mb-0">
-                  Dorești să ștergi departamentul <span className="fw-semibold">{subdivisionDeleteTarget.name}</span>? Acțiunea nu poate fi anulată.
-                </p>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-light border" onClick={() => setSubdivisionDeleteTarget(null)}>
-                  Renunță
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-danger"
-                  onClick={() => void confirmSubdivisionDelete()}
-                  disabled={deleteSubdivisionMutation.isPending}
-                >
-                  Șterge departament
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : null}
-      {(isTableTab && isModalOpen) ||
-      (isScrutineTab && scrutineDeleteTarget) ||
-      (isResponsibleTab && responsibleDeleteTarget) ||
-      (isGroupsTab && audienceDeleteTarget) ||
-      (isSubdivisionsTab && subdivisionDeleteTarget) ? (
-        <div className="modal-backdrop fade show" />
-      ) : null}
+      <NomenclatoareFormModal
+        open={nomenclatoare.isTableTab && nomenclatoare.isModalOpen}
+        isSubdivisionsTab={nomenclatoare.isSubdivisionsTab}
+        isResponsibleTab={nomenclatoare.isResponsibleTab}
+        isGroupsTab={nomenclatoare.isGroupsTab}
+        editingId={nomenclatoare.editingId}
+        name={nomenclatoare.name}
+        code={nomenclatoare.code}
+        error={nomenclatoare.error}
+        onNameChange={nomenclatoare.setName}
+        onCodeChange={nomenclatoare.setCode}
+        onSubmit={nomenclatoare.onSubmit}
+        onClose={nomenclatoare.resetForm}
+        submitDisabled={nomenclatoare.submitDisabled}
+      />
+      <NomenclatoareDeleteModals
+        isTableTab={nomenclatoare.isTableTab}
+        isModalOpen={nomenclatoare.isModalOpen}
+        isScrutineTab={nomenclatoare.isScrutineTab}
+        isResponsibleTab={nomenclatoare.isResponsibleTab}
+        isGroupsTab={nomenclatoare.isGroupsTab}
+        isSubdivisionsTab={nomenclatoare.isSubdivisionsTab}
+        scrutineDeleteTarget={nomenclatoare.scrutineDeleteTarget}
+        responsibleDeleteTarget={nomenclatoare.responsibleDeleteTarget}
+        audienceDeleteTarget={nomenclatoare.audienceDeleteTarget}
+        subdivisionDeleteTarget={nomenclatoare.subdivisionDeleteTarget}
+        onDismissScrutine={() => nomenclatoare.setScrutineDeleteTarget(null)}
+        onDismissResponsible={() => nomenclatoare.setResponsibleDeleteTarget(null)}
+        onDismissAudience={() => nomenclatoare.setAudienceDeleteTarget(null)}
+        onDismissSubdivision={() => nomenclatoare.setSubdivisionDeleteTarget(null)}
+        onConfirmScrutine={() => void nomenclatoare.confirmScrutineDelete()}
+        onConfirmResponsible={() => void nomenclatoare.confirmResponsibleDelete()}
+        onConfirmAudience={() => void nomenclatoare.confirmAudienceDelete()}
+        onConfirmSubdivision={() => void nomenclatoare.confirmSubdivisionDelete()}
+        deleteScrutinePending={nomenclatoare.deleteScrutinePending}
+        deleteResponsiblePending={nomenclatoare.deleteResponsiblePending}
+        deleteAudiencePending={nomenclatoare.deleteAudiencePending}
+        deleteSubdivisionPending={nomenclatoare.deleteSubdivisionPending}
+      />
     </div>
   );
 }

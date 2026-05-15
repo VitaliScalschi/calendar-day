@@ -22,7 +22,7 @@
 .admin-events-filters__toggle {
   border: 0;
   background: transparent;
-  color: #2563eb;
+  color: var(--color-primary);
   width: 30px;
   height: 30px;
   border-radius: 8px;

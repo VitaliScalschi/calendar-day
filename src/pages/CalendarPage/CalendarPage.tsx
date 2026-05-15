@@ -342,7 +342,7 @@ function CalendarPage() {
                 datesSet={handleDatesSet}
                 eventClick={handleEventClick}
                 eventContent={renderEventContent}
-                dayMaxEvents={4}
+                dayMaxEvents={3}
                 moreLinkClick="popover"
                 moreLinkText={(n) => `+${n} evenimente`}
               />

@@ -42,7 +42,7 @@
 }
 
 .input-select__button:focus-visible {
-  border-color: var(--color-primary, #0677c3) !important;
+  border-color: var(--color-primary) !important;
   box-shadow: 0 0 0 0.2rem rgba(6, 127, 195, 0.15);
 }
 
@@ -92,12 +92,12 @@
 }
 
 .input-select__option:hover:not(:disabled) {
-  background: var(--color-primary, #0677c3);
+  background: var(--color-primary);
   color: #fff;
 }
 
 .input-select__option.is-active {
-  background: var(--color-primary, #0677c3);
+  background: var(--color-primary);
   color: #fff;
 }
 
