@@ -5,10 +5,10 @@
 
 .timeline-event {
   /* Culorile sunt suprascrise per-status mai jos. */
-  --accent: #2563eb;
-  --accent-soft: rgba(37, 99, 235, 0.12);
-  --accent-strong: #1d4ed8;
-  --accent-border: rgba(37, 99, 235, 0.35);
+  --accent: var(--color-primary);
+  --accent-soft: rgba(6, 127, 195, 0.12);
+  --accent-strong: var(--color-primary-strong);
+  --accent-border: rgba(6, 127, 195, 0.35);
 
   position: relative;
   display: grid;
@@ -32,10 +32,10 @@
 }
 
 .timeline-event[data-timeline-accent='spans_today'] {
-  --accent: #2563eb;
-  --accent-soft: #e0ecff;
-  --accent-strong: #1d4ed8;
-  --accent-border: #93c5fd;
+  --accent: var(--color-primary);
+  --accent-soft: #e6f4fc;
+  --accent-strong: var(--color-primary-strong);
+  --accent-border: rgba(6, 127, 195, 0.45);
 }
 
 .timeline-event[data-timeline-accent='future'] {

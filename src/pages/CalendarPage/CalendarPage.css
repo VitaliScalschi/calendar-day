@@ -77,12 +77,11 @@
   min-width: 8rem;
 }
 
-/* ---------- Titlu „Mai 2026 ⌄" ---------- */
+/* ---------- Titlu lună/an (ex. „Mai 2026”) ---------- */
 
 .calendar-page .fc .fc-toolbar-title {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
   font-size: 1.1rem;
   font-weight: 700;
   color: #111827;
@@ -90,13 +89,11 @@
   margin: 0;
 }
 
+/* Fără săgeată decorativă lângă „Mai 2026” (evită ::after din CSS vechi sau alte surse) */
+.calendar-page .fc .fc-toolbar-title::before,
 .calendar-page .fc .fc-toolbar-title::after {
-  content: '\f282'; /* bi-chevron-down */
-  font-family: 'bootstrap-icons';
-  font-weight: 400;
-  font-size: 0.95rem;
-  color: #6b7280;
-  line-height: 1;
+  content: none !important;
+  display: none !important;
 }
 
 /* ---------- Butoane FullCalendar (reset general) ---------- */
@@ -125,7 +122,7 @@
 
 .calendar-page .fc .fc-button:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #2563eb) 22%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 22%, transparent);
 }
 
 .calendar-page .fc .fc-button:disabled {
@@ -139,7 +136,7 @@
 .calendar-page .fc .fc-next-button {
   background: #eaf1ff !important;
   border: 1px solid #d8e4ff !important;
-  color: #2563eb !important;
+  color: var(--color-primary) !important;
   padding: 0.5rem 0.75rem;
   font-size: 1rem;
 }
@@ -150,7 +147,7 @@
 .calendar-page .fc .fc-next-button:focus {
   background: #d8e4ff !important;
   border-color: #b9cdfb !important;
-  color: #1d4ed8 !important;
+  color: var(--color-primary-strong) !important;
 }
 
 .calendar-page .fc .fc-prev-button .fc-icon,
@@ -174,7 +171,7 @@
   content: '\f214'; /* bi-calendar3 */
   font-family: 'bootstrap-icons';
   font-weight: 400;
-  color: #2563eb;
+  color: var(--color-primary);
   font-size: 0.95rem;
   line-height: 1;
 }
@@ -215,9 +212,9 @@
   --bs-btn-hover-bg: #f3f6fd;
   --bs-btn-hover-color: #1f2937;
   --bs-btn-hover-border-color: transparent;
-  --bs-btn-active-bg: var(--color-primary, #2563eb);
+  --bs-btn-active-bg: var(--color-primary);
   --bs-btn-active-color: #ffffff;
-  --bs-btn-active-border-color: var(--color-primary, #2563eb);
+  --bs-btn-active-border-color: var(--color-primary);
   --bs-btn-focus-shadow-rgb: 37, 99, 235;
   --bs-btn-disabled-bg: transparent;
   --bs-btn-disabled-color: #9ca3af;
@@ -271,10 +268,10 @@
 .calendar-page .fc .btn-group > .fc-button.active,
 .calendar-page .fc .btn-group > .btn.fc-button-active,
 .calendar-page .fc .btn-group > .btn.active {
-  background: var(--color-primary, #2563eb) !important;
-  background-color: var(--color-primary, #2563eb) !important;
+  background: var(--color-primary) !important;
+  background-color: var(--color-primary) !important;
   color: #ffffff !important;
-  border-color: var(--color-primary, #2563eb) !important;
+  border-color: var(--color-primary) !important;
   box-shadow: 0 1px 3px rgba(37, 99, 235, 0.25) !important;
 }
 
@@ -310,7 +307,7 @@
 
 .calendar-page .fc .fc-button-group:focus-within,
 .calendar-page .fc .btn-group:focus-within {
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #2563eb) 22%, transparent),
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 22%, transparent),
     0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
@@ -436,7 +433,7 @@
   margin-top: 0.32rem;
   border-radius: 50%;
   flex-shrink: 0;
-  background-color: var(--color-primary, #2563eb);
+  background-color: var(--color-primary);
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
 }
 
@@ -558,8 +555,8 @@
 }
 
 .calendar-page .calendar-page__scrutiny-input-select .input-select__button:focus-visible {
-  border-color: var(--color-primary, #2563eb) !important;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #2563eb) 18%, transparent);
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 18%, transparent);
 }
 
 .calendar-page .calendar-page__scrutiny-input-select .input-select__button:disabled {

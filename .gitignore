@@ -23,3 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 
+# .NET build outputs (regenerate with `dotnet build`)
+**/bin/
+**/obj/
+

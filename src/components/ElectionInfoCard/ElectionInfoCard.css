@@ -33,7 +33,7 @@
   height: 38px;
   border-radius: 9px;
   background: #eaf1ff;
-  color: #2563eb;
+  color: var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -76,7 +76,7 @@
 
 .election-info-hero__pill--active {
   background: #e0ecff;
-  color: #1d4ed8;
+  color: var(--color-primary-strong);
 }
 
 .election-info-hero__pill--inactive {
@@ -163,7 +163,7 @@
 
 .election-info-stat__icon--date {
   background: #eaf1ff;
-  color: #2563eb;
+  color: var(--color-primary);
 }
 
 .election-info-stat__icon--orange {
@@ -178,7 +178,7 @@
 
 .election-info-stat__icon--blue {
   background: #e0ecff;
-  color: #2563eb;
+  color: var(--color-primary);
 }
 
 .election-info-stat__icon--blue i.bi-circle-fill {
@@ -220,7 +220,7 @@
 }
 
 .election-info-stat__bar--blue .election-info-stat__bar-fill {
-  background: #2563eb;
+  background: var(--color-primary);
 }
 
 .election-info-stat__value {
@@ -246,7 +246,7 @@
 
 .election-info-stat__value--blue {
   background: #e0ecff;
-  color: #1d4ed8;
+  color: var(--color-primary-strong);
 }
 
 /* ---------- Authority card (CEC) ---------- */
@@ -293,7 +293,7 @@
   height: 36px;
   border-radius: 9px;
   background: #eaf1ff;
-  color: #2563eb;
+  color: var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;

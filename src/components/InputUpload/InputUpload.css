@@ -13,7 +13,7 @@
 }
 
 .input-upload__dropzone {
-  border: 2px dashed var(--color-primary, #067fc3);
+  border: 2px dashed var(--color-primary);
   border-radius: 6px;
   background: rgba(6, 127, 195, 0.08);
   padding: 1.35rem 1rem 1.5rem;
@@ -37,13 +37,13 @@
 
 .input-upload--drag-active .input-upload__dropzone:not(.input-upload__dropzone--disabled),
 .input-upload--drag-active .input-upload__file-card {
-  border-color: var(--color-primary, #067fc3);
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(6, 127, 195, 0.2);
 }
 
 .input-upload__drop-icon {
   font-size: 2rem;
-  color: var(--color-primary, #067fc3);
+  color: var(--color-primary);
   margin-bottom: 0.65rem;
   line-height: 1;
 }
@@ -91,7 +91,7 @@
 }
 
 .input-upload__file-icon--word {
-  color: #2563eb;
+  color: var(--color-primary);
 }
 
 .input-upload__file-icon--excel {
@@ -173,7 +173,7 @@
 }
 
 .input-upload__remove:focus-visible {
-  outline: 2px solid var(--color-primary, #067fc3);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 

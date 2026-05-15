@@ -7,7 +7,9 @@ export function useCurrentUserQuery(enabled = true) {
     queryKey: queryKeys.currentUser.me(),
     queryFn: ({ signal }) => fetchCurrentUser(signal),
     enabled,
-    staleTime: 5 * 60_000,
+    /** Profilul (inclusiv subdiviziunea) trebuie actualizat la fiecare intrare în dashboard; global `refetchOnMount: false` altfel lasă date vechi după login. */
+    staleTime: 60_000,
     gcTime: 15 * 60_000,
+    refetchOnMount: 'always',
   });
 }

@@ -14,9 +14,9 @@
 }
 
 .modal-content {
-  --accent: #2563eb;
-  --accent-soft: #e6efff;
-  --accent-strong: #1d4ed8;
+  --accent: var(--color-primary);
+  --accent-soft: #e6f4fc;
+  --accent-strong: var(--color-primary-strong);
 
   position: relative;
   z-index: 1;
@@ -37,9 +37,9 @@
 }
 
 .modal-content[data-accent='spans_today'] {
-  --accent: #2563eb;
-  --accent-soft: #e0ecff;
-  --accent-strong: #1d4ed8;
+  --accent: var(--color-primary);
+  --accent-soft: #e6f4fc;
+  --accent-strong: var(--color-primary-strong);
 }
 
 .modal-content[data-accent='future'] {
@@ -154,7 +154,7 @@
 
 .modal-deadline__pill--spans_today {
   background: #e0ecff;
-  color: #1d4ed8;
+  color: var(--color-primary-strong);
   border-color: #bfdbfe;
 }
 
@@ -208,7 +208,7 @@
   height: 44px;
   border-radius: 10px;
   background: #eef3ff;
-  color: #2563eb;
+  color: var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -292,7 +292,7 @@
   padding: 0.4rem 0.85rem;
   border-radius: 999px;
   background: #e6efff;
-  color: #1d4ed8;
+  color: var(--color-primary-strong);
   font-size: 0.85rem;
   font-weight: 500;
   line-height: 1.2;

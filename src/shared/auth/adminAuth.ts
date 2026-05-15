@@ -1,4 +1,6 @@
 import { apiRequest } from '../services/apiClient';
+import { queryClient } from '../query/queryClient';
+import { queryKeys } from '../query/queryKeys';
 
 const ADMIN_TOKEN_KEY = 'adminAuthToken';
 const ADMIN_ROLE_KEY = 'adminAuthRole';
@@ -158,6 +160,7 @@ export async function loginAdmin(email: string, password: string): Promise<boole
   setAdminToken(data.accessToken);
   setAdminRole(data.user?.role || '');
   setAdminEmail(data.user?.email || '');
+  void queryClient.invalidateQueries({ queryKey: queryKeys.currentUser.me() });
   return true;
 }
 
@@ -196,6 +199,7 @@ export async function exchangeSiaAdminSession(sessionToken?: string | null): Pro
   setAdminToken(data.accessToken);
   setAdminRole(data.user?.role || '');
   setAdminEmail(data.user?.email || '');
+  void queryClient.invalidateQueries({ queryKey: queryKeys.currentUser.me() });
   return true;
 }
 
@@ -207,4 +211,5 @@ export function logoutAdmin(): void {
   } catch {
     // no-op
   }
+  void queryClient.removeQueries({ queryKey: queryKeys.currentUser.me() });
 }
