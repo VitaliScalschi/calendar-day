@@ -13,8 +13,13 @@ public class AuthController(IAuthService authService, IOptions<SiaAdminOptions> 
 {
     [AllowAnonymous]
     [HttpPost("login")]
-    public async Task<ActionResult<LoginResponseDto>> Login([FromBody] LoginRequestDto dto, CancellationToken ct)
+    public async Task<ActionResult<LoginResponseDto>> Login([FromBody] LoginRequestDto? dto, CancellationToken ct)
     {
+        if (dto is null)
+        {
+            return BadRequest(new { message = "Request body is required." });
+        }
+
         var response = await authService.LoginAsync(dto, ct);
         return response is null ? Unauthorized(new { message = "Invalid credentials" }) : Ok(response);
     }

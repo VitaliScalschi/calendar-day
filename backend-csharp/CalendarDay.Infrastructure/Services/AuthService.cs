@@ -26,17 +26,28 @@ public class AuthService(
     public async Task<LoginResponseDto?> LoginAsync(LoginRequestDto dto, CancellationToken ct)
     {
         var email = dto.Email.Trim().ToLowerInvariant();
-        var user = await db.Users
-            .Include(x => x.UserRoles)
-            .ThenInclude(x => x.Role)
-            .FirstOrDefaultAsync(x => x.Email == email, ct);
+        User? user;
+        try
+        {
+            user = await db.Users
+                .Include(x => x.UserRoles)
+                .ThenInclude(x => x.Role)
+                .FirstOrDefaultAsync(x => x.Email == email, ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Database error while loading user {Email}.", email);
+            throw;
+        }
+
         if (user is not null && user.IsActive)
         {
-            var passwordOk = BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash);
+            var passwordOk = TryVerifyPassword(dto.Password, user.PasswordHash);
             if (passwordOk)
             {
                 var roles = user.UserRoles
-                    .Select(ur => ur.Role.Name)
+                    .Where(ur => ur.Role is not null)
+                    .Select(ur => ur.Role!.Name)
                     .Distinct(StringComparer.OrdinalIgnoreCase)
                     .ToList();
                 if (roles.Count == 0)
@@ -109,9 +120,32 @@ public class AuthService(
         }
     }
 
+    private static bool TryVerifyPassword(string password, string passwordHash)
+    {
+        if (string.IsNullOrWhiteSpace(passwordHash))
+        {
+            return false;
+        }
+
+        try
+        {
+            return BCrypt.Net.BCrypt.Verify(password, passwordHash);
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
     private LoginResponseDto BuildLoginResponse(Guid userId, string email, IReadOnlyCollection<string> userRoles, bool siaLeastPrivilegedForPrimary)
     {
         var jwt = jwtOptions.Value;
+        if (string.IsNullOrWhiteSpace(jwt.SecretKey) || jwt.SecretKey.Length < 32)
+        {
+            throw new InvalidOperationException(
+                "JWT signing key is not configured. Set JWT_SECRET_KEY (minimum 32 characters) in the API environment.");
+        }
+
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SecretKey));
         var roles = userRoles.Count == 0 ? [AppRoles.Viewer] : userRoles.Distinct(StringComparer.OrdinalIgnoreCase).ToArray();

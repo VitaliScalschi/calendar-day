@@ -27,12 +27,45 @@ docker compose -f docker-compose.prod.yml --env-file .env up -d --build
 
 ## 5) Verificare
 ```bash
-docker compose -f docker-compose.prod.yml ps
-docker compose -f docker-compose.prod.yml logs -f api
+docker compose -f docker-compose.prod.yml --env-file .env ps
+docker compose -f docker-compose.prod.yml --env-file .env logs -f api
+```
+
+> **Numele containerului** nu este fix `calendar_day-api`. Compose îl generează automat
+> (ex. `calendar_day-api-1`). Pentru loguri folosește mereu **serviciul** `api`, nu numele manual.
+
+Test login direct în containerul API (înlocuiește numele din `docker ps`):
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env ps
+docker compose -f docker-compose.prod.yml --env-file .env exec api \
+  wget -qO- --header="Content-Type: application/json" \
+  --post-data='{"email":"admin@cec.md","password":"admin123"}' \
+  http://localhost:8080/api/auth/login
 ```
 
 Aplicatia web va fi pe:
 - `http://<IP-SERVER>`
+
+## 5b) Login returnează 500
+
+Cauze frecvente:
+
+1. **`JWT_SECRET_KEY` lipsă sau prea scurtă** în `.env` pe server. Docker suprascrie
+   `appsettings.json` cu valoarea din mediu; dacă e goală, generarea token-ului JWT la login eșuează.
+   - Verifică: `docker compose -f docker-compose.prod.yml --env-file .env exec api printenv Jwt__SecretKey`
+   - Trebuie să aibă **minim 32 caractere**.
+
+2. **Baza de date indisponibilă** (migrări eșuate). Vezi logurile:
+   ```bash
+   docker compose -f docker-compose.prod.yml --env-file .env logs api --tail 80
+   ```
+
+3. **Containerele nu rulează**:
+   ```bash
+   docker compose -f docker-compose.prod.yml --env-file .env up -d
+   ```
+
+Cont implicit (creat la primul start dacă lipsește în DB): `admin@cec.md` / `admin123`.
 
 ## 6) Oprire / update
 ```bash
