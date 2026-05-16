@@ -185,6 +185,11 @@ function CalendarPage() {
     [scrutinyOptions],
   );
 
+  const selectedScrutinyTitle = useMemo(
+    () => scrutinyOptions.find((o) => o.id === filterElectionId)?.title ?? '',
+    [scrutinyOptions, filterElectionId],
+  );
+
   /** Fără „toate”: mereu un scrutin; implicit primul din listă. */
   useEffect(() => {
     if (scrutinyOptions.length === 0) {
@@ -261,7 +266,7 @@ function CalendarPage() {
 
             <div className="calendar-page__intro-controls">
               {scrutinyOptions.length > 0 ? (
-                <div className="calendar-page__select-group">
+                <div className="calendar-page__select-group" title={selectedScrutinyTitle || undefined}>
                   <InputSelect
                     id="calendar-scrutiny-filter"
                     label="Alege scrutinul"

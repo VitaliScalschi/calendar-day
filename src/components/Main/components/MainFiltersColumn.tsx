@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
 import { Calendar, EventFilter } from '../../index';
 import type { ElectionItem, FilterType } from '../../../interface/index';
 
-const TABLET_BREAKPOINT = 1024;
-
 type MainFiltersColumnProps = {
+  isTabletViewport: boolean;
+  isFilterOpen: boolean;
+  onFilterOpenChange: (open: boolean) => void;
   electionOptions: Array<{ id: string; label: string }>;
   targetGroupOptions: Array<{ key: string; label: string }>;
   selectedElectionId: string | null;
@@ -28,6 +28,9 @@ type MainFiltersColumnProps = {
 };
 
 function MainFiltersColumn({
+  isTabletViewport,
+  isFilterOpen,
+  onFilterOpenChange,
   electionOptions,
   targetGroupOptions,
   selectedElectionId,
@@ -49,47 +52,6 @@ function MainFiltersColumn({
   draftDateKey,
   onSelectDateKey,
 }: MainFiltersColumnProps) {
-  const [isTabletViewport, setIsTabletViewport] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-    return window.innerWidth <= TABLET_BREAKPOINT;
-  });
-  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return true;
-    return window.innerWidth > TABLET_BREAKPOINT;
-  });
-
-  useEffect(() => {
-    const onResize = () => {
-      const isTablet = window.innerWidth <= TABLET_BREAKPOINT;
-      const wasTablet = isTabletViewport;
-      setIsTabletViewport(isTablet);
-
-      if (!isTablet) {
-        setIsFilterOpen(true);
-      } else if (!wasTablet && isTablet) {
-        // Entering tablet/mobile layout should start collapsed.
-        setIsFilterOpen(false);
-      }
-    };
-
-    onResize();
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, [isTabletViewport]);
-
-  useEffect(() => {
-    if (!isTabletViewport) {
-      document.body.style.overflow = '';
-      return;
-    }
-
-    document.body.style.overflow = isFilterOpen ? 'hidden' : '';
-
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isTabletViewport, isFilterOpen]);
-
   return (
     <aside
       className={[
@@ -98,20 +60,6 @@ function MainFiltersColumn({
       ].filter(Boolean).join(' ')}
     >
       <div className="main-layout__sticky">
-        {isTabletViewport ? (
-          <button
-            type="button"
-            className="main-layout__filter-toggle main-layout__filter-toggle--icon btn btn-outline-primary btn-sm mb-2 d-inline-flex align-items-center justify-content-center"
-            onClick={() => setIsFilterOpen((prev) => !prev)}
-            aria-expanded={isFilterOpen}
-            aria-controls="main-filters-panel"
-            aria-label={isFilterOpen ? 'Ascunde filtrele' : 'Afiseaza filtrele'}
-            title={isFilterOpen ? 'Ascunde filtrele' : 'Afiseaza filtrele'}
-          >
-            <i className="fa-solid fa-filter" aria-hidden="true" />
-          </button>
-        ) : null}
-
         {isTabletViewport ? (
           <>
             <div
@@ -129,7 +77,7 @@ function MainFiltersColumn({
                 <button
                   type="button"
                   className="btn-close"
-                  onClick={() => setIsFilterOpen(false)}
+                  onClick={() => onFilterOpenChange(false)}
                   aria-label="Inchide filtrele"
                 />
               </div>
@@ -165,7 +113,7 @@ function MainFiltersColumn({
             </div>
             <div
               className={`offcanvas-backdrop fade main-layout__offcanvas-backdrop ${isFilterOpen ? 'show' : ''}`}
-              onClick={() => setIsFilterOpen(false)}
+              onClick={() => onFilterOpenChange(false)}
               aria-hidden={!isFilterOpen}
             />
           </>

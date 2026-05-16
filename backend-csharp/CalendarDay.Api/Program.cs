@@ -86,7 +86,11 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex)
     {
-        logger.LogWarning(ex, "Default user seed skipped because database is unavailable.");
+        logger.LogError(ex, "Database migration or seed failed at startup.");
+        if (!app.Environment.IsDevelopment())
+        {
+            throw;
+        }
     }
 }
 

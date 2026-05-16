@@ -1,9 +1,37 @@
 .main-layout {
   --main-sticky-offset: 1rem;
+  --main-control-height: 38px;
+}
+
+.main-layout__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+.main-layout__toolbar .main-layout__search {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-bottom: 0;
 }
 
 .main-layout__search .search-bar-container {
   margin-bottom: 0;
+  width: 100%;
+}
+
+.main-layout__search .search-bar {
+  min-height: var(--main-control-height);
+  height: var(--main-control-height);
+  box-sizing: border-box;
+}
+
+.main-layout__search .search-bar__input {
+  padding-top: 0;
+  padding-bottom: 0;
+  height: 100%;
+  line-height: var(--main-control-height);
 }
 
 .main-layout__center {
@@ -25,11 +53,17 @@
 }
 
 .main-layout__filter-toggle--icon {
-  width: 52px;
-  height: 42px;
-  padding: 0;
+  width: var(--main-control-height);
+  min-width: var(--main-control-height);
+  height: var(--main-control-height);
+  min-height: var(--main-control-height);
+  padding: 0 !important;
   border-radius: 10px;
   font-size: 1.2rem;
+  line-height: 1 !important;
+  box-sizing: border-box;
+  --bs-btn-padding-y: 0;
+  --bs-btn-padding-x: 0;
 }
 
 .main-layout__filters-panel.is-collapsed {
@@ -43,33 +77,28 @@
 
   .main-layout__filters-col.is-tablet-mode {
     position: absolute;
-    top: 17px;
-    left: calc(var(--bs-gutter-x) * 0.5);
-    z-index: 12;
-    width: auto !important;
-    flex: 0 0 auto !important;
-    padding: 0;
-    margin-top: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    flex: 0 0 0 !important;
+    max-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible;
+    border: 0;
+    z-index: 20;
   }
 
   .main-layout__filters-col.is-tablet-mode .main-layout__sticky {
-    display: flex;
-    align-items: flex-start;
-    position: relative;
+    position: static;
+    width: 0;
+    height: 0;
+    overflow: visible;
   }
 
   .main-layout__filters-col.is-tablet-mode + .main-layout__center {
     width: 100% !important;
     flex: 0 0 100% !important;
     max-width: 100%;
-  }
-
-  .main-layout__filters-col.is-tablet-mode + .main-layout__center .main-layout__search {
-    padding-left: 4.25rem;
-  }
-
-  .main-layout__filters-col.is-tablet-mode .main-layout__filter-toggle {
-    margin-bottom: 0 !important;
   }
 
   .main-layout__offcanvas {
@@ -103,5 +132,15 @@
 @media (max-width: 1199.98px) {
   .main-layout__sticky {
     position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-layout {
+    --main-control-height: 48px;
+  }
+
+  .main-layout__toolbar .search-bar-container {
+    flex-direction: row;
   }
 }

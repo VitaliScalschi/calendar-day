@@ -222,6 +222,31 @@
   color: var(--accent-strong);
 }
 
+/* Variantă neutră — aceeași culoare indiferent de status (expirat / astăzi / viitor). */
+.modal-section--neutral .modal-section__icon {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.modal-section--neutral .modal-section__content,
+.modal-section--neutral .modal-bullet-list li,
+.modal-section--neutral .modal-empty {
+  color: #4b5563;
+}
+
+.modal-section--neutral .modal-bullet-list li::marker {
+  color: #9ca3af;
+}
+
+.modal-section--neutral .modal-link {
+  color: #4b5563;
+  font-style: italic;
+}
+
+.modal-section--neutral .modal-link:hover {
+  color: #374151;
+}
+
 .modal-section__body {
   min-width: 0;
 }
