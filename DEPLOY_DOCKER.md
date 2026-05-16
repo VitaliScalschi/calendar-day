@@ -67,6 +67,38 @@ Cauze frecvente:
 
 Cont implicit (creat la primul start dacă lipsește în DB): `admin@cec.md` / `admin123`.
 
+### Reset parolă din linia de comandă
+
+```bash
+chmod +x scripts/reset-user-password.sh
+./scripts/reset-user-password.sh admin@cec.md 'ParolaNoua123'
+```
+
+Scriptul actualizează `PasswordHash` în PostgreSQL (BCrypt, compatibil cu API-ul).
+
+### Eroare `column u.DeletedAtUtc does not exist`
+
+Schema DB e în urmă față de cod. **Remediere rapidă** (fără rebuild API), rulează scriptul SQL din proiect:
+
+```bash
+cd ~/calendar_day
+docker compose -f docker-compose.prod.yml --env-file .env exec -T postgres \
+  psql -U "${POSTGRES_USER:-postgres}" -d "${POSTGRES_DB:-calendar_day}" \
+  < backend-csharp/CalendarDay.Infrastructure/Persistence/Sql/20260508_role_management.sql
+```
+
+Apoi repornește API-ul:
+
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env restart api
+```
+
+**Remediere permanentă:** copiază codul nou (include migrarea `20260515120000_AddUserRoleManagementAndSoftDelete`) și:
+
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env up -d --build api
+```
+
 ## 6) Oprire / update
 ```bash
 docker compose -f docker-compose.prod.yml down

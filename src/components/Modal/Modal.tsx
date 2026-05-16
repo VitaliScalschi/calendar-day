@@ -23,12 +23,19 @@ type SectionProps = {
   iconClass: string
   title: string
   children: ReactNode
-  variant?: 'default' | 'accent'
+  variant?: 'default' | 'accent' | 'neutral'
 }
 
 function ModalSection({ iconClass, title, children, variant = 'default' }: SectionProps) {
+  const variantClass =
+    variant === 'accent'
+      ? ' modal-section--accent'
+      : variant === 'neutral'
+        ? ' modal-section--neutral'
+        : ''
+
   return (
-    <section className={`modal-section${variant === 'accent' ? ' modal-section--accent' : ''}`}>
+    <section className={`modal-section${variantClass}`}>
       <div className="modal-section__icon" aria-hidden>
         <i className={iconClass} />
       </div>
@@ -136,7 +143,7 @@ function Modal({ isOpen, onClose, deadline }: ModalProps) {
               </div>
             </ModalSection>
 
-            <ModalSection iconClass="bi bi-bank2" title="CADRU NORMATIV">
+            <ModalSection iconClass="bi bi-bank2" title="CADRU NORMATIV" variant="neutral">
               {deadline.regulations && deadline.regulations.length > 0 ? (
                 <ul className="modal-bullet-list">
                   {deadline.regulations.map((reg, index) => (

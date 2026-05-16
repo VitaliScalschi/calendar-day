@@ -7,6 +7,7 @@ import { filterDeadlinesByTargetGroups, getActiveElections } from '../../utils/e
 import { expandMultiDateDeadlinesForDisplay } from '../../shared/utils/expandMultiDateDeadlines';
 import MainFiltersColumn from './components/MainFiltersColumn';
 import MainEventsColumn from './components/MainEventsColumn';
+import { useMainTabletLayout } from './useMainTabletLayout';
 import { useElectionTypesQuery } from '../../features/election-types/hooks/useElectionTypesQuery';
 import { CALENDAR_HOME_RESET_EVENT } from '../../shared/calendarHomeReset';
 import './Main.css';
@@ -43,6 +44,7 @@ function Main({
   const [appliedDateRangeStart, setAppliedDateRangeStart] = useState(DEFAULT_DATE_RANGE_START);
   const [appliedDateRangeEnd, setAppliedDateRangeEnd] = useState(DEFAULT_DATE_RANGE_END);
   const [searchResetKey, setSearchResetKey] = useState(0);
+  const { isTabletViewport, isFilterOpen, setIsFilterOpen } = useMainTabletLayout();
 
   const electionTypesQuery = useElectionTypesQuery(true);
   const activeElections = getActiveElections(data);
@@ -300,6 +302,9 @@ function Main({
   return (
     <div className="main-layout row g-3 align-items-start">
       <MainFiltersColumn
+        isTabletViewport={isTabletViewport}
+        isFilterOpen={isFilterOpen}
+        onFilterOpenChange={setIsFilterOpen}
         electionOptions={electionOptions}
         targetGroupOptions={targetGroupOptions}
         selectedElectionId={selectedElectionId}
@@ -323,6 +328,9 @@ function Main({
       />
 
       <MainEventsColumn
+        isTabletViewport={isTabletViewport}
+        isFilterOpen={isFilterOpen}
+        onFilterToggle={() => setIsFilterOpen((prev) => !prev)}
         searchResetKey={searchResetKey}
         onSearch={handleSearch}
         appliedElection={appliedElection}

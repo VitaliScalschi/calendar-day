@@ -62,6 +62,7 @@ function AdminScrutinyEventsPage() {
     responsibleFilter,
     responsibleMultiOptions,
     responsibleOptions,
+    responsibles,
     rows,
     safePage,
     saveEvent,
