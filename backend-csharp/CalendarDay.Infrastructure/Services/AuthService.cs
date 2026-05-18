@@ -8,6 +8,7 @@ using CalendarDay.Application.Contracts.SiaAdmin;
 using CalendarDay.Domain.Entities;
 using CalendarDay.Infrastructure.Auth;
 using CalendarDay.Infrastructure.Persistence;
+using CalendarDay.Infrastructure.Email;
 using CalendarDay.Infrastructure.Services.SiaAdmin;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -16,11 +17,14 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace CalendarDay.Infrastructure.Services;
 
-public class AuthService(
+public partial class AuthService(
     CalendarDayDbContext db,
     IOptions<JwtOptions> jwtOptions,
     ISiaAdminService siaAdminService,
     IOptions<SiaAdminOptions> siaOptions,
+    IEmailNotificationService emailNotificationService,
+    IOptions<PasswordResetOptions> passwordResetOptions,
+    PasswordResetRateLimiter rateLimiter,
     ILogger<AuthService> logger) : IAuthService
 {
     public async Task<LoginResponseDto?> LoginAsync(LoginRequestDto dto, CancellationToken ct)

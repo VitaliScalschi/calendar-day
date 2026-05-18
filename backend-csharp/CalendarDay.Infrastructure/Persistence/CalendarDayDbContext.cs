@@ -21,6 +21,7 @@ public class CalendarDayDbContext(DbContextOptions<CalendarDayDbContext> options
     public DbSet<UserRole> UserRoles => Set<UserRole>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<Subdivision> Subdivisions => Set<Subdivision>();
+    public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -226,6 +227,19 @@ public class CalendarDayDbContext(DbContextOptions<CalendarDayDbContext> options
             s.Property(x => x.UpdatedAtUtc).HasColumnName("updated_at_utc");
             s.HasIndex(x => x.Code).IsUnique();
             s.HasIndex(x => x.Name);
+        });
+
+        modelBuilder.Entity<PasswordResetToken>(t =>
+        {
+            t.ToTable("password_reset_tokens");
+            t.HasKey(x => x.Id);
+            t.Property(x => x.TokenHash).IsRequired().HasMaxLength(128);
+            t.HasIndex(x => x.TokenHash);
+            t.HasIndex(x => new { x.UserId, x.UsedAtUtc });
+            t.HasOne(x => x.User)
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

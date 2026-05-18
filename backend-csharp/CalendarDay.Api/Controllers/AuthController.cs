@@ -41,4 +41,42 @@ public class AuthController(IAuthService authService, IOptions<SiaAdminOptions> 
         var response = await authService.ExchangeSiaSessionAsync(sessionToken ?? string.Empty, ct);
         return response is null ? Unauthorized(new { message = "Invalid or expired SIA session" }) : Ok(response);
     }
+
+    [AllowAnonymous]
+    [HttpPost("forgot-password")]
+    public async Task<ActionResult<ForgotPasswordResponseDto>> ForgotPassword(
+        [FromBody] ForgotPasswordRequestDto? dto,
+        CancellationToken ct)
+    {
+        if (dto is null)
+        {
+            return BadRequest(new { message = "Request body is required." });
+        }
+
+        var clientIp = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var response = await authService.RequestPasswordResetAsync(dto, clientIp, ct);
+        return Ok(response);
+    }
+
+    [AllowAnonymous]
+    [HttpPost("reset-password")]
+    public async Task<ActionResult<ResetPasswordResponseDto>> ResetPassword(
+        [FromBody] ResetPasswordRequestDto? dto,
+        CancellationToken ct)
+    {
+        if (dto is null)
+        {
+            return BadRequest(new { message = "Request body is required." });
+        }
+
+        try
+        {
+            var response = await authService.ResetPasswordAsync(dto, ct);
+            return Ok(response);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 }
