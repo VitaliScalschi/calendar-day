@@ -345,6 +345,38 @@ namespace CalendarDay.Infrastructure.Migrations
                     b.ToTable("election_types", (string)null);
                 });
 
+            modelBuilder.Entity("CalendarDay.Domain.Entities.PasswordResetToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiresAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTime?>("UsedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TokenHash");
+
+                    b.HasIndex("UserId", "UsedAtUtc");
+
+                    b.ToTable("password_reset_tokens", (string)null);
+                });
+
             modelBuilder.Entity("CalendarDay.Domain.Entities.Regulation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -634,6 +666,17 @@ namespace CalendarDay.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Deadline");
+                });
+
+            modelBuilder.Entity("CalendarDay.Domain.Entities.PasswordResetToken", b =>
+                {
+                    b.HasOne("CalendarDay.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("CalendarDay.Domain.Entities.Regulation", b =>

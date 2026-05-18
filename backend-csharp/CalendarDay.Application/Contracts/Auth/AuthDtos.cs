@@ -21,3 +21,21 @@ public record LoginResponseDto(
     string AccessToken,
     AuthUserDto User
 );
+
+public class ForgotPasswordRequestDto
+{
+    public string Email { get; set; } = string.Empty;
+}
+
+public record ForgotPasswordResponseDto(
+    string Message,
+    string? DevResetLink = null
+);
+
+public class ResetPasswordRequestDto
+{
+    public string Token { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+}
+
+public record ResetPasswordResponseDto(string Message);

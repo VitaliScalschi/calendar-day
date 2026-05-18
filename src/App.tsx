@@ -8,6 +8,8 @@ const CalendarPage = lazy(() => import('./pages/CalendarPage/CalendarPage'));
 const HistoryPage = lazy(() => import('./pages/HistoryPage/HistoryPage'));
 const Admin = lazy(() => import('./pages/Admin/Admin'));
 const LoginPage = lazy(() => import('./pages/LoginPage/LoginPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/LoginPage/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('./pages/LoginPage/ResetPasswordPage'));
 const AdminPortalGate = lazy(() => import('./pages/AdminPortalGate/AdminPortalGate'));
 const AdminScrutinyEventsPage = lazy(() => import('./pages/AdminScrutinyEventsPage/AdminScrutinyEventsPage'));
 const AdminUsefulInfoPage = lazy(() => import('./pages/AdminUsefulInfoPage/AdminUsefulInfoPage'));
@@ -89,6 +91,8 @@ function App() {
         </Route>
 
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/login/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>

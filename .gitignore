@@ -27,3 +27,6 @@ dist-ssr
 **/bin/
 **/obj/
 
+# SMTP / secrets locale (nu comite parole)
+backend-csharp/CalendarDay.Api/appsettings.Development.local.json
+

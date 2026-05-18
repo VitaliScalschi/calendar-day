@@ -1,4 +1,5 @@
 using CalendarDay.Application.Abstractions;
+using CalendarDay.Infrastructure.Email;
 using CalendarDay.Infrastructure.Persistence;
 using CalendarDay.Infrastructure.Seed;
 using CalendarDay.Infrastructure.Services;
@@ -33,6 +34,7 @@ public static class DependencyInjection
         services.AddScoped<SeedFromJsonService>();
         services.AddScoped<DefaultUsersSeedService>();
         services.AddScoped<ResponsibleOptionsSeedService>();
+        services.AddEmailDelivery(configuration);
 
         return services;
     }

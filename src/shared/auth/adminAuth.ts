@@ -203,6 +203,28 @@ export async function exchangeSiaAdminSession(sessionToken?: string | null): Pro
   return true;
 }
 
+export type ForgotPasswordResult = {
+  message: string;
+  devResetLink?: string | null;
+};
+
+export async function requestPasswordReset(email: string): Promise<ForgotPasswordResult> {
+  return apiRequest<ForgotPasswordResult>('/auth/forgot-password', {
+    method: 'POST',
+    skipAuth: true,
+    body: JSON.stringify({ email: email.trim().toLowerCase() }),
+  });
+}
+
+export async function resetPasswordWithToken(token: string, password: string): Promise<string> {
+  const data = await apiRequest<{ message: string }>('/auth/reset-password', {
+    method: 'POST',
+    skipAuth: true,
+    body: JSON.stringify({ token, password }),
+  });
+  return data.message;
+}
+
 export function logoutAdmin(): void {
   try {
     localStorage.removeItem(ADMIN_TOKEN_KEY);

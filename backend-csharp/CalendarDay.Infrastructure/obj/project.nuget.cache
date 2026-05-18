@@ -1,12 +1,14 @@
 {
   "version": 2,
-  "dgSpecHash": "nHlU5jumXTs=",
+  "dgSpecHash": "l6kLgZ+cstY=",
   "success": true,
   "projectFilePath": "C:\\Users\\vitali.scalschi\\Desktop\\Project\\calendar_day\\backend-csharp\\CalendarDay.Infrastructure\\CalendarDay.Infrastructure.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\bcrypt.net-next\\4.0.3\\bcrypt.net-next.4.0.3.nupkg.sha512",
+    "C:\\Users\\vitali.scalschi\\.nuget\\packages\\bouncycastle.cryptography\\2.6.2\\bouncycastle.cryptography.2.6.2.nupkg.sha512",
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\fluentvalidation\\12.1.0\\fluentvalidation.12.1.0.nupkg.sha512",
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
+    "C:\\Users\\vitali.scalschi\\.nuget\\packages\\mailkit\\4.15.0\\mailkit.4.15.0.nupkg.sha512",
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\microsoft.build\\17.7.2\\microsoft.build.17.7.2.nupkg.sha512",
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\microsoft.build.framework\\17.14.8\\microsoft.build.framework.17.14.8.nupkg.sha512",
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\microsoft.build.locator\\1.9.1\\microsoft.build.locator.1.9.1.nupkg.sha512",
@@ -23,8 +25,8 @@
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\microsoft.entityframeworkcore.analyzers\\10.0.0-rc.1.25451.107\\microsoft.entityframeworkcore.analyzers.10.0.0-rc.1.25451.107.nupkg.sha512",
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\microsoft.entityframeworkcore.design\\10.0.0-rc.1.25451.107\\microsoft.entityframeworkcore.design.10.0.0-rc.1.25451.107.nupkg.sha512",
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\microsoft.entityframeworkcore.relational\\10.0.0-rc.1.25451.107\\microsoft.entityframeworkcore.relational.10.0.0-rc.1.25451.107.nupkg.sha512",
-    "C:\\Users\\vitali.scalschi\\.nuget\\packages\\microsoft.extensions.caching.abstractions\\10.0.0-rc.1.25451.107\\microsoft.extensions.caching.abstractions.10.0.0-rc.1.25451.107.nupkg.sha512",
-    "C:\\Users\\vitali.scalschi\\.nuget\\packages\\microsoft.extensions.caching.memory\\10.0.0-rc.1.25451.107\\microsoft.extensions.caching.memory.10.0.0-rc.1.25451.107.nupkg.sha512",
+    "C:\\Users\\vitali.scalschi\\.nuget\\packages\\microsoft.extensions.caching.abstractions\\10.0.7\\microsoft.extensions.caching.abstractions.10.0.7.nupkg.sha512",
+    "C:\\Users\\vitali.scalschi\\.nuget\\packages\\microsoft.extensions.caching.memory\\10.0.7\\microsoft.extensions.caching.memory.10.0.7.nupkg.sha512",
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\microsoft.extensions.configuration\\10.0.7\\microsoft.extensions.configuration.10.0.7.nupkg.sha512",
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\10.0.7\\microsoft.extensions.configuration.abstractions.10.0.7.nupkg.sha512",
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\microsoft.extensions.configuration.binder\\10.0.7\\microsoft.extensions.configuration.binder.10.0.7.nupkg.sha512",
@@ -44,6 +46,7 @@
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\microsoft.identitymodel.logging\\8.14.0\\microsoft.identitymodel.logging.8.14.0.nupkg.sha512",
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\microsoft.identitymodel.tokens\\8.14.0\\microsoft.identitymodel.tokens.8.14.0.nupkg.sha512",
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\microsoft.net.stringtools\\17.14.8\\microsoft.net.stringtools.17.14.8.nupkg.sha512",
+    "C:\\Users\\vitali.scalschi\\.nuget\\packages\\mimekit\\4.15.0\\mimekit.4.15.0.nupkg.sha512",
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\mono.texttemplating\\3.0.0\\mono.texttemplating.3.0.0.nupkg.sha512",
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512",
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\npgsql\\9.0.3\\npgsql.9.0.3.nupkg.sha512",
@@ -61,13 +64,25 @@
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\system.identitymodel.tokens.jwt\\8.14.0\\system.identitymodel.tokens.jwt.8.14.0.nupkg.sha512",
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\system.reflection.metadataloadcontext\\7.0.0\\system.reflection.metadataloadcontext.7.0.0.nupkg.sha512",
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\system.resources.extensions\\9.0.0\\system.resources.extensions.9.0.0.nupkg.sha512",
-    "C:\\Users\\vitali.scalschi\\.nuget\\packages\\system.security.cryptography.pkcs\\9.0.0\\system.security.cryptography.pkcs.9.0.0.nupkg.sha512",
+    "C:\\Users\\vitali.scalschi\\.nuget\\packages\\system.security.cryptography.pkcs\\10.0.0\\system.security.cryptography.pkcs.10.0.0.nupkg.sha512",
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\system.security.cryptography.protecteddata\\9.0.0\\system.security.cryptography.protecteddata.9.0.0.nupkg.sha512",
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\system.security.cryptography.xml\\9.0.0\\system.security.cryptography.xml.9.0.0.nupkg.sha512",
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\system.security.permissions\\9.0.0\\system.security.permissions.9.0.0.nupkg.sha512",
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\system.windows.extensions\\9.0.0\\system.windows.extensions.9.0.0.nupkg.sha512"
   ],
   "logs": [
+    {
+      "code": "NU1902",
+      "level": "Warning",
+      "message": "Package 'MailKit' 4.15.0 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-9j88-vvj5-vhgr",
+      "projectPath": "C:\\Users\\vitali.scalschi\\Desktop\\Project\\calendar_day\\backend-csharp\\CalendarDay.Infrastructure\\CalendarDay.Infrastructure.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\vitali.scalschi\\Desktop\\Project\\calendar_day\\backend-csharp\\CalendarDay.Infrastructure\\CalendarDay.Infrastructure.csproj",
+      "libraryId": "MailKit",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
     {
       "code": "NU1903",
       "level": "Warning",
@@ -88,6 +103,18 @@
       "warningLevel": 1,
       "filePath": "C:\\Users\\vitali.scalschi\\Desktop\\Project\\calendar_day\\backend-csharp\\CalendarDay.Infrastructure\\CalendarDay.Infrastructure.csproj",
       "libraryId": "Microsoft.Build.Utilities.Core",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1902",
+      "level": "Warning",
+      "message": "Package 'MimeKit' 4.15.0 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-g7hc-96xr-gvvx",
+      "projectPath": "C:\\Users\\vitali.scalschi\\Desktop\\Project\\calendar_day\\backend-csharp\\CalendarDay.Infrastructure\\CalendarDay.Infrastructure.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\vitali.scalschi\\Desktop\\Project\\calendar_day\\backend-csharp\\CalendarDay.Infrastructure\\CalendarDay.Infrastructure.csproj",
+      "libraryId": "MimeKit",
       "targetGraphs": [
         "net10.0"
       ]

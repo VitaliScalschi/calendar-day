@@ -11,8 +11,10 @@
           "BCrypt.Net-Next": "4.0.3",
           "CalendarDay.Application": "1.0.0",
           "CalendarDay.Domain": "1.0.0",
+          "MailKit": "4.15.0",
           "Microsoft.EntityFrameworkCore": "10.0.0-rc.1.25451.107",
           "Microsoft.EntityFrameworkCore.Design": "10.0.0-rc.1.25451.107",
+          "Microsoft.Extensions.Caching.Memory": "10.0.7",
           "Microsoft.Extensions.Http": "10.0.7",
           "Microsoft.Extensions.Options.ConfigurationExtensions": "10.0.7",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "10.0.0-rc.1",
@@ -30,6 +32,14 @@
           }
         }
       },
+      "BouncyCastle.Cryptography/2.6.2": {
+        "runtime": {
+          "lib/net6.0/BouncyCastle.Cryptography.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.6.2.46322"
+          }
+        }
+      },
       "FluentValidation/12.1.0": {
         "runtime": {
           "lib/net8.0/FluentValidation.dll": {
@@ -43,6 +53,17 @@
           "lib/net6.0/Humanizer.dll": {
             "assemblyVersion": "2.14.0.0",
             "fileVersion": "2.14.1.48190"
+          }
+        }
+      },
+      "MailKit/4.15.0": {
+        "dependencies": {
+          "MimeKit": "4.15.0"
+        },
+        "runtime": {
+          "lib/net10.0/MailKit.dll": {
+            "assemblyVersion": "4.15.0.0",
+            "fileVersion": "4.15.0.0"
           }
         }
       },
@@ -87,7 +108,7 @@
           "System.Diagnostics.EventLog": "9.0.0",
           "System.Formats.Nrbf": "9.0.0",
           "System.Resources.Extensions": "9.0.0",
-          "System.Security.Cryptography.Pkcs": "9.0.0",
+          "System.Security.Cryptography.Pkcs": "10.0.0",
           "System.Security.Cryptography.ProtectedData": "9.0.0",
           "System.Security.Cryptography.Xml": "9.0.0"
         },
@@ -343,7 +364,7 @@
           "System.Configuration.ConfigurationManager": "9.0.0",
           "System.Diagnostics.EventLog": "9.0.0",
           "System.Resources.Extensions": "9.0.0",
-          "System.Security.Cryptography.Pkcs": "9.0.0",
+          "System.Security.Cryptography.Pkcs": "10.0.0",
           "System.Security.Cryptography.ProtectedData": "9.0.0",
           "System.Security.Cryptography.Xml": "9.0.0",
           "System.Security.Permissions": "9.0.0",
@@ -404,7 +425,7 @@
       "Microsoft.EntityFrameworkCore/10.0.0-rc.1.25451.107": {
         "dependencies": {
           "Microsoft.EntityFrameworkCore.Abstractions": "10.0.0-rc.1.25451.107",
-          "Microsoft.Extensions.Caching.Memory": "10.0.0-rc.1.25451.107",
+          "Microsoft.Extensions.Caching.Memory": "10.0.7",
           "Microsoft.Extensions.Logging": "10.0.7"
         },
         "runtime": {
@@ -433,7 +454,7 @@
           "Microsoft.CodeAnalysis.CSharp.Workspaces": "4.14.0",
           "Microsoft.CodeAnalysis.Workspaces.MSBuild": "4.14.0",
           "Microsoft.EntityFrameworkCore.Relational": "10.0.0-rc.1.25451.107",
-          "Microsoft.Extensions.Caching.Memory": "10.0.0-rc.1.25451.107",
+          "Microsoft.Extensions.Caching.Memory": "10.0.7",
           "Microsoft.Extensions.Configuration.Abstractions": "10.0.7",
           "Microsoft.Extensions.DependencyModel": "10.0.0-rc.1.25451.107",
           "Microsoft.Extensions.Logging": "10.0.7",
@@ -450,7 +471,7 @@
       "Microsoft.EntityFrameworkCore.Relational/10.0.0-rc.1.25451.107": {
         "dependencies": {
           "Microsoft.EntityFrameworkCore": "10.0.0-rc.1.25451.107",
-          "Microsoft.Extensions.Caching.Memory": "10.0.0-rc.1.25451.107",
+          "Microsoft.Extensions.Caching.Memory": "10.0.7",
           "Microsoft.Extensions.Configuration.Abstractions": "10.0.7",
           "Microsoft.Extensions.Logging": "10.0.7"
         },
@@ -461,20 +482,20 @@
           }
         }
       },
-      "Microsoft.Extensions.Caching.Abstractions/10.0.0-rc.1.25451.107": {
+      "Microsoft.Extensions.Caching.Abstractions/10.0.7": {
         "dependencies": {
           "Microsoft.Extensions.Primitives": "10.0.7"
         },
         "runtime": {
           "lib/net10.0/Microsoft.Extensions.Caching.Abstractions.dll": {
             "assemblyVersion": "10.0.0.0",
-            "fileVersion": "10.0.25.45207"
+            "fileVersion": "10.0.726.21808"
           }
         }
       },
-      "Microsoft.Extensions.Caching.Memory/10.0.0-rc.1.25451.107": {
+      "Microsoft.Extensions.Caching.Memory/10.0.7": {
         "dependencies": {
-          "Microsoft.Extensions.Caching.Abstractions": "10.0.0-rc.1.25451.107",
+          "Microsoft.Extensions.Caching.Abstractions": "10.0.7",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.7",
           "Microsoft.Extensions.Logging.Abstractions": "10.0.7",
           "Microsoft.Extensions.Options": "10.0.7",
@@ -483,7 +504,7 @@
         "runtime": {
           "lib/net10.0/Microsoft.Extensions.Caching.Memory.dll": {
             "assemblyVersion": "10.0.0.0",
-            "fileVersion": "10.0.25.45207"
+            "fileVersion": "10.0.726.21808"
           }
         }
       },
@@ -699,6 +720,18 @@
           }
         }
       },
+      "MimeKit/4.15.0": {
+        "dependencies": {
+          "BouncyCastle.Cryptography": "2.6.2",
+          "System.Security.Cryptography.Pkcs": "10.0.0"
+        },
+        "runtime": {
+          "lib/net10.0/MimeKit.dll": {
+            "assemblyVersion": "4.15.0.0",
+            "fileVersion": "4.15.0.0"
+          }
+        }
+      },
       "Mono.TextTemplating/3.0.0": {
         "dependencies": {
           "System.CodeDom": "9.0.0"
@@ -883,19 +916,19 @@
           }
         }
       },
-      "System.Security.Cryptography.Pkcs/9.0.0": {
+      "System.Security.Cryptography.Pkcs/10.0.0": {
         "runtime": {
-          "lib/net9.0/System.Security.Cryptography.Pkcs.dll": {
-            "assemblyVersion": "9.0.0.0",
-            "fileVersion": "9.0.24.52809"
+          "lib/net10.0/System.Security.Cryptography.Pkcs.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.25.52411"
           }
         },
         "runtimeTargets": {
-          "runtimes/win/lib/net9.0/System.Security.Cryptography.Pkcs.dll": {
+          "runtimes/win/lib/net10.0/System.Security.Cryptography.Pkcs.dll": {
             "rid": "win",
             "assetType": "runtime",
-            "assemblyVersion": "9.0.0.0",
-            "fileVersion": "9.0.24.52809"
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.25.52411"
           }
         }
       },
@@ -909,7 +942,7 @@
       },
       "System.Security.Cryptography.Xml/9.0.0": {
         "dependencies": {
-          "System.Security.Cryptography.Pkcs": "9.0.0"
+          "System.Security.Cryptography.Pkcs": "10.0.0"
         },
         "runtime": {
           "lib/net9.0/System.Security.Cryptography.Xml.dll": {
@@ -980,6 +1013,13 @@
       "path": "bcrypt.net-next/4.0.3",
       "hashPath": "bcrypt.net-next.4.0.3.nupkg.sha512"
     },
+    "BouncyCastle.Cryptography/2.6.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-7oWOcvnntmMKNzDLsdxAYqApt+AjpRpP2CShjMfIa3umZ42UQMvH0tl1qAliYPNYO6vTdcGMqnRrCPmsfzTI1w==",
+      "path": "bouncycastle.cryptography/2.6.2",
+      "hashPath": "bouncycastle.cryptography.2.6.2.nupkg.sha512"
+    },
     "FluentValidation/12.1.0": {
       "type": "package",
       "serviceable": true,
@@ -993,6 +1033,13 @@
       "sha512": "sha512-lQKvtaTDOXnoVJ20ibTuSIOf2i0uO0MPbDhd1jm238I+U/2ZnRENj0cktKZhtchBMtCUSRQ5v4xBCUbKNmyVMw==",
       "path": "humanizer.core/2.14.1",
       "hashPath": "humanizer.core.2.14.1.nupkg.sha512"
+    },
+    "MailKit/4.15.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-PM3bNDLwmK2hdiTx8xkTLRMRf9Y0VuirdyHWsrlSlz9hrME0lFkt/rF/9xlK/AtVML86BlS07pEPqo43Cmptbg==",
+      "path": "mailkit/4.15.0",
+      "hashPath": "mailkit.4.15.0.nupkg.sha512"
     },
     "Microsoft.Build/17.7.2": {
       "type": "package",
@@ -1092,19 +1139,19 @@
       "path": "microsoft.entityframeworkcore.relational/10.0.0-rc.1.25451.107",
       "hashPath": "microsoft.entityframeworkcore.relational.10.0.0-rc.1.25451.107.nupkg.sha512"
     },
-    "Microsoft.Extensions.Caching.Abstractions/10.0.0-rc.1.25451.107": {
+    "Microsoft.Extensions.Caching.Abstractions/10.0.7": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-AhG1CLvPoyWX2QZDpvmZFAE+jXEN6UKTARQbXgCLD1XA314n2tY/86AYAIe41eUYYkL5a6uBvEMpK81/cgj3uA==",
-      "path": "microsoft.extensions.caching.abstractions/10.0.0-rc.1.25451.107",
-      "hashPath": "microsoft.extensions.caching.abstractions.10.0.0-rc.1.25451.107.nupkg.sha512"
+      "sha512": "sha512-pUDgQKEqNUFlerDIFRg7zzoDVRPEWIG7nR40h8Gzg8RXza4Ry0lWZ7u91bmwu3iUDCxw3Dv6TLHVFoAgY0gy7Q==",
+      "path": "microsoft.extensions.caching.abstractions/10.0.7",
+      "hashPath": "microsoft.extensions.caching.abstractions.10.0.7.nupkg.sha512"
     },
-    "Microsoft.Extensions.Caching.Memory/10.0.0-rc.1.25451.107": {
+    "Microsoft.Extensions.Caching.Memory/10.0.7": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-nlmQ2Zs9ACD4mlYD8+lQ0K4suram+zox6EclFVErUcQu5aD7n0duPxyxedcE//xZ3H8H0fAsRPfF8QiGSfj9Rg==",
-      "path": "microsoft.extensions.caching.memory/10.0.0-rc.1.25451.107",
-      "hashPath": "microsoft.extensions.caching.memory.10.0.0-rc.1.25451.107.nupkg.sha512"
+      "sha512": "sha512-6eULH/sc97yfCEV31g7AgUzHc7dIm0DGBcofoE8GgBaXbdAPPhathN8rYcgi1TSiG1QucCdqKiVNaDEPAEXL5Q==",
+      "path": "microsoft.extensions.caching.memory/10.0.7",
+      "hashPath": "microsoft.extensions.caching.memory.10.0.7.nupkg.sha512"
     },
     "Microsoft.Extensions.Configuration/10.0.7": {
       "type": "package",
@@ -1239,6 +1286,13 @@
       "path": "microsoft.net.stringtools/17.14.8",
       "hashPath": "microsoft.net.stringtools.17.14.8.nupkg.sha512"
     },
+    "MimeKit/4.15.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-+KVUJwHIp1aVPyVjcadAH1M9QkAwLflLujzySAS4N//AqSYjD+wMo2a3PkYu5XDibSuhlAg5sIh/DVNwVNGiVw==",
+      "path": "mimekit/4.15.0",
+      "hashPath": "mimekit.4.15.0.nupkg.sha512"
+    },
     "Mono.TextTemplating/3.0.0": {
       "type": "package",
       "serviceable": true,
@@ -1358,12 +1412,12 @@
       "path": "system.resources.extensions/9.0.0",
       "hashPath": "system.resources.extensions.9.0.0.nupkg.sha512"
     },
-    "System.Security.Cryptography.Pkcs/9.0.0": {
+    "System.Security.Cryptography.Pkcs/10.0.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-8tluJF8w9si+2yoHeL8rgVJS6lKvWomTDC8px65Z8MCzzdME5eaPtEQf4OfVGrAxB5fW93ncucy1+221O9EQaw==",
-      "path": "system.security.cryptography.pkcs/9.0.0",
-      "hashPath": "system.security.cryptography.pkcs.9.0.0.nupkg.sha512"
+      "sha512": "sha512-UPWqLSygJlFerRi9XNIuM0a1VC8gHUIufyP24xQ0sc+XimqUAEcjpOz9DhKpyDjH+5B/wO3RpC0KpkEeDj/ddg==",
+      "path": "system.security.cryptography.pkcs/10.0.0",
+      "hashPath": "system.security.cryptography.pkcs.10.0.0.nupkg.sha512"
     },
     "System.Security.Cryptography.ProtectedData/9.0.0": {
       "type": "package",
