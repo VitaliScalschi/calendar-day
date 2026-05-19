@@ -5,7 +5,10 @@ import { fetchScrutinyEventsData, type FetchScrutinyEventsParams } from '../serv
 export function useScrutinyEventsQuery(scrutinyId: string | undefined, params: FetchScrutinyEventsParams) {
   return useQuery({
     queryKey: scrutinyId
-      ? [...queryKeys.admin.scrutinyEvents(scrutinyId), { page: params.page, pageSize: params.pageSize }]
+      ? [
+          ...queryKeys.admin.scrutinyEvents(scrutinyId),
+          { page: params.fetchAll ? 'all' : params.page, pageSize: params.pageSize, fetchAll: Boolean(params.fetchAll) },
+        ]
       : ['admin', 'scrutinyEvents', 'missing'],
     queryFn: ({ signal }) => fetchScrutinyEventsData(scrutinyId as string, params, signal),
     enabled: Boolean(scrutinyId),

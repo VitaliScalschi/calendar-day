@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "l6kLgZ+cstY=",
+  "dgSpecHash": "JxS6o7phxWk=",
   "success": true,
   "projectFilePath": "C:\\Users\\vitali.scalschi\\Desktop\\Project\\calendar_day\\backend-csharp\\CalendarDay.Infrastructure\\CalendarDay.Infrastructure.csproj",
   "expectedPackageFiles": [
@@ -35,6 +35,8 @@
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\microsoft.extensions.dependencymodel\\10.0.0-rc.1.25451.107\\microsoft.extensions.dependencymodel.10.0.0-rc.1.25451.107.nupkg.sha512",
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\microsoft.extensions.diagnostics\\10.0.7\\microsoft.extensions.diagnostics.10.0.7.nupkg.sha512",
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\microsoft.extensions.diagnostics.abstractions\\10.0.7\\microsoft.extensions.diagnostics.abstractions.10.0.7.nupkg.sha512",
+    "C:\\Users\\vitali.scalschi\\.nuget\\packages\\microsoft.extensions.fileproviders.abstractions\\10.0.7\\microsoft.extensions.fileproviders.abstractions.10.0.7.nupkg.sha512",
+    "C:\\Users\\vitali.scalschi\\.nuget\\packages\\microsoft.extensions.hosting.abstractions\\10.0.7\\microsoft.extensions.hosting.abstractions.10.0.7.nupkg.sha512",
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\microsoft.extensions.http\\10.0.7\\microsoft.extensions.http.10.0.7.nupkg.sha512",
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\microsoft.extensions.logging\\10.0.7\\microsoft.extensions.logging.10.0.7.nupkg.sha512",
     "C:\\Users\\vitali.scalschi\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\10.0.7\\microsoft.extensions.logging.abstractions.10.0.7.nupkg.sha512",

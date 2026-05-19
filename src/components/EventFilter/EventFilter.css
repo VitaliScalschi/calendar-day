@@ -45,10 +45,27 @@
   font-size: 0.82rem;
   color: #3c4656;
   cursor: pointer;
+  min-width: 0;
 }
 
 .event-filter-election-label {
   cursor: pointer;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.event-filter-election-label > span {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.event-filter-election-label-text {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .event-filter-election-item + .event-filter-election-item {
@@ -57,6 +74,7 @@
 
 .event-filter-election-item input[type='radio'] {
   accent-color: var(--color-primary);
+  flex-shrink: 0;
 }
 
 .event-filter-election-download-btn {
@@ -69,6 +87,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   transition: background-color 0.2s ease, color 0.2s ease, transform 0.12s ease;
 }
 

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CalendarDay.Application")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+04195196ab274bd7491558c8116107fc15de2f01")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4cb2dd0afe3310156611a8c0328dae2b06a53485")]
 [assembly: System.Reflection.AssemblyProductAttribute("CalendarDay.Application")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CalendarDay.Application")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

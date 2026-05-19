@@ -370,22 +370,22 @@
   font-weight: 600;
   padding: 0.35rem 0.85rem;
   border-radius: 6px;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--color-primary);
   background: #fff;
-  color: var(--accent-strong);
+  color: var(--color-primary-strong);
   white-space: nowrap;
   transition: background 0.15s ease, color 0.15s ease;
   cursor: pointer;
 }
 
 .timeline-card__details-btn:hover {
-  background: var(--accent-soft);
+  background: rgba(6, 127, 195, 0.12);
 }
 
 .timeline-card__details-btn:focus,
 .timeline-card__details-btn:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 25%, transparent);
 }
 
 /* ============================================================

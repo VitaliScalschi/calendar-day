@@ -53,7 +53,9 @@ function ElectionInfoCard({
           <i className="fa-solid fa-check-to-slot" />
         </div>
         <div className="election-info-hero__text">
-          <h3 className="election-info-hero__title">{title}</h3>
+          <h3 className="election-info-hero__title" title={title}>
+            {title}
+          </h3>
         </div>
       </header>
 
@@ -141,7 +143,9 @@ function StatRow({ iconClass, variant, label, value, progress, valueVariant }: S
       <div className={`election-info-stat__icon election-info-stat__icon--${variant}`} aria-hidden>
         <i className={iconClass} />
       </div>
-      <span className="election-info-stat__label">{label}</span>
+      <span className="election-info-stat__label" title={label}>
+        {label}
+      </span>
       <div className={`election-info-stat__bar election-info-stat__bar--${variant}`}>
         <span
           className="election-info-stat__bar-fill"

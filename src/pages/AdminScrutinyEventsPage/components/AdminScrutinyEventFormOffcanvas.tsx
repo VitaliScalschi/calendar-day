@@ -5,10 +5,11 @@ import { InputText } from '../../../components/InputText';
 import { InputTextArea } from '../../../components/InputTextArea';
 import { InputUpload } from '../../../components/InputUpload';
 import { MultiCheckboxDropdown } from '../../../components/MultiCheckboxDropdown';
+import '../../../components/MultiCheckboxDropdown/MultiCheckboxDropdown.css';
 import type { SelectionRange } from '../../../interface';
-import { toRoDateLocal } from '../../../shared/utils/deadlineDate';
+import { normalizeDateLabel } from '../../../shared/utils/deadlineDate';
 import type { ApiResponsibleOption, EventFormValidation, RegulationFormEntry, TargetGroupOption } from '../types';
-import { normalizeUniqueSingleDates } from '../utils';
+import { isValidNotificationEmail, normalizeUniqueEmails, normalizeUniqueSingleDates } from '../utils';
 
 export type EventFormFields = {
   title: string;
@@ -59,6 +60,10 @@ export type AdminScrutinyEventFormOffcanvasProps = {
   selectedGroups: string[];
   handleTargetGroupToggle: (group: string) => void;
   setSelectedGroups: Dispatch<SetStateAction<string[]>>;
+  notificationEmailInput: string;
+  setNotificationEmailInput: (value: string) => void;
+  notificationEmails: string[];
+  setNotificationEmails: Dispatch<SetStateAction<string[]>>;
   error: string;
   isSaving: boolean;
 };
@@ -106,9 +111,23 @@ export function AdminScrutinyEventFormOffcanvas({
   selectedGroups,
   handleTargetGroupToggle,
   setSelectedGroups,
+  notificationEmailInput,
+  setNotificationEmailInput,
+  notificationEmails,
+  setNotificationEmails,
   error,
   isSaving,
 }: AdminScrutinyEventFormOffcanvasProps) {
+  const addNotificationEmail = () => {
+    const email = notificationEmailInput.trim().toLowerCase();
+    if (!email) return;
+    if (!isValidNotificationEmail(email)) {
+      return;
+    }
+    setNotificationEmails((prev) => normalizeUniqueEmails([...prev, email]));
+    setNotificationEmailInput('');
+  };
+
   if (!open) return null;
 
   return (
@@ -212,24 +231,24 @@ export function AdminScrutinyEventFormOffcanvas({
                           </button>
                         </div>
                         <div className="admin-event-form__single-date-list">
-                          {normalizeUniqueSingleDates(singleDeadlineDates).map((date) => (
-                            <div key={date} className="admin-event-form__single-date-chip">
-                              <span>{toRoDateLocal(new Date(`${date}T00:00:00`))}</span>
-                              <button
-                                type="button"
-                                className="btn btn-link p-0 text-danger text-decoration-none"
-                                onClick={() =>
-                                  setSingleDeadlineDates((prev) => {
-                                    const next = prev.filter((item) => item !== date);
-                                    return next;
-                                  })
-                                }
-                                aria-label={`Elimină data ${date}`}
-                              >
-                                elimină
-                              </button>
-                            </div>
-                          ))}
+                          {normalizeUniqueSingleDates(singleDeadlineDates).map((date) => {
+                            const dateLabel = normalizeDateLabel(date);
+                            return (
+                              <span key={date} className="admin-event-form__single-date-chip">
+                                <span className="admin-event-form__single-date-chip-label">{dateLabel}</span>
+                                <button
+                                  type="button"
+                                  className="admin-event-form__single-date-chip-remove"
+                                  onClick={() =>
+                                    setSingleDeadlineDates((prev) => prev.filter((item) => item !== date))
+                                  }
+                                  aria-label={`Elimină data ${dateLabel}`}
+                                >
+                                  <i className="bi bi-x-lg" aria-hidden="true" />
+                                </button>
+                              </span>
+                            );
+                          })}
                         </div>
                       </>
                     )}
@@ -274,6 +293,33 @@ export function AdminScrutinyEventFormOffcanvas({
                   checkboxGroupName="admin-event-responsibles"
                   clearButtonAriaLabel="Șterge selecția responsabililor"
                   className={`admin-responsible-dropdown mb-0 ${validation.responsible ? 'admin-event-form__invalid-multi' : ''}`}
+                  showSelectionChips
+                  size="lg"
+                />
+              </div>
+
+              <div className="admin-event-form__section">
+                <div className="admin-event-form__section-title">
+                  <i className="fa-solid fa-users" aria-hidden="true" />
+                  <span>
+                    Grupuri țintă <span className="text-danger">*</span>
+                  </span>
+                </div>
+                <MultiCheckboxDropdown
+                  options={targetGroupOptions}
+                  allowedKeys={allowedAudienceKeys}
+                  selectedKeys={selectedGroups}
+                  onToggle={handleTargetGroupToggle}
+                  onClear={() => {
+                    setSelectedGroups([]);
+                    setValidation((prev) => ({ ...prev, groups: false }));
+                  }}
+                  placeholder="Selectează grupuri țintă"
+                  disabled={targetGroupOptions.length === 0}
+                  checkboxGroupName="admin-event-target-groups"
+                  clearButtonAriaLabel="Șterge selecția grupurilor țintă"
+                  className={`admin-responsible-dropdown ${validation.groups ? 'admin-event-form__invalid-multi' : ''}`}
+                  showSelectionChips
                   size="lg"
                 />
               </div>
@@ -406,27 +452,67 @@ export function AdminScrutinyEventFormOffcanvas({
 
               <div className="admin-event-form__section">
                 <div className="admin-event-form__section-title">
-                  <i className="fa-solid fa-users" aria-hidden="true" />
-                  <span>
-                    Grupuri țintă <span className="text-danger">*</span>
-                  </span>
+                  <i className="fa-regular fa-envelope" aria-hidden="true" />
+                  <span>Notificare prin email</span>
                 </div>
-                <MultiCheckboxDropdown
-                  options={targetGroupOptions}
-                  allowedKeys={allowedAudienceKeys}
-                  selectedKeys={selectedGroups}
-                  onToggle={handleTargetGroupToggle}
-                  onClear={() => {
-                    setSelectedGroups([]);
-                    setValidation((prev) => ({ ...prev, groups: false }));
-                  }}
-                  placeholder="Selectează grupuri țintă"
-                  disabled={targetGroupOptions.length === 0}
-                  checkboxGroupName="admin-event-target-groups"
-                  clearButtonAriaLabel="Șterge selecția grupurilor țintă"
-                  className={`admin-responsible-dropdown ${validation.groups ? 'admin-event-form__invalid-multi' : ''}`}
-                  size="lg"
-                />
+                <label className="form-label" htmlFor="admin-event-notification-email">
+                  Email pentru notificare
+                </label>
+                <div className="admin-event-form__single-date-row">
+                  <div className="w-100 min-w-0">
+                    <InputText
+                      id="admin-event-notification-email"
+                      type="email"
+                      size="md"
+                      value={notificationEmailInput}
+                      onValueChange={setNotificationEmailInput}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          addNotificationEmail();
+                        }
+                      }}
+                      placeholder="exemplu@cec.md"
+                      aria-label="Email pentru notificare eveniment"
+                      disabled={isViewOnly}
+                      clearable={false}
+                      className="w-100"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-outline-primary admin-event-form__inline-add-btn"
+                    onClick={addNotificationEmail}
+                    disabled={isViewOnly || !notificationEmailInput.trim()}
+                  >
+                    Adaugă
+                  </button>
+                </div>
+                {notificationEmails.length > 0 ? (
+                  <div className="multi-checkbox-dropdown__chips mt-2">
+                    {notificationEmails.map((email) => (
+                      <span key={email} className="multi-checkbox-dropdown__chip">
+                        <span className="multi-checkbox-dropdown__chip-label">{email}</span>
+                        {!isViewOnly ? (
+                          <button
+                            type="button"
+                            className="multi-checkbox-dropdown__chip-remove"
+                            onClick={() =>
+                              setNotificationEmails((prev) => prev.filter((item) => item !== email))
+                            }
+                            aria-label={`Elimină ${email}`}
+                          >
+                            <i className="bi bi-x-lg" aria-hidden="true" />
+                          </button>
+                        ) : null}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+                <p className="form-text text-secondary mb-0 mt-2">
+                  Opțional. La ora 00:00 în ziua setată fiecare persoană adăugată primește detaliile evenimentului.
+                  Pentru interval de date, notificarea se trimite o singură dată, la începutul intervalului.
+                </p>
               </div>
             </fieldset>
 

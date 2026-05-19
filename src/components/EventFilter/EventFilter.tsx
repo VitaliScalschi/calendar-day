@@ -89,7 +89,9 @@ function EventFilter({
                 onChange={() => onElectionChange(option.id)}
                 className="event-filter-election-label d-flex align-items-center gap-2 flex-grow-1 mb-0"
               >
-                {option.label}
+                <span className="event-filter-election-label-text" title={option.label}>
+                  {option.label}
+                </span>
               </RadioButton>
               <button
                 type="button"

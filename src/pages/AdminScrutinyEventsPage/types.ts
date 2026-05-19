@@ -16,6 +16,9 @@ export type ApiDeadline = {
   responsible: string[];
   group: string[];
   regulations?: Array<{ id: string; documentId?: string | null; title: string; link: string }>;
+  notificationEmails?: string[];
+  /** Compatibilitate răspuns vechi */
+  notificationEmail?: string | null;
 };
 
 export type ApiResponsibleOption = {

@@ -16,6 +16,11 @@ public class CreateDeadlineDtoValidator : AbstractValidator<CreateDeadlineDto>
             .WithMessage("Either deadline or deadlines is required.");
         RuleForEach(x => x.Deadlines).NotEmpty();
         RuleFor(x => x.Description).MaximumLength(4000);
+        RuleForEach(x => x.NotificationEmails)
+            .EmailAddress()
+            .MaximumLength(320);
+        RuleFor(x => x.NotificationEmails).Must(list => list.Count <= 50)
+            .WithMessage("Maximum 50 notification emails are allowed.");
         RuleForEach(x => x.Responsible).NotEmpty();
         RuleForEach(x => x.Group)
             .NotEmpty()

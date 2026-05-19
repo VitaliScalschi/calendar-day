@@ -220,7 +220,7 @@ function TimelineEvent({
 
           <button
             type="button"
-            className={`timeline-card__details-btn timeline-card__details-btn--${accentAttr}`}
+            className="timeline-card__details-btn"
             tabIndex={-1}
           >
             Vezi detalii <span aria-hidden>&gt;</span>
