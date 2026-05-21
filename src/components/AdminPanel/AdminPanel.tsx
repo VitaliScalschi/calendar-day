@@ -4,7 +4,7 @@ import { Sidebar, HeaderBar } from './components/index';
 import EventsTable from './components/Table/EventsTable';
 import type { AdminEventItem } from './components/Table/EventsTable.interface';
 import Users from './components/Users/Users';
-import { canAccessUsersPage, getAdminRole, isAdministratorRole, logoutAdmin } from '../../shared/auth/adminAuth';
+import { canAccessUsersPage, canDeleteCalendarProgram, getAdminRole, isAdministratorRole, logoutAdmin } from '../../shared/auth/adminAuth';
 import { ApiError } from '../../shared/services/apiClient';
 import {
   useAdminPanelQuery,
@@ -28,6 +28,7 @@ import '../EventFilter/EventFilter.css';
 import './components/AdminPanel.css';
 import type { AdminMenuItem } from './components/Sidebar/AdminSidebar.interface';
 import { getAdminSidebarItemFromPath, navigateForAdminSidebarItem } from '../../shared/admin/adminSidebarNavigation';
+import { useToast } from '../Toast';
 
 const PAGE_SIZE = 5;
 type ScrutinyForm = {
@@ -86,11 +87,13 @@ function isAllowedCalendarProgramFileName(name: string): boolean {
 }
 
 function AdminPanel() {
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   const activeMenuItem = getAdminSidebarItemFromPath(location.pathname);
   const currentRole = getAdminRole();
   const canManageUsers = canAccessUsersPage();
+  const canDeleteProgram = canDeleteCalendarProgram();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [loadError, setLoadError] = useState('');
@@ -318,6 +321,7 @@ function AdminPanel() {
       return;
     }
 
+    const wasEditingProgram = Boolean(scrutinyForm.id);
     setIsSaving(true);
     try {
       const electionTypeIds = scrutinyForm.electionTypeIds
@@ -338,12 +342,19 @@ function AdminPanel() {
       setIsModalOpen(false);
       setScrutinyDocumentFile(null);
       setExistingScrutinyDocument(null);
+      showToast({
+        variant: 'success',
+        title: wasEditingProgram ? 'Salvat!' : 'Adăugat!',
+        message: wasEditingProgram
+          ? 'Programul calendaristic a fost actualizat.'
+          : 'Programul calendaristic a fost adăugat.',
+      });
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
         logoutAdmin();
         navigate('/login', { replace: true });
       } else {
-        setFormError('Nu am putut salva scrutinul.');
+        showToast({ variant: 'error', message: 'Nu am putut salva programul calendaristic.' });
       }
     } finally {
       setIsSaving(false);
@@ -351,6 +362,12 @@ function AdminPanel() {
   };
 
   const handleDeleteScrutiny = (id: string) => {
+    if (!canDeleteProgram) {
+      setLoadError(
+        'Nu aveți drepturi pentru a șterge un program calendaristic întreg. Pentru această acțiune este necesar rolul de administrator — contactați un administrator.'
+      );
+      return;
+    }
     setPendingDeleteId(id);
     setIsDeleteModalOpen(true);
   };
@@ -362,8 +379,24 @@ function AdminPanel() {
       await deleteElectionMutation.mutateAsync(pendingDeleteId);
       setIsDeleteModalOpen(false);
       setPendingDeleteId(null);
-    } catch {
-      setLoadError('Nu am putut sterge scrutinul.');
+      showToast({
+        variant: 'success',
+        title: 'Șters!',
+        message: 'Programul calendaristic a fost șters.',
+      });
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 403) {
+        setLoadError(
+          'Nu aveți drepturi pentru a șterge un program calendaristic întreg. Pentru această acțiune este necesar rolul de administrator — contactați un administrator.'
+        );
+        showToast({
+          variant: 'error',
+          message: 'Nu aveți drepturi pentru a șterge acest program.',
+        });
+      } else {
+        setLoadError('Nu am putut sterge scrutinul.');
+        showToast({ variant: 'error', message: 'Nu am putut șterge programul calendaristic.' });
+      }
     } finally {
       setIsDeleting(false);
     }
@@ -517,6 +550,7 @@ function AdminPanel() {
             onManageEvents={(id) => navigate(`/admin/scrutiny/${id}/events`)}
             onEdit={openEditModal}
             onDelete={handleDeleteScrutiny}
+            canDeleteProgram={canDeleteProgram}
             page={safePage}
             pageSize={PAGE_SIZE}
             totalPages={totalPages}

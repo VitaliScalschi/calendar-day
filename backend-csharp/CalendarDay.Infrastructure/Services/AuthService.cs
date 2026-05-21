@@ -164,7 +164,7 @@ public partial class AuthService(
             [
                 new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, email),
-                ..roles.Select(role => new Claim(ClaimTypes.Role, role)),
+                ..roles.Select(role => new Claim("role", role)),
                 new Claim("calday_primary", primary)
             ]),
             SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256)

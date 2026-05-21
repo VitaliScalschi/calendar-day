@@ -43,6 +43,8 @@ builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        // JWT standard folosește claimul scurt „role”; trebuie să coincidă cu RoleClaimType la validare.
+        options.MapInboundClaims = false;
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -51,7 +53,8 @@ builder.Services
             ValidateLifetime = true,
             ValidIssuer = jwt.Issuer,
             ValidAudience = jwt.Audience,
-            IssuerSigningKey = signingKey
+            IssuerSigningKey = signingKey,
+            RoleClaimType = "role",
         };
     });
 

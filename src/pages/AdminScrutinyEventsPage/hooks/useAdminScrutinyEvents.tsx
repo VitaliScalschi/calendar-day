@@ -24,8 +24,10 @@ import {
   toDateKey,
   toSqlDateLocal,
 } from '../utils';
+import { useToast } from '../../../components/Toast';
 
 export function useAdminScrutinyEvents() {
+  const { showToast } = useToast();
   const { scrutinyId } = useParams();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -271,6 +273,7 @@ export function useAdminScrutinyEvents() {
       return;
     }
 
+    const wasEditingEvent = Boolean(editingEventId);
     setIsSaving(true);
     try {
       const cleanedResponsibles = responsibles.map((x) => x.trim()).filter(Boolean);
@@ -381,12 +384,15 @@ export function useAdminScrutinyEvents() {
       setEditingEventId(null);
       clearEventQueryParam();
       await loadData();
+      showToast({
+        variant: 'success',
+        title: wasEditingEvent ? 'Salvat!' : 'Adăugat!',
+        message: wasEditingEvent ? 'Acțiunea a fost actualizată.' : 'Acțiunea a fost adăugată în program.',
+      });
     } catch (e) {
-      if (e instanceof ApiError) {
-        setError(`Nu am putut salva evenimentul: ${parseApiErrorMessage(e.message)} (${e.status})`);
-      } else {
-        setError('Nu am putut salva evenimentul.');
-      }
+      const detail =
+        e instanceof ApiError ? `${parseApiErrorMessage(e.message)} (${e.status})` : 'A apărut o eroare la salvare.';
+      showToast({ variant: 'error', message: detail });
     } finally {
       setIsSaving(false);
     }
@@ -684,8 +690,13 @@ export function useAdminScrutinyEvents() {
       await loadData();
       setIsDeleteModalOpen(false);
       setPendingDeleteEventId(null);
+      showToast({
+        variant: 'success',
+        title: 'Șters!',
+        message: 'Acțiunea a fost eliminată din program.',
+      });
     } catch {
-      setError('Nu am putut șterge evenimentul.');
+      showToast({ variant: 'error', message: 'Nu am putut șterge acțiunea.' });
     } finally {
       setIsDeleting(false);
     }

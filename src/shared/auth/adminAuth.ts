@@ -133,6 +133,12 @@ export function canAccessUsersPage(): boolean {
   return isAdministratorRole(getAdminRole());
 }
 
+/** Doar administratorii pot șterge un program calendaristic întreg (API: DELETE /elections/{id}). */
+export function canDeleteCalendarProgram(): boolean {
+  if (!isAdminLoggedIn()) return false;
+  return isAdministratorRole(getAdminRole());
+}
+
 export function isAdminLoggedIn(): boolean {
   return Boolean(getAdminToken());
 }

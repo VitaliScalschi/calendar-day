@@ -152,7 +152,6 @@ public class DeadlineNotificationProcessor(
                 .Append("</p>");
         }
 
-        sb.Append("<p style=\"font-size:0.9rem;color:#6b7280;margin-top:1rem;\">Acest email a fost trimis automat la ora 00:00 în ziua evenimentului.</p>");
         return sb.ToString();
     }
 

@@ -509,10 +509,6 @@ export function AdminScrutinyEventFormOffcanvas({
                     ))}
                   </div>
                 ) : null}
-                <p className="form-text text-secondary mb-0 mt-2">
-                  Opțional. La ora 00:00 în ziua setată fiecare persoană adăugată primește detaliile evenimentului.
-                  Pentru interval de date, notificarea se trimite o singură dată, la începutul intervalului.
-                </p>
               </div>
             </fieldset>
 
