@@ -7,6 +7,7 @@ using CalendarDay.Infrastructure.Services.SiaAdmin;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
 namespace CalendarDay.Infrastructure;
@@ -35,6 +36,8 @@ public static class DependencyInjection
         services.AddScoped<DefaultUsersSeedService>();
         services.AddScoped<ResponsibleOptionsSeedService>();
         services.AddEmailDelivery(configuration);
+        services.AddScoped<DeadlineNotificationProcessor>();
+        services.AddHostedService<DeadlineNotificationHostedService>();
 
         return services;
     }

@@ -1,8 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { format, isValid, parseISO } from 'date-fns';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { DatePickerCalendarPanel } from '../shared/DatePickerCalendarPanel';
 import type { FormInputSize } from '../shared/formInputSize';
 import { formInputSizeClass } from '../shared/formInputSize';
+import '../shared/datePickerCalendar.css';
 import './InputDate.css';
-import { formatIsoToDisplay, openNativeDatePicker, parseDisplayToIso } from './formatDateInput';
 
 export type InputDateSize = FormInputSize;
 
@@ -23,6 +25,12 @@ export type InputDateProps = {
   clearButtonAriaLabel?: string;
 };
 
+function parseIsoDate(iso: string): Date | null {
+  if (!iso) return null;
+  const parsed = parseISO(`${iso}T12:00:00`);
+  return isValid(parsed) ? parsed : null;
+}
+
 export function InputDate({
   id,
   isoValue,
@@ -33,42 +41,32 @@ export function InputDate({
   size = 'sm',
   wrapClassName = '',
   textInputClassName = '',
-  placeholder = 'dd/mm/yyyy',
-  title = 'dd/mm/yyyy',
+  placeholder = 'dd.mm.yyyy',
+  title = 'dd.mm.yyyy',
   clearable = true,
   clearButtonAriaLabel = 'Șterge data',
 }: InputDateProps) {
-  const nativeInputRef = useRef<HTMLInputElement | null>(null);
-  const [displayValue, setDisplayValue] = useState(() => formatIsoToDisplay(isoValue));
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const [showCalendar, setShowCalendar] = useState(false);
+
+  const selectedDate = useMemo(() => parseIsoDate(isoValue), [isoValue]);
+  const displayValue = selectedDate ? format(selectedDate, 'dd.MM.yyyy') : '';
+  const calendarDate = selectedDate ?? new Date();
 
   useEffect(() => {
-    setDisplayValue(formatIsoToDisplay(isoValue));
-  }, [isoValue]);
+    if (!showCalendar) return;
 
-  const openPicker = () => {
-    if (disabled || !nativeInputRef.current) return;
-    openNativeDatePicker(nativeInputRef.current);
-  };
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!rootRef.current) return;
+      const targetNode = event.target as Node | null;
+      if (targetNode && !rootRef.current.contains(targetNode)) {
+        setShowCalendar(false);
+      }
+    };
 
-  const handleDisplayChange = (value: string) => {
-    setDisplayValue(value);
-    if (!value.trim()) {
-      onIsoChange('');
-      return;
-    }
-    const iso = parseDisplayToIso(value);
-    if (iso) {
-      onIsoChange(iso);
-    }
-  };
-
-  const wrapClass = [
-    'input-date__wrap',
-    `input-date__wrap--${size}`,
-    wrapClassName,
-  ]
-    .filter(Boolean)
-    .join(' ');
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showCalendar]);
 
   const formSizeClass =
     size === 'lg' ? 'form-control-lg' : size === 'md' ? '' : 'form-control-sm';
@@ -76,65 +74,75 @@ export function InputDate({
     'form-control',
     formSizeClass,
     formInputSizeClass(size),
-    'input-date__text',
-    clearable ? 'input-date__text--clearable' : '',
+    clearable ? 'date-picker__input--clearable' : '',
     textInputClassName,
   ]
     .filter(Boolean)
     .join(' ');
 
+  const wrapClass = ['input-date', wrapClassName].filter(Boolean).join(' ');
+
+  const openCalendar = () => {
+    if (disabled) return;
+    setShowCalendar((prev) => !prev);
+  };
+
   return (
-    <div className={wrapClass}>
-      <input
-        id={id}
-        type="text"
-        inputMode="numeric"
-        placeholder={placeholder}
-        title={title}
-        className={textClass}
-        value={displayValue}
-        disabled={disabled}
-        onChange={(e) => handleDisplayChange(e.target.value)}
-        onBlur={() => setDisplayValue(formatIsoToDisplay(isoValue))}
-        onClick={openPicker}
-        onFocus={openPicker}
-      />
-      <button
-        type="button"
-        className="input-date__picker-btn"
-        disabled={disabled}
-        onClick={openPicker}
-        aria-label={pickerAriaLabel}
-        title={pickerTitle}
-      >
-        <i className="fa-regular fa-calendar" aria-hidden="true" />
-      </button>
-      {clearable && displayValue.trim() ? (
-        <button
-          type="button"
-          className="input-date__clear-btn"
+    <div ref={rootRef} className={`position-relative ${wrapClass}`.trim()}>
+      <div className="date-picker__control">
+        <input
+          id={id}
+          type="text"
+          readOnly
+          placeholder={placeholder}
+          title={title}
+          className={textClass}
+          value={displayValue}
           disabled={disabled}
-          onClick={() => {
-            setDisplayValue('');
-            onIsoChange('');
+          onClick={openCalendar}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              openCalendar();
+            }
           }}
-          aria-label={clearButtonAriaLabel}
-          title={clearButtonAriaLabel}
+          style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+          aria-label={pickerAriaLabel}
+          aria-haspopup="dialog"
+          aria-expanded={showCalendar}
+        />
+        {clearable && displayValue ? (
+          <button
+            type="button"
+            className="date-picker__clear-btn"
+            disabled={disabled}
+            onClick={() => {
+              onIsoChange('');
+              setShowCalendar(false);
+            }}
+            aria-label={clearButtonAriaLabel}
+            title={clearButtonAriaLabel}
+          >
+            <i className="fa-solid fa-xmark" aria-hidden="true" />
+          </button>
+        ) : null}
+      </div>
+
+      {showCalendar ? (
+        <div
+          className="position-absolute bg-white shadow rounded mt-2 p-2 dropdown-calendar"
+          role="dialog"
+          aria-label={pickerTitle}
         >
-          <i className="fa-solid fa-xmark" aria-hidden="true" />
-        </button>
+          <DatePickerCalendarPanel
+            date={calendarDate}
+            onChange={(date) => {
+              onIsoChange(format(date, 'yyyy-MM-dd'));
+              setShowCalendar(false);
+            }}
+          />
+        </div>
       ) : null}
-      <input
-        ref={nativeInputRef}
-        type="date"
-        className="input-date__native"
-        value={isoValue}
-        onChange={(e) => {
-          onIsoChange(e.target.value);
-        }}
-        tabIndex={-1}
-        aria-hidden="true"
-      />
     </div>
   );
 }

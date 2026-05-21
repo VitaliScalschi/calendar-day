@@ -92,6 +92,7 @@ public class CalendarDayDbContext(DbContextOptions<CalendarDayDbContext> options
             d.Property(x => x.Title).IsRequired().HasMaxLength(350);
             d.Property(x => x.Description).IsRequired();
             d.Property(x => x.Type).IsRequired().HasMaxLength(20);
+            d.Property(x => x.NotificationEmail).HasColumnType("text");
             d.HasOne(x => x.Election)
                 .WithMany(e => e.Deadlines)
                 .HasForeignKey(x => x.ElectionId)

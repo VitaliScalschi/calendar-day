@@ -3,7 +3,7 @@ using MailKit.Security;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
 
-var apiDir = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "CalendarDay.Api"));
+var apiDir = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "CalendarDay.Api"));
 var config = new ConfigurationBuilder()
     .SetBasePath(apiDir)
     .AddJsonFile("appsettings.json", optional: false)
@@ -43,8 +43,11 @@ try
     var msg = new MimeMessage();
     msg.From.Add(MailboxAddress.Parse(from));
     msg.To.Add(MailboxAddress.Parse(to));
-    msg.Subject = "Test SMTP Calendar CEC";
-    msg.Body = new TextPart("plain") { Text = "Test trimitere SMTP din SmtpProbe." };
+    msg.Subject = "Test notificare eveniment — Calendar CEC";
+    msg.Body = new TextPart("plain")
+    {
+        Text = "Acesta este un email de test pentru notificările automate de eveniment (Calendar CEC).\n\nDacă l-ai primit, SMTP funcționează corect."
+    };
 
     await client.SendAsync(msg);
     await client.DisconnectAsync(true);

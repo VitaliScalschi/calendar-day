@@ -15,6 +15,9 @@ public class Deadline
     public DateOnly? EndDate { get; set; }
     public DateOnly DeadlineDate { get; set; }
     public string Description { get; set; } = string.Empty;
+    public string? NotificationEmail { get; set; }
+    /// <summary>Data la care s-a trimis notificarea (SINGLE / RANGE — o singură dată).</summary>
+    public DateOnly? NotificationSentOn { get; set; }
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
 

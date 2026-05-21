@@ -2,7 +2,7 @@ export function formatIsoToDisplay(value: string): string {
   if (!value) return '';
   const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (!match) return value;
-  return `${match[3]}/${match[2]}/${match[1]}`;
+  return `${match[3]}.${match[2]}.${match[1]}`;
 }
 
 export function parseDisplayToIso(value: string): string | null {
@@ -26,10 +26,3 @@ export function parseDisplayToIso(value: string): string | null {
   return isoValue;
 }
 
-export function openNativeDatePicker(input: HTMLInputElement) {
-  if ('showPicker' in input && typeof input.showPicker === 'function') {
-    input.showPicker();
-  } else {
-    input.focus();
-  }
-}

@@ -15,7 +15,8 @@ public record DeadlineDto(
     string Description,
     IReadOnlyList<string> Responsible,
     IReadOnlyList<string> Group,
-    IReadOnlyList<RegulationDto> Regulations
+    IReadOnlyList<RegulationDto> Regulations,
+    IReadOnlyList<string> NotificationEmails
 );
 
 public class CreateDeadlineDto
@@ -28,6 +29,7 @@ public class CreateDeadlineDto
     public string Description { get; set; } = string.Empty;
     public List<string> Responsible { get; set; } = [];
     public List<string> Group { get; set; } = [];
+    public List<string> NotificationEmails { get; set; } = [];
 }
 
 public class UpdateDeadlineDto : CreateDeadlineDto;

@@ -20,6 +20,8 @@ export type MultiCheckboxDropdownProps = {
   className?: string;
   buttonClassName?: string;
   toggleButtonAriaLabel?: string;
+  /** Afișează sub dropdown chip-uri pentru fiecare element selectat, cu buton de eliminare. */
+  showSelectionChips?: boolean;
   /** Implicit `md` (38px), aliniat cu `form-input-size--md`. */
   size?: MultiCheckboxDropdownSize;
 };
@@ -41,6 +43,7 @@ export function MultiCheckboxDropdown({
   className = '',
   buttonClassName = '',
   toggleButtonAriaLabel,
+  showSelectionChips = false,
   size = 'md',
 }: MultiCheckboxDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -73,6 +76,8 @@ export function MultiCheckboxDropdown({
 
   const hasSelection = selectedKeys.length > 0;
   const buttonLabel = hasSelection ? formatSelectionSummary(selectedKeys.length) : placeholder;
+
+  const labelByKey = useMemo(() => new Map(options.map((o) => [o.key, o.label] as const)), [options]);
 
   return (
     <div
@@ -114,6 +119,26 @@ export function MultiCheckboxDropdown({
               <span>{option.label}</span>
             </label>
           ))}
+        </div>
+      ) : null}
+      {showSelectionChips && hasSelection ? (
+        <div className="multi-checkbox-dropdown__chips" role="list">
+          {selectedKeys.map((key) => {
+            const label = labelByKey.get(key) ?? key;
+            return (
+              <span key={key} className="multi-checkbox-dropdown__chip" role="listitem">
+                <span className="multi-checkbox-dropdown__chip-label">{label}</span>
+                <button
+                  type="button"
+                  className="multi-checkbox-dropdown__chip-remove"
+                  onClick={() => onToggle(key)}
+                  aria-label={`Elimină ${label}`}
+                >
+                  <i className="bi bi-x-lg" aria-hidden="true" />
+                </button>
+              </span>
+            );
+          })}
         </div>
       ) : null}
     </div>

@@ -51,7 +51,10 @@
   font-weight: 700;
   color: #111827;
   line-height: 1.2;
-  word-break: break-word;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .election-info-hero__subtitle {
@@ -144,10 +147,11 @@
 
 .election-info-stat {
   display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, auto) minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.6rem;
   min-height: 30px;
+  min-width: 0;
 }
 
 .election-info-stat__icon {
@@ -190,6 +194,8 @@
   font-weight: 500;
   color: #1f2937;
   line-height: 1.2;
+  min-width: 0;
+  max-width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -353,6 +359,14 @@
   .election-info-stat {
     grid-template-columns: auto minmax(0, 1fr) auto;
     gap: 0.5rem;
+  }
+
+  .election-info-stat__label {
+    grid-column: 2;
+  }
+
+  .election-info-stat__value {
+    grid-column: 3;
   }
 
   .election-info-stat__bar {

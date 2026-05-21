@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { DateRange } from 'react-date-range';
+import { DatePickerCalendarLegend } from '../shared/DatePickerCalendarPanel';
+import { datePickerCalendarCommonProps } from '../shared/datePickerCalendarConfig';
 import { format } from 'date-fns';
 import { SelectionRange } from '../../interface';
 import './DateRangePicker.css';
@@ -72,9 +74,9 @@ export default function DateRangeDropdown({
   return (
     <div className="position-relative" ref={ref}>
       
-      <div className="date-range-picker__control">
+      <div className="date-picker__control">
         <input
-          className={`form-control form-input-size--md ${clearable ? 'date-range-picker__input--clearable' : ''}`}
+          className={`form-control form-input-size--md ${clearable ? 'date-picker__input--clearable' : ''}`}
           value={formatted}
           onClick={() => setShow(!show)}
           readOnly
@@ -83,7 +85,7 @@ export default function DateRangeDropdown({
         {clearable ? (
           <button
             type="button"
-            className="date-range-picker__clear-btn clear-btn"
+            className="date-picker__clear-btn clear-btn"
             onClick={handleClear}
             aria-label={clearButtonAriaLabel}
             title={clearButtonAriaLabel}
@@ -99,10 +101,12 @@ export default function DateRangeDropdown({
           style={{ zIndex: 1000 }}
         >
           <DateRange
+            {...datePickerCalendarCommonProps}
             ranges={activeRange}
             onChange={(item) => handleRangeChange([normalizeSelection(item.selection)])}
             moveRangeOnFirstSelection={false}
           />
+          <DatePickerCalendarLegend />
         </div>
       )}
     </div>

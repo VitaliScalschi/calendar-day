@@ -15,6 +15,8 @@ export interface EventsTableProps {
   onSearch: (value: string) => void;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
+  /** Doar administratorii pot șterge programul; pentru Editor butonul e dezactivat vizual. */
+  canDeleteProgram?: boolean;
   onManageEvents?: (id: string) => void;
   onAddEventClick?: () => void;
   page: number;

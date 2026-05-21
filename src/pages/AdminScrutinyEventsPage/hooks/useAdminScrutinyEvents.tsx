@@ -6,18 +6,28 @@ import { canAccessUsersPage, getAdminEmail, logoutAdmin } from '../../../shared/
 import { navigateForAdminSidebarItem } from '../../../shared/admin/adminSidebarNavigation';
 import { ApiError, apiRequest } from '../../../shared/services/apiClient';
 import type { SelectionRange } from '../../../interface';
-import { formatDeadlineLabel, toLegacyDeadlineValue, toRoDateLocal } from '../../../shared/utils/deadlineDate';
+import { formatDeadlineLabel, toRoDateLocal } from '../../../shared/utils/deadlineDate';
 import { getDeadlineRangeFromString } from '../../../shared/utils/deadlineTodayKind';
 import { useScrutinyEventsQuery } from '../../../features/admin/hooks/useScrutinyEventsQuery';
-import { fetchScrutinyDeadlineById } from '../../../features/admin/services/scrutinyEventsService';
+import { fetchAllScrutinyDeadlines, fetchScrutinyDeadlineById } from '../../../features/admin/services/scrutinyEventsService';
 import { useAudiencesQuery } from '../../../features/audiences/hooks/useAudiencesQuery';
 import { FALLBACK_TARGET_GROUP_OPTIONS } from '../../../utils/electionFilters';
 import type { TableColumn } from '../../../components/Table/Table';
 import { ADMIN_SCRUTINY_EVENTS_PAGE_SIZE } from '../constants';
-import type { AdminEventRow, ApiDeadline, ApiElection, ApiResponsibleOption, EventFormValidation, PagedResult, UploadDocumentResponse } from '../types';
-import { normalizeSearch, normalizeUniqueSingleDates, parseApiErrorMessage, toDateKey, toSqlDateLocal } from '../utils';
+import type { AdminEventRow, ApiDeadline, ApiElection, ApiResponsibleOption, EventFormValidation, UploadDocumentResponse } from '../types';
+import {
+  normalizeSearch,
+  normalizeUniqueEmails,
+  normalizeUniqueSingleDates,
+  parseApiErrorMessage,
+  parseNotificationEmailsFromApi,
+  toDateKey,
+  toSqlDateLocal,
+} from '../utils';
+import { useToast } from '../../../components/Toast';
 
 export function useAdminScrutinyEvents() {
+  const { showToast } = useToast();
   const { scrutinyId } = useParams();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -67,6 +77,8 @@ export function useAdminScrutinyEvents() {
     description: '',
     additionalInfo: '',
   });
+  const [notificationEmailInput, setNotificationEmailInput] = useState('');
+  const [notificationEmails, setNotificationEmails] = useState<string[]>([]);
   const [validation, setValidation] = useState<EventFormValidation>({
     title: false,
     period: false,
@@ -74,7 +86,19 @@ export function useAdminScrutinyEvents() {
     groups: false,
   });
 
-  const scrutinyQuery = useScrutinyEventsQuery(scrutinyId, { page, pageSize: ADMIN_SCRUTINY_EVENTS_PAGE_SIZE });
+  const hasActiveFilters = Boolean(
+    searchQuery.trim() ||
+      filterDateFrom ||
+      filterDateTo ||
+      groupFilter.length > 0 ||
+      responsibleFilter.length > 0
+  );
+
+  const scrutinyQuery = useScrutinyEventsQuery(scrutinyId, {
+    page,
+    pageSize: ADMIN_SCRUTINY_EVENTS_PAGE_SIZE,
+    fetchAll: hasActiveFilters,
+  });
   const audiencesQuery = useAudiencesQuery(true);
 
   const targetGroupOptions = useMemo(() => {
@@ -203,14 +227,15 @@ export function useAdminScrutinyEvents() {
     });
   }, [rows, searchQuery, filterDateFrom, filterDateTo, groupFilter, responsibleFilter]);
 
-  const serverPage = scrutinyQuery.data?.page ?? page;
-  const serverPageSize = scrutinyQuery.data?.pageSize ?? ADMIN_SCRUTINY_EVENTS_PAGE_SIZE;
-  const totalItems = scrutinyQuery.data?.totalCount ?? filteredRows.length;
+  const serverPageSize = ADMIN_SCRUTINY_EVENTS_PAGE_SIZE;
+  const totalItems = hasActiveFilters ? filteredRows.length : (scrutinyQuery.data?.totalCount ?? filteredRows.length);
   const totalPages = Math.max(1, Math.ceil(totalItems / serverPageSize));
-  const safePage = Math.min(Math.max(serverPage, 1), totalPages);
+  const safePage = Math.min(Math.max(hasActiveFilters ? page : (scrutinyQuery.data?.page ?? page), 1), totalPages);
   const from = totalItems === 0 ? 0 : (safePage - 1) * serverPageSize + 1;
-  const to = totalItems === 0 ? 0 : Math.min(from + filteredRows.length - 1, totalItems);
-  const pageItems = filteredRows;
+  const to = totalItems === 0 ? 0 : Math.min(safePage * serverPageSize, totalItems);
+  const pageItems = hasActiveFilters
+    ? filteredRows.slice((safePage - 1) * serverPageSize, safePage * serverPageSize)
+    : filteredRows;
 
   useEffect(() => {
     setPage(1);
@@ -248,6 +273,7 @@ export function useAdminScrutinyEvents() {
       return;
     }
 
+    const wasEditingEvent = Boolean(editingEventId);
     setIsSaving(true);
     try {
       const cleanedResponsibles = responsibles.map((x) => x.trim()).filter(Boolean);
@@ -267,6 +293,7 @@ export function useAdminScrutinyEvents() {
         additionalInfo: intervalAdditionalInfo,
         responsible: cleanedResponsibles,
         group: cleanedGroups,
+        notificationEmails: normalizeUniqueEmails(notificationEmails),
       };
 
       let createdId = editingEventId;
@@ -342,6 +369,8 @@ export function useAdminScrutinyEvents() {
 
       setIsModalOpen(false);
       setForm({ title: '', description: '', additionalInfo: '' });
+      setNotificationEmailInput('');
+      setNotificationEmails([]);
       setDateRange([{ startDate: new Date(), endDate: new Date(), key: 'selection' }]);
       setUseDateInterval(false);
       setSingleDeadlineDateInput('');
@@ -355,12 +384,15 @@ export function useAdminScrutinyEvents() {
       setEditingEventId(null);
       clearEventQueryParam();
       await loadData();
+      showToast({
+        variant: 'success',
+        title: wasEditingEvent ? 'Salvat!' : 'Adăugat!',
+        message: wasEditingEvent ? 'Acțiunea a fost actualizată.' : 'Acțiunea a fost adăugată în program.',
+      });
     } catch (e) {
-      if (e instanceof ApiError) {
-        setError(`Nu am putut salva evenimentul: ${parseApiErrorMessage(e.message)} (${e.status})`);
-      } else {
-        setError('Nu am putut salva evenimentul.');
-      }
+      const detail =
+        e instanceof ApiError ? `${parseApiErrorMessage(e.message)} (${e.status})` : 'A apărut o eroare la salvare.';
+      showToast({ variant: 'error', message: detail });
     } finally {
       setIsSaving(false);
     }
@@ -456,6 +488,8 @@ export function useAdminScrutinyEvents() {
       description: event.description || '',
       additionalInfo: event.additionalInfo || '',
     });
+    setNotificationEmailInput('');
+    setNotificationEmails(parseNotificationEmailsFromApi(event));
     setResponsibles((event.responsible || []).map((x) => x.trim()).filter(Boolean));
     setSelectedGroups((event.group || []).filter((group) => audienceKeySet.has(group)));
     setDateRange([{ startDate: baseDate, endDate: endDate, key: 'selection' }]);
@@ -501,6 +535,8 @@ export function useAdminScrutinyEvents() {
       description: event.description || '',
       additionalInfo: event.additionalInfo || '',
     });
+    setNotificationEmailInput('');
+    setNotificationEmails(parseNotificationEmailsFromApi(event));
     setResponsibles((event.responsible || []).map((x) => x.trim()).filter(Boolean));
     setSelectedGroups((event.group || []).filter((group) => audienceKeySet.has(group)));
     setDateRange([{ startDate: baseDate, endDate: endDate, key: 'selection' }]);
@@ -532,6 +568,8 @@ export function useAdminScrutinyEvents() {
   const openCreateEvent = () => {
     setEditingEventId(null);
     setForm({ title: '', description: '', additionalInfo: '' });
+    setNotificationEmailInput('');
+    setNotificationEmails([]);
     setDateRange([{ startDate: new Date(), endDate: new Date(), key: 'selection' }]);
     setUseDateInterval(false);
     setSingleDeadlineDateInput('');
@@ -652,8 +690,13 @@ export function useAdminScrutinyEvents() {
       await loadData();
       setIsDeleteModalOpen(false);
       setPendingDeleteEventId(null);
+      showToast({
+        variant: 'success',
+        title: 'Șters!',
+        message: 'Acțiunea a fost eliminată din program.',
+      });
     } catch {
-      setError('Nu am putut șterge evenimentul.');
+      showToast({ variant: 'error', message: 'Nu am putut șterge acțiunea.' });
     } finally {
       setIsDeleting(false);
     }
@@ -689,32 +732,8 @@ export function useAdminScrutinyEvents() {
     [canManageUsers, navigate],
   );
 
-  const fetchAllDeadlinesFromElection = async (electionId: string): Promise<ApiDeadline[]> => {
-    const pageSize = 100;
-    let page = 1;
-    let hasMore = true;
-    const merged: ApiDeadline[] = [];
-
-    while (hasMore) {
-      const response = await apiRequest<PagedResult<ApiDeadline>>(
-        `/deadlines?electionId=${electionId}&page=${page}&pageSize=${pageSize}`
-      );
-      const items = (response.items || []).map((item) => ({
-        ...item,
-        deadline: toLegacyDeadlineValue({
-          type: item.type,
-          startDate: item.startDate,
-          endDate: item.endDate,
-          deadlines: item.deadlines,
-        }),
-      }));
-      merged.push(...items);
-      hasMore = items.length === pageSize;
-      page += 1;
-    }
-
-    return merged;
-  };
+  const fetchAllDeadlinesFromElection = async (electionId: string): Promise<ApiDeadline[]> =>
+    fetchAllScrutinyDeadlines(electionId) as Promise<ApiDeadline[]>;
 
   const importEventsFromSelectedElection = async () => {
     if (!scrutinyId || !selectedSourceElectionId) return;
@@ -889,6 +908,8 @@ export function useAdminScrutinyEvents() {
     isUploadingRegulation,
     isViewOnly,
     navigate,
+    notificationEmailInput,
+    notificationEmails,
     onLogout,
     openCreateEvent,
     pageItems,
@@ -919,6 +940,8 @@ export function useAdminScrutinyEvents() {
     setIsFilterOpen,
     setIsImportModalOpen,
     setIsModalOpen,
+    setNotificationEmailInput,
+    setNotificationEmails,
     setIsRegulationUploadOpen,
     setIsViewOnly,
     setPendingDeleteEventId,

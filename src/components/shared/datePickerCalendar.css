@@ -1,0 +1,158 @@
+.rdrCalendarWrapper {
+  border-radius: 10px;
+  font-family: inherit;
+}
+
+.rdrDateDisplayWrapper {
+  display: none;
+}
+
+/* Header: lună/an și săgeți în albastru */
+.dropdown-calendar .rdrMonthAndYearPickers select {
+  color: #0d6efd;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.dropdown-calendar .rdrNextPrevButton {
+  background: #f0f4ff;
+  border-radius: 6px;
+}
+
+.dropdown-calendar .rdrPprevButton i {
+  border-color: transparent #0d6efd transparent transparent;
+}
+
+.dropdown-calendar .rdrNextButton i {
+  border-color: transparent transparent transparent #0d6efd;
+}
+
+/* Zile săptămână (Du, Lu, …) */
+.dropdown-calendar .rdrWeekDay {
+  color: #0d6efd;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+/* Ascunde underline implicit pentru „azi” */
+.dropdown-calendar .rdrDayToday .rdrDayNumber span::after {
+  display: none;
+}
+
+/* Astăzi — cerc contur albastru */
+.dropdown-calendar .rdrDayToday:not(.rdrDayPassive):not(:has(.rdrSelected)) .rdrDayNumber span {
+  box-sizing: border-box;
+  width: 2.25em;
+  height: 2.25em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #0d6efd;
+  border-radius: 50%;
+  font-weight: 600;
+  color: #0d6efd;
+}
+
+/* Selectat — cerc plin albastru */
+.dropdown-calendar .rdrSelected {
+  background: transparent !important;
+}
+
+.dropdown-calendar .rdrDay:not(.rdrDayPassive) .rdrSelected ~ .rdrDayNumber span {
+  box-sizing: border-box;
+  width: 2.25em;
+  height: 2.25em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #0d6efd;
+  color: #fff !important;
+  font-weight: 600;
+}
+
+/* Legendă */
+.date-picker__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid #e8ecf2;
+  font-size: 0.82rem;
+  color: #4b5563;
+}
+
+.date-picker__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.date-picker__legend-dot {
+  flex-shrink: 0;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+}
+
+.date-picker__legend-dot--today {
+  border: 2px solid #0d6efd;
+  background: transparent;
+}
+
+.date-picker__legend-dot--selected {
+  background: #0d6efd;
+}
+
+.dropdown-calendar {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 8px;
+  background: white;
+  border-radius: 12px;
+  padding: 12px;
+  z-index: 1090;
+  animation: date-picker-fade-in 0.2s ease;
+}
+
+.date-picker__control {
+  position: relative;
+}
+
+.date-picker__input--clearable {
+  padding-right: 2.2rem;
+}
+
+.date-picker__clear-btn {
+  position: absolute;
+  right: 0.55rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: #6b7280;
+  width: 1.2rem;
+  height: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.date-picker__clear-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@keyframes date-picker-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

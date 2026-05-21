@@ -285,7 +285,17 @@
 .admin-event-form {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 1rem;
+}
+
+.admin-event-form > fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
 }
 
 .admin-event-form__section {
@@ -346,21 +356,9 @@
 
 .admin-event-form__single-date-list {
   display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+  flex-wrap: wrap;
+  gap: 0.45rem;
   margin-top: 0.6rem;
-}
-
-.admin-event-form__single-date-chip {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border: 1px solid #d7dce5;
-  border-radius: 8px;
-  padding: 0.35rem 0.55rem;
-  font-size: 0.85rem;
-  color: #374151;
-  background: #fff;
 }
 
 .admin-events-topbar__back {
@@ -455,6 +453,16 @@
   color: #dc2626;
 }
 
+.admin-programs-actions__delete.is-disabled-permission {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.admin-programs-actions__delete.is-disabled-permission:hover {
+  background: #fff8f8;
+  color: #ef4444;
+}
+
 .admin-table-actions {
   display: inline-flex;
   align-items: center;
@@ -503,6 +511,16 @@
 .admin-table-actions__btn--delete:hover {
   background: #fff1f1;
   color: #dc2626;
+}
+
+.admin-table-actions__btn--delete.is-disabled-permission {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.admin-table-actions__btn--delete.is-disabled-permission:hover {
+  background: #fff8f8;
+  color: #ef4444;
 }
 
 .admin-useful-info-row {

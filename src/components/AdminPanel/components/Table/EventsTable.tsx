@@ -8,6 +8,7 @@ function EventsTable({
   onSearch,
   onEdit,
   onDelete,
+  canDeleteProgram = true,
   onManageEvents,
   onAddEventClick,
   page,
@@ -57,7 +58,16 @@ function EventsTable({
           <button type="button" className="btn admin-programs-actions__edit" onClick={() => onEdit?.(event.id)}>
             <i className="fa-solid fa-pen" aria-hidden="true"></i>
           </button>
-          <button type="button" className="btn admin-programs-actions__delete" onClick={() => onDelete?.(event.id)}>
+          <button
+            type="button"
+            className={`btn admin-programs-actions__delete${canDeleteProgram ? '' : ' is-disabled-permission'}`}
+            title={
+              canDeleteProgram
+                ? 'Șterge programul calendaristic'
+                : 'Ștergerea programului nu este permisă — contactați un administrator'
+            }
+            onClick={() => onDelete?.(event.id)}
+          >
             <i className="fa-solid fa-trash-can" aria-hidden="true"></i>
           </button>
         </div>

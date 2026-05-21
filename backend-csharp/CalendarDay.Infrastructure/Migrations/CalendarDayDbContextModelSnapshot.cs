@@ -141,6 +141,12 @@ namespace CalendarDay.Infrastructure.Migrations
                     b.Property<Guid>("ElectionId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("NotificationEmail")
+                        .HasColumnType("text");
+
+                    b.Property<DateOnly?>("NotificationSentOn")
+                        .HasColumnType("date");
+
                     b.Property<DateOnly?>("EndDate")
                         .HasColumnType("date");
 
@@ -181,6 +187,9 @@ namespace CalendarDay.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateOnly>("EventDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly?>("NotificationSentOn")
                         .HasColumnType("date");
 
                     b.HasKey("Id");

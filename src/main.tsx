@@ -9,6 +9,7 @@ import '@fortawesome/fontawesome-free/css/all.css'
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import App from './App'
+import { ToastProvider } from './components/Toast'
 import { AppErrorBoundary } from './shared/components/AppErrorBoundary'
 import { queryClient } from './shared/query/queryClient'
 import './index.css'
@@ -16,9 +17,11 @@ import './index.css'
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <QueryClientProvider client={queryClient}>
     <AppErrorBoundary>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <ToastProvider>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </ToastProvider>
     </AppErrorBoundary>
   </QueryClientProvider>,
 )

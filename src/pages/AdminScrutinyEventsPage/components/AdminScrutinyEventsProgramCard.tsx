@@ -61,9 +61,9 @@ export function AdminScrutinyEventsProgramCard({
             <div className="admin-events-subtitle">Gestionează și urmărește acțiunile planificate</div>
           </div>
           <div className="d-flex align-items-center gap-2">
-            <button type="button" className="btn btn-outline-primary" onClick={onOpenImport}>
+            {/* <button type="button" className="btn btn-outline-primary" onClick={onOpenImport}>
               Preia din alt program
-            </button>
+            </button> */}
             <button type="button" className="btn btn-primary" onClick={onAddEvent}>
               Adaugă acțiune
             </button>

@@ -242,6 +242,8 @@ public class DeadlinesService(CalendarDayDbContext db) : IDeadlinesService
             EndDate = shape.EndDate,
             DeadlineDate = normalizedDeadline,
             Description = dto.Description.Trim(),
+            NotificationEmail = DeadlineNotificationEmails.Serialize(dto.NotificationEmails),
+            NotificationSentOn = null,
             Responsibles = dto.Responsible.Select(x => new DeadlineResponsible { Id = Guid.NewGuid(), Value = x.Trim() }).ToList(),
             Groups = dto.Group.Select(x => new DeadlineGroup { Id = Guid.NewGuid(), Value = x.Trim() }).ToList(),
             Dates = BuildDeadlineDateEntities(Guid.Empty, shape.MultipleDates),
@@ -270,6 +272,12 @@ public class DeadlinesService(CalendarDayDbContext db) : IDeadlinesService
         if (entity is null) return null;
 
         var shape = ParseInputShape(dto.Deadline, dto.Deadlines);
+        var previousType = entity.Type;
+        var previousStart = entity.StartDate;
+        var previousEnd = entity.EndDate;
+        var previousMultipleDates = entity.Type == Deadline.TypeMultiple
+            ? await db.DeadlineDates.Where(x => x.DeadlineId == entity.Id).Select(x => x.EventDate).OrderBy(x => x).ToListAsync(ct)
+            : [];
         entity.ElectionId = dto.ElectionId;
         entity.Title = dto.Title.Trim();
         entity.AdditionalInfo = shape.Type == Deadline.TypeRange ? MergeAdditionalInfoWithRange(dto.AdditionalInfo, dto.Deadline) : RemoveRangeMeta(dto.AdditionalInfo);
@@ -280,7 +288,23 @@ public class DeadlinesService(CalendarDayDbContext db) : IDeadlinesService
             ? shape.MultipleDates.Min()
             : (shape.StartDate ?? ParseSingleDate(dto.Deadline));
         entity.Description = dto.Description.Trim();
+        var serializedEmails = DeadlineNotificationEmails.Serialize(dto.NotificationEmails);
+        if (!string.Equals(entity.NotificationEmail, serializedEmails, StringComparison.Ordinal))
+        {
+            entity.NotificationEmail = serializedEmails;
+            entity.NotificationSentOn = null;
+        }
+
         entity.UpdatedAtUtc = DateTime.UtcNow;
+
+        var periodChanged = shape.Type != previousType ||
+            shape.StartDate != previousStart ||
+            shape.EndDate != previousEnd ||
+            (shape.Type == Deadline.TypeMultiple && !shape.MultipleDates.SequenceEqual(previousMultipleDates));
+        if (periodChanged)
+        {
+            entity.NotificationSentOn = null;
+        }
 
         await using var trx = await db.Database.BeginTransactionAsync(ct);
         await db.DeadlineDates.Where(x => x.DeadlineId == entity.Id).ExecuteDeleteAsync(ct);
@@ -350,7 +374,8 @@ public class DeadlinesService(CalendarDayDbContext db) : IDeadlinesService
                     d.Description,
                     d.Responsibles.Select(x => x.Value).ToList(),
                     d.Groups.Select(x => x.Value).ToList(),
-                    d.Regulations.Select(r => new RegulationDto(r.Id, d.Id, r.DocumentId, r.Title, r.Link)).ToList()))
+                    d.Regulations.Select(r => new RegulationDto(r.Id, d.Id, r.DocumentId, r.Title, r.Link)).ToList(),
+                    DeadlineNotificationEmails.Parse(d.NotificationEmail)))
                 .ToList()))
             .ToList();
     }
@@ -416,6 +441,7 @@ public class DeadlinesService(CalendarDayDbContext db) : IDeadlinesService
             d.Description,
             d.Responsibles.Select(x => x.Value).ToList(),
             d.Groups.Select(x => x.Value).ToList(),
-            d.Regulations.Select(r => new RegulationDto(r.Id, d.Id, r.DocumentId, r.Title, r.Link)).ToList()
+            d.Regulations.Select(r => new RegulationDto(r.Id, d.Id, r.DocumentId, r.Title, r.Link)).ToList(),
+            DeadlineNotificationEmails.Parse(d.NotificationEmail)
         );
 }

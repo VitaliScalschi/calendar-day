@@ -12,6 +12,7 @@ export {default as SearchBar} from './SearchBar/SearchBar';
 export { Button } from './Button';
 export {default as EventFilter} from './EventFilter/EventFilter';
 export {default as ScrollToTop} from './ScrollToTop/ScrollToTop';
+export { ToastProvider, useToast, type ShowToastOptions, type ToastVariant } from './Toast';
 export {default as ElectionInfoCard} from './ElectionInfoCard/ElectionInfoCard';
 export {default as DateRangePicker} from './DateRangePicker/DateRangePicker';
 export {default as Table} from './Table/Table';

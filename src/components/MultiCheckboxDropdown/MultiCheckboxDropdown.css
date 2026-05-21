@@ -1,3 +1,62 @@
+.multi-checkbox-dropdown__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.6rem;
+}
+
+.multi-checkbox-dropdown__chip,
+.admin-event-form__single-date-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  max-width: 100%;
+  padding: 0.35rem 0.4rem 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: #e6efff;
+  color: var(--color-primary-strong, #055a8f);
+  font-size: 0.85rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.multi-checkbox-dropdown__chip-label,
+.admin-event-form__single-date-chip-label {
+  white-space: nowrap;
+}
+
+.multi-checkbox-dropdown__chip-remove,
+.admin-event-form__single-date-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.35rem;
+  height: 1.35rem;
+  padding: 0;
+  margin: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  font-size: 0.7rem;
+  line-height: 1;
+  opacity: 0.8;
+  cursor: pointer;
+}
+
+.multi-checkbox-dropdown__chip-remove:hover,
+.admin-event-form__single-date-chip-remove:hover {
+  opacity: 1;
+  background: rgba(5, 90, 143, 0.12);
+}
+
+.multi-checkbox-dropdown__chip-remove:focus-visible,
+.admin-event-form__single-date-chip-remove:focus-visible {
+  outline: 2px solid var(--color-primary-strong, #055a8f);
+  outline-offset: 1px;
+}
+
 /* Dimensiuni aliniate cu formInputSizes: xs 32px, sm 35px, md 38px, lg 42px */
 
 .multi-checkbox-dropdown--xs .event-filter-dropdown__control .event-filter-dropdown__button {

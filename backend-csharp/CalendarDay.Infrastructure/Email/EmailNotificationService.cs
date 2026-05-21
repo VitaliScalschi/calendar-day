@@ -24,7 +24,7 @@ public class EmailNotificationService(
             ct);
     }
 
-    public async Task SendEventNotificationAsync(
+    public Task<bool> SendEventNotificationAsync(
         string toEmail,
         string eventTitle,
         string eventDetailsHtml,
@@ -33,7 +33,7 @@ public class EmailNotificationService(
         var html = EmailTemplates.EventNotification(eventTitle, eventDetailsHtml);
         var plain = $"Notificare eveniment: {eventTitle}";
 
-        await SendAsync(
+        return SendAsync(
             new EmailMessage(toEmail, $"Eveniment: {eventTitle}", html, plain),
             ct);
     }
