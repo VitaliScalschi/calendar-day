@@ -7,7 +7,7 @@ const TITLE_HEADER = 'Comisia Electorală Centrală';
 const NAV_ITEMS = [
   { to: '/', label: 'Acasă', icon: 'bi-house', end: true as const },
   { to: '/calendar', label: 'Calendar', icon: 'bi-calendar3', end: false as const },
-  { to: '/arhiva', label: 'Documente', icon: 'bi-folder2', end: false as const },
+  { to: '/arhiva', label: 'Arhivă evenimente', icon: 'bi-folder2', end: false as const },
 ];
 
 function HeaderNav({
