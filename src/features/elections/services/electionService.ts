@@ -23,7 +23,7 @@ type ApiDeadline = {
   electionId: string;
   title: string;
   additionalInfo?: string | null;
-  type?: 'RANGE' | 'MULTIPLE' | 'SINGLE';
+  type?: 'RANGE' | 'MULTIPLE' | 'SINGLE' | 'MIXED';
   startDate?: string | null;
   endDate?: string | null;
   deadlines?: string[];
@@ -47,6 +47,14 @@ export type InactiveElection = {
   hasDocument?: boolean;
   electionTypeIds?: number[];
 };
+
+/** Pentru MIXED, `deadline.deadlines` vine din backend expandat cu toate zilele intervalului — păstrăm doar cele din afara lui. */
+function computeExtraDates(deadline: Pick<ApiDeadline, 'type' | 'startDate' | 'endDate' | 'deadlines'>): string[] {
+  const all = deadline.deadlines ?? [];
+  if (deadline.type !== 'MIXED' || !deadline.startDate || !deadline.endDate) return all;
+  const { startDate, endDate } = deadline;
+  return all.filter((date) => date < startDate || date > endDate);
+}
 
 export type GroupedDeadlines = {
   electionId: string;
@@ -128,6 +136,7 @@ export async function fetchGroupedDeadlinesForCalendar(signal?: AbortSignal): Pr
           additionalInfo?: string | null;
           responsible?: string[] | null;
           group?: string[] | null;
+          regulations?: ApiRegulation[] | null;
         }>;
       }>
     >('/deadlines/grouped-by-election', { signal }),
@@ -153,7 +162,7 @@ export async function fetchGroupedDeadlines(signal?: AbortSignal): Promise<Group
     deadlines: Array<{
       id: string;
       title: string;
-      type?: 'RANGE' | 'MULTIPLE' | 'SINGLE';
+      type?: 'RANGE' | 'MULTIPLE' | 'SINGLE' | 'MIXED';
       startDate?: string | null;
       endDate?: string | null;
       deadlines?: string[];

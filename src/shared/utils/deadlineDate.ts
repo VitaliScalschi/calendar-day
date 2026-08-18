@@ -49,7 +49,7 @@ export function toLegacyDeadlineValue(input: {
 }): string {
   const type = input.type || 'SINGLE';
   const list = (input.deadlines || []).filter(Boolean);
-  if (type === 'RANGE' && input.startDate && input.endDate) {
+  if ((type === 'RANGE' || type === 'MIXED') && input.startDate && input.endDate) {
     return `${input.startDate} - ${input.endDate}`;
   }
   if (list.length > 0) {

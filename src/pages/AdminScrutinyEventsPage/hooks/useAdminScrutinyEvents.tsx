@@ -26,6 +26,48 @@ import {
 } from '../utils';
 import { useToast } from '../../../components/Toast';
 
+function parseFlexibleDate(value: string): Date {
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
+    const [day, month, year] = value.split('/').map(Number);
+    return new Date(year, month - 1, day);
+  }
+  return new Date(value);
+}
+
+/**
+ * Reconstruiește starea formularului (interval + date individuale) dintr-un eveniment existent.
+ * Pentru RANGE/MIXED, `event.deadlines` vine de la backend expandat cu fiecare zi din interval —
+ * trebuie filtrate zilele acoperite deja de interval, ca lista de „date suplimentare" să conțină
+ * doar datele individuale reale, nu tot intervalul.
+ */
+function resolveEventDateFields(event: ApiDeadline): {
+  baseDate: Date;
+  endDate: Date;
+  isRangeLike: boolean;
+  singleDates: string[];
+} {
+  const isRangeLike = event.type === 'RANGE' || event.type === 'MIXED';
+  const rangeMatch = event.deadline.match(/^(\d{4}-\d{2}-\d{2}|\d{2}\/\d{2}\/\d{4})\s*-\s*(\d{4}-\d{2}-\d{2}|\d{2}\/\d{2}\/\d{4})$/);
+
+  const baseDate = isRangeLike && event.startDate
+    ? parseFlexibleDate(event.startDate)
+    : parseFlexibleDate(rangeMatch ? rangeMatch[1] : event.deadline);
+  const endDate = isRangeLike && event.endDate
+    ? parseFlexibleDate(event.endDate)
+    : parseFlexibleDate(rangeMatch ? rangeMatch[2] : event.deadline);
+
+  const allDates = Array.isArray(event.deadlines) ? event.deadlines : [];
+  if (!isRangeLike) {
+    const singleDates = normalizeUniqueSingleDates(allDates.length > 0 ? allDates : [toSqlDateLocal(baseDate)]);
+    return { baseDate, endDate, isRangeLike, singleDates };
+  }
+
+  const rangeStartIso = toSqlDateLocal(baseDate);
+  const rangeEndIso = toSqlDateLocal(endDate);
+  const extraDates = allDates.filter((date) => date < rangeStartIso || date > rangeEndIso);
+  return { baseDate, endDate, isRangeLike, singleDates: normalizeUniqueSingleDates(extraDates) };
+}
+
 export function useAdminScrutinyEvents() {
   const { showToast } = useToast();
   const { scrutinyId } = useParams();
@@ -260,10 +302,13 @@ export function useAdminScrutinyEvents() {
     const rangeDeadlineDate = dateRange[0]?.endDate ?? dateRange[0]?.startDate;
     const normalizedSingleDates = normalizeUniqueSingleDates(singleDeadlineDates.length > 0 ? singleDeadlineDates : [singleDeadlineDateInput]);
     const singleDeadline = normalizedSingleDates[0] ? new Date(`${normalizedSingleDates[0]}T00:00:00`) : null;
-    const deadlineDate = useDateInterval ? rangeDeadlineDate : singleDeadline;
+    const hasRange = useDateInterval && Boolean(rangeStartDate) && Boolean(rangeDeadlineDate);
+    const hasSingleDates = normalizedSingleDates.length > 0;
     const nextValidation: EventFormValidation = {
       title: !form.title.trim(),
-      period: !deadlineDate || (!useDateInterval && normalizedSingleDates.length === 0),
+      // Interval + date individuale suplimentare pot fi completate independent — perioada e
+      // validă dacă există ORICARE dintre ele (sau ambele, pentru evenimente de tip MIXED).
+      period: !hasRange && !hasSingleDates,
       responsible: responsibles.length === 0,
       groups: selectedGroups.length === 0,
     };
@@ -280,15 +325,16 @@ export function useAdminScrutinyEvents() {
       const cleanedGroups = selectedGroups.filter((group) => audienceKeySet.has(group));
       const singleAdditionalInfo = form.additionalInfo.trim() || undefined;
       const intervalAdditionalInfo = singleAdditionalInfo;
-      const deadlineValue =
-        useDateInterval && rangeStartDate && rangeDeadlineDate
-          ? `${toRoDateLocal(rangeStartDate)} - ${toRoDateLocal(rangeDeadlineDate)}`
-          : toRoDateLocal(deadlineDate);
+      const deadlineValue = hasRange && rangeStartDate && rangeDeadlineDate
+        ? `${toRoDateLocal(rangeStartDate)} - ${toRoDateLocal(rangeDeadlineDate)}`
+        : toRoDateLocal(singleDeadline ?? rangeStartDate ?? new Date());
       const payload = {
         electionId: scrutinyId,
         title: form.title.trim(),
         deadline: deadlineValue,
-        deadlines: useDateInterval ? [] : normalizedSingleDates,
+        // Trimitem mereu datele individuale, indiferent de mod — backend-ul decide singur
+        // dacă rezultă RANGE, MULTIPLE sau MIXED (interval + date suplimentare).
+        deadlines: normalizedSingleDates,
         description: form.description.trim(),
         additionalInfo: intervalAdditionalInfo,
         responsible: cleanedResponsibles,
@@ -472,16 +518,7 @@ export function useAdminScrutinyEvents() {
   };
 
   const editEvent = (event: ApiDeadline) => {
-    const rangeMatch = event.deadline.match(/^(\d{4}-\d{2}-\d{2}|\d{2}\/\d{2}\/\d{4})\s*-\s*(\d{4}-\d{2}-\d{2}|\d{2}\/\d{2}\/\d{4})$/);
-    const parseFlexibleDate = (value: string): Date => {
-      if (/^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
-        const [day, month, year] = value.split('/').map(Number);
-        return new Date(year, month - 1, day);
-      }
-      return new Date(value);
-    };
-    const baseDate = parseFlexibleDate(rangeMatch ? rangeMatch[1] : event.deadline);
-    const endDate = parseFlexibleDate(rangeMatch ? rangeMatch[2] : event.deadline);
+    const dateFields = resolveEventDateFields(event);
     setEditingEventId(event.id);
     setForm({
       title: event.title || '',
@@ -492,15 +529,10 @@ export function useAdminScrutinyEvents() {
     setNotificationEmails(parseNotificationEmailsFromApi(event));
     setResponsibles((event.responsible || []).map((x) => x.trim()).filter(Boolean));
     setSelectedGroups((event.group || []).filter((group) => audienceKeySet.has(group)));
-    setDateRange([{ startDate: baseDate, endDate: endDate, key: 'selection' }]);
-    setUseDateInterval(Boolean(rangeMatch));
-    const eventSingleDates = normalizeUniqueSingleDates(
-      Array.isArray(event.deadlines) && event.deadlines.length > 0
-        ? event.deadlines
-        : [toSqlDateLocal(baseDate)]
-    );
-    setSingleDeadlineDates(eventSingleDates);
-    setSingleDeadlineDateInput(eventSingleDates[0] || toSqlDateLocal(baseDate));
+    setDateRange([{ startDate: dateFields.baseDate, endDate: dateFields.endDate, key: 'selection' }]);
+    setUseDateInterval(dateFields.isRangeLike);
+    setSingleDeadlineDates(dateFields.singleDates);
+    setSingleDeadlineDateInput(dateFields.singleDates[0] || toSqlDateLocal(dateFields.baseDate));
     const existingRegulations = (event.regulations || []).map((r) => ({
       id: r.id,
       documentId: r.documentId || null,
@@ -519,16 +551,7 @@ export function useAdminScrutinyEvents() {
   };
 
   const viewEvent = (event: ApiDeadline) => {
-    const rangeMatch = event.deadline.match(/^(\d{4}-\d{2}-\d{2}|\d{2}\/\d{2}\/\d{4})\s*-\s*(\d{4}-\d{2}-\d{2}|\d{2}\/\d{2}\/\d{4})$/);
-    const parseFlexibleDate = (value: string): Date => {
-      if (/^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
-        const [day, month, year] = value.split('/').map(Number);
-        return new Date(year, month - 1, day);
-      }
-      return new Date(value);
-    };
-    const baseDate = parseFlexibleDate(rangeMatch ? rangeMatch[1] : event.deadline);
-    const endDate = parseFlexibleDate(rangeMatch ? rangeMatch[2] : event.deadline);
+    const dateFields = resolveEventDateFields(event);
     setEditingEventId(event.id);
     setForm({
       title: event.title || '',
@@ -539,15 +562,10 @@ export function useAdminScrutinyEvents() {
     setNotificationEmails(parseNotificationEmailsFromApi(event));
     setResponsibles((event.responsible || []).map((x) => x.trim()).filter(Boolean));
     setSelectedGroups((event.group || []).filter((group) => audienceKeySet.has(group)));
-    setDateRange([{ startDate: baseDate, endDate: endDate, key: 'selection' }]);
-    setUseDateInterval(Boolean(rangeMatch));
-    const eventSingleDates = normalizeUniqueSingleDates(
-      Array.isArray(event.deadlines) && event.deadlines.length > 0
-        ? event.deadlines
-        : [toSqlDateLocal(baseDate)]
-    );
-    setSingleDeadlineDates(eventSingleDates);
-    setSingleDeadlineDateInput(eventSingleDates[0] || toSqlDateLocal(baseDate));
+    setDateRange([{ startDate: dateFields.baseDate, endDate: dateFields.endDate, key: 'selection' }]);
+    setUseDateInterval(dateFields.isRangeLike);
+    setSingleDeadlineDates(dateFields.singleDates);
+    setSingleDeadlineDateInput(dateFields.singleDates[0] || toSqlDateLocal(dateFields.baseDate));
     const existingRegulations = (event.regulations || []).map((r) => ({
       id: r.id,
       documentId: r.documentId || null,
@@ -708,21 +726,19 @@ export function useAdminScrutinyEvents() {
   };
 
   const handleUseDateIntervalChange = (checked: boolean) => {
+    // Intervalul și datele individuale suplimentare sunt independente — comutarea nu mai
+    // șterge lista de date individuale, ca să poată fi completate ambele (eveniment MIXED).
     setUseDateInterval(checked);
     setValidation((prev) => ({ ...prev, period: false }));
-    if (checked) {
-      // Interval mode must keep only interval data.
-      setSingleDeadlineDates([]);
-      setSingleDeadlineDateInput('');
-      return;
-    }
+    if (checked) return;
 
-    // Leaving interval mode: clear interval values and keep one selected day in single-date input.
+    // La ieșirea din modul interval, păstrăm ultima zi selectată ca sugestie în câmpul de dată.
     const selectedRange = dateRange[0];
     const selectedDate = selectedRange?.endDate ?? selectedRange?.startDate ?? null;
     setDateRange([{ startDate: new Date(), endDate: new Date(), key: 'selection' }]);
-    setSingleDeadlineDates([]);
-    setSingleDeadlineDateInput(selectedDate ? toSqlDateLocal(selectedDate) : '');
+    if (!singleDeadlineDateInput && selectedDate) {
+      setSingleDeadlineDateInput(toSqlDateLocal(selectedDate));
+    }
   };
 
   const handleAdminMenuChange = useCallback(

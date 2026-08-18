@@ -28,11 +28,12 @@ public class DeadlineNotificationProcessor(
         {
             try
             {
-                if (deadline.Type == Deadline.TypeMultiple)
+                if (deadline.Type is Deadline.TypeMultiple or Deadline.TypeMixed)
                 {
                     sentCount += await SendMultipleDateNotificationsAsync(deadline, localToday, ct);
                 }
-                else if (await TrySendSingleOrRangeNotificationAsync(deadline, localToday, ct))
+
+                if (deadline.Type != Deadline.TypeMultiple && await TrySendSingleOrRangeNotificationAsync(deadline, localToday, ct))
                 {
                     sentCount++;
                 }
@@ -91,7 +92,7 @@ public class DeadlineNotificationProcessor(
             return false;
         }
 
-        var dateLabel = deadline.Type == Deadline.TypeRange && deadline.StartDate.HasValue && deadline.EndDate.HasValue
+        var dateLabel = deadline.Type is Deadline.TypeRange or Deadline.TypeMixed && deadline.StartDate.HasValue && deadline.EndDate.HasValue
             ? $"{FormatDateLabel(deadline.StartDate.Value)} – {FormatDateLabel(deadline.EndDate.Value)}"
             : FormatDateLabel(triggerDate);
 

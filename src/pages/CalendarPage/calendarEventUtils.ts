@@ -1,7 +1,7 @@
 import { addDays, format, parseISO } from 'date-fns';
 import { ro } from 'date-fns/locale';
 import type { EventInput } from '@fullcalendar/core';
-import type { EventDeadlineProps } from '../../interface';
+import type { EventDeadlineProps, Regulation } from '../../interface';
 
 export const CALENDAR_MOBILE_BREAKPOINT_PX = 768;
 
@@ -50,6 +50,12 @@ export function eventInputToDeadlineProps(event: EventInput): EventDeadlineProps
   const group = Array.isArray(ext.group)
     ? ext.group.map((item) => String(item ?? '').trim()).filter(Boolean)
     : undefined;
+  const regulations = Array.isArray(ext.regulations)
+    ? (ext.regulations as Regulation[])
+    : undefined;
+  const extraDates = Array.isArray(ext.extraDates)
+    ? ext.extraDates.map((item) => String(item ?? '').trim()).filter(Boolean)
+    : undefined;
 
   const start = eventInputToIsoDate(event.start);
   let deadline = start;
@@ -75,6 +81,8 @@ export function eventInputToDeadlineProps(event: EventInput): EventDeadlineProps
     additional_info: additionalInfo,
     responsible: responsible?.length ? responsible : undefined,
     group: group?.length ? group : undefined,
+    regulations: regulations?.length ? regulations : undefined,
+    extraDates: extraDates?.length ? extraDates : undefined,
   };
 }
 

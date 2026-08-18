@@ -200,58 +200,64 @@ export function AdminScrutinyEventFormOffcanvas({
                           }}
                         />
                       </div>
-                    ) : (
-                      <>
-                        <div className="admin-event-form__single-date-row">
-                          <InputDate
-                            id="admin-scrutiny-event-single-deadline-date"
-                            isoValue={singleDeadlineDateInput}
-                            onIsoChange={(iso) => {
-                              setSingleDeadlineDateInput(iso);
-                              setValidation((prev) => ({ ...prev, period: false }));
-                            }}
-                            size="md"
-                            wrapClassName="w-100 min-w-0"
-                            textInputClassName={validation.period ? 'is-invalid' : ''}
-                            pickerAriaLabel="Selectează data realizării"
-                            pickerTitle="Selectează data"
-                          />
-                          <button
-                            type="button"
-                            className="btn btn-outline-primary admin-event-form__inline-add-btn"
-                            onClick={() => {
-                              if (!singleDeadlineDateInput) return;
-                              setSingleDeadlineDates((prev) =>
-                                normalizeUniqueSingleDates([...prev, singleDeadlineDateInput]),
-                              );
-                              setValidation((prev) => ({ ...prev, period: false }));
-                            }}
-                          >
-                            Adaugă dată
-                          </button>
-                        </div>
-                        <div className="admin-event-form__single-date-list">
-                          {normalizeUniqueSingleDates(singleDeadlineDates).map((date) => {
-                            const dateLabel = normalizeDateLabel(date);
-                            return (
-                              <span key={date} className="admin-event-form__single-date-chip">
-                                <span className="admin-event-form__single-date-chip-label">{dateLabel}</span>
-                                <button
-                                  type="button"
-                                  className="admin-event-form__single-date-chip-remove"
-                                  onClick={() =>
-                                    setSingleDeadlineDates((prev) => prev.filter((item) => item !== date))
-                                  }
-                                  aria-label={`Elimină data ${dateLabel}`}
-                                >
-                                  <i className="bi bi-x-lg" aria-hidden="true" />
-                                </button>
-                              </span>
+                    ) : null}
+                    {/* Datele individuale sunt independente de interval — pot completa intervalul
+                        (eveniment MIXED) sau pot fi singura sursă a perioadei (eveniment MULTIPLE). */}
+                    <div className={useDateInterval ? 'mt-3' : ''}>
+                      {useDateInterval ? (
+                        <label className="form-label small text-secondary mb-1">
+                          Date individuale suplimentare (opțional)
+                        </label>
+                      ) : null}
+                      <div className="admin-event-form__single-date-row">
+                        <InputDate
+                          id="admin-scrutiny-event-single-deadline-date"
+                          isoValue={singleDeadlineDateInput}
+                          onIsoChange={(iso) => {
+                            setSingleDeadlineDateInput(iso);
+                            setValidation((prev) => ({ ...prev, period: false }));
+                          }}
+                          size="md"
+                          wrapClassName="w-100 min-w-0"
+                          textInputClassName={!useDateInterval && validation.period ? 'is-invalid' : ''}
+                          pickerAriaLabel="Selectează data realizării"
+                          pickerTitle="Selectează data"
+                        />
+                        <button
+                          type="button"
+                          className="btn btn-outline-primary admin-event-form__inline-add-btn"
+                          onClick={() => {
+                            if (!singleDeadlineDateInput) return;
+                            setSingleDeadlineDates((prev) =>
+                              normalizeUniqueSingleDates([...prev, singleDeadlineDateInput]),
                             );
-                          })}
-                        </div>
-                      </>
-                    )}
+                            setValidation((prev) => ({ ...prev, period: false }));
+                          }}
+                        >
+                          Adaugă dată
+                        </button>
+                      </div>
+                      <div className="admin-event-form__single-date-list">
+                        {normalizeUniqueSingleDates(singleDeadlineDates).map((date) => {
+                          const dateLabel = normalizeDateLabel(date);
+                          return (
+                            <span key={date} className="admin-event-form__single-date-chip">
+                              <span className="admin-event-form__single-date-chip-label">{dateLabel}</span>
+                              <button
+                                type="button"
+                                className="admin-event-form__single-date-chip-remove"
+                                onClick={() =>
+                                  setSingleDeadlineDates((prev) => prev.filter((item) => item !== date))
+                                }
+                                aria-label={`Elimină data ${dateLabel}`}
+                              >
+                                <i className="bi bi-x-lg" aria-hidden="true" />
+                              </button>
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div className="mt-3">

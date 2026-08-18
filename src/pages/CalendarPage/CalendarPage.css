@@ -349,8 +349,11 @@
    subtil, dot albastru pe stânga, text negru.
    ============================================================ */
 
+/* Fără max-width aici: FullCalendar întinde evenimentele multi-zi via left/right negativ
+   (nu prin width), iar un max-width: 100% ar limita bara la lățimea unei singure celule,
+   anulând întinderea pe toate zilele acoperite de interval. */
 .calendar-page .fc .fc-daygrid-event-harness {
-  max-width: 100%;
+  max-width: none;
 }
 
 .calendar-page .fc .fc-daygrid-event,

@@ -178,6 +178,18 @@
   line-height: 1.5;
 }
 
+.modal-deadline__extra-dates {
+  margin: 0.4rem 0 0;
+  font-size: 0.9rem;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.modal-deadline__extra-dates-label {
+  font-weight: 600;
+  color: #1f2937;
+}
+
 /* ---------- Sections list ---------- */
 
 .modal-sections {

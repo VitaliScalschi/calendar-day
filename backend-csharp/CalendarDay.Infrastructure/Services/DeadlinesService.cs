@@ -106,17 +106,21 @@ public class DeadlinesService(CalendarDayDbContext db) : IDeadlinesService
 
     private static (string Type, DateOnly? StartDate, DateOnly? EndDate, IReadOnlyList<DateOnly> MultipleDates) ParseInputShape(string deadline, IReadOnlyCollection<string> deadlines)
     {
+        var raw = (deadline ?? string.Empty).Trim();
+        var hasRange = TryParseRange(raw, out var rangeStart, out var rangeEnd);
+
         if (deadlines.Count > 0)
         {
             var parsedDates = deadlines.Select(ParseSingleDate).Distinct().OrderBy(x => x).ToList();
-            return (Deadline.TypeMultiple, null, null, parsedDates);
+            return hasRange
+                ? (Deadline.TypeMixed, rangeStart, rangeEnd, parsedDates)
+                : (Deadline.TypeMultiple, null, null, parsedDates);
         }
 
-        var raw = (deadline ?? string.Empty).Trim();
         if (string.IsNullOrWhiteSpace(raw))
             throw new ArgumentException("Deadline is required.");
 
-        if (TryParseRange(raw, out var rangeStart, out var rangeEnd))
+        if (hasRange)
         {
             return (Deadline.TypeRange, rangeStart, rangeEnd, []);
         }
@@ -127,7 +131,7 @@ public class DeadlinesService(CalendarDayDbContext db) : IDeadlinesService
 
     private static List<DateOnly> NormalizeEventDates(Deadline deadline)
     {
-        if (deadline.Type == Deadline.TypeRange && deadline.StartDate.HasValue && deadline.EndDate.HasValue)
+        if (deadline.Type is Deadline.TypeRange or Deadline.TypeMixed && deadline.StartDate.HasValue && deadline.EndDate.HasValue)
         {
             var dates = new List<DateOnly>();
             var cursor = deadline.StartDate.Value;
@@ -136,13 +140,32 @@ public class DeadlinesService(CalendarDayDbContext db) : IDeadlinesService
                 dates.Add(cursor);
                 cursor = cursor.AddDays(1);
             }
-            return dates;
+            if (deadline.Type == Deadline.TypeMixed)
+            {
+                dates.AddRange(deadline.Dates.Select(d => d.EventDate));
+            }
+            return dates.Distinct().OrderBy(x => x).ToList();
         }
 
         var normalized = deadline.Dates.Select(d => d.EventDate).Distinct().OrderBy(x => x).ToList();
         if (normalized.Count > 0) return normalized;
         if (deadline.StartDate.HasValue) return [deadline.StartDate.Value];
         return [deadline.DeadlineDate];
+    }
+
+    private static DateOnly ComputeNormalizedDeadline(
+        (string Type, DateOnly? StartDate, DateOnly? EndDate, IReadOnlyList<DateOnly> MultipleDates) shape,
+        string rawDeadline)
+    {
+        if (shape.Type == Deadline.TypeMultiple && shape.MultipleDates.Count > 0)
+            return shape.MultipleDates.Min();
+
+        if (shape.Type == Deadline.TypeMixed && shape.StartDate.HasValue)
+            return shape.MultipleDates.Count > 0
+                ? new[] { shape.StartDate.Value }.Concat(shape.MultipleDates).Min()
+                : shape.StartDate.Value;
+
+        return shape.StartDate ?? ParseSingleDate(rawDeadline);
     }
 
     private static List<DeadlineDate> BuildDeadlineDateEntities(Guid deadlineId, IEnumerable<DateOnly> dates)
@@ -178,6 +201,7 @@ public class DeadlinesService(CalendarDayDbContext db) : IDeadlinesService
             q = q.Where(d =>
                 (d.Type == Deadline.TypeRange && (d.EndDate ?? d.DeadlineDate) >= from) ||
                 (d.Type == Deadline.TypeMultiple && d.Dates.Any(x => x.EventDate >= from)) ||
+                (d.Type == Deadline.TypeMixed && ((d.EndDate ?? d.DeadlineDate) >= from || d.Dates.Any(x => x.EventDate >= from))) ||
                 ((d.Type == Deadline.TypeSingle || string.IsNullOrWhiteSpace(d.Type)) && (d.StartDate ?? d.DeadlineDate) >= from));
         }
         if (query.To.HasValue)
@@ -186,6 +210,7 @@ public class DeadlinesService(CalendarDayDbContext db) : IDeadlinesService
             q = q.Where(d =>
                 (d.Type == Deadline.TypeRange && (d.StartDate ?? d.DeadlineDate) <= to) ||
                 (d.Type == Deadline.TypeMultiple && d.Dates.Any(x => x.EventDate <= to)) ||
+                (d.Type == Deadline.TypeMixed && ((d.StartDate ?? d.DeadlineDate) <= to || d.Dates.Any(x => x.EventDate <= to))) ||
                 ((d.Type == Deadline.TypeSingle || string.IsNullOrWhiteSpace(d.Type)) && (d.EndDate ?? d.DeadlineDate) <= to));
         }
 
@@ -228,15 +253,13 @@ public class DeadlinesService(CalendarDayDbContext db) : IDeadlinesService
         }
 
         var shape = ParseInputShape(dto.Deadline, dto.Deadlines);
-        var normalizedDeadline = shape.Type == Deadline.TypeMultiple && shape.MultipleDates.Count > 0
-            ? shape.MultipleDates.Min()
-            : (shape.StartDate ?? ParseSingleDate(dto.Deadline));
+        var normalizedDeadline = ComputeNormalizedDeadline(shape, dto.Deadline);
         var entity = new Deadline
         {
             Id = Guid.NewGuid(),
             ElectionId = dto.ElectionId,
             Title = dto.Title.Trim(),
-            AdditionalInfo = shape.Type == Deadline.TypeRange ? MergeAdditionalInfoWithRange(dto.AdditionalInfo, dto.Deadline) : RemoveRangeMeta(dto.AdditionalInfo),
+            AdditionalInfo = shape.Type is Deadline.TypeRange or Deadline.TypeMixed ? MergeAdditionalInfoWithRange(dto.AdditionalInfo, dto.Deadline) : RemoveRangeMeta(dto.AdditionalInfo),
             Type = shape.Type,
             StartDate = shape.StartDate,
             EndDate = shape.EndDate,
@@ -275,18 +298,16 @@ public class DeadlinesService(CalendarDayDbContext db) : IDeadlinesService
         var previousType = entity.Type;
         var previousStart = entity.StartDate;
         var previousEnd = entity.EndDate;
-        var previousMultipleDates = entity.Type == Deadline.TypeMultiple
+        var previousMultipleDates = entity.Type is Deadline.TypeMultiple or Deadline.TypeMixed
             ? await db.DeadlineDates.Where(x => x.DeadlineId == entity.Id).Select(x => x.EventDate).OrderBy(x => x).ToListAsync(ct)
             : [];
         entity.ElectionId = dto.ElectionId;
         entity.Title = dto.Title.Trim();
-        entity.AdditionalInfo = shape.Type == Deadline.TypeRange ? MergeAdditionalInfoWithRange(dto.AdditionalInfo, dto.Deadline) : RemoveRangeMeta(dto.AdditionalInfo);
+        entity.AdditionalInfo = shape.Type is Deadline.TypeRange or Deadline.TypeMixed ? MergeAdditionalInfoWithRange(dto.AdditionalInfo, dto.Deadline) : RemoveRangeMeta(dto.AdditionalInfo);
         entity.Type = shape.Type;
         entity.StartDate = shape.StartDate;
         entity.EndDate = shape.EndDate;
-        entity.DeadlineDate = shape.Type == Deadline.TypeMultiple && shape.MultipleDates.Count > 0
-            ? shape.MultipleDates.Min()
-            : (shape.StartDate ?? ParseSingleDate(dto.Deadline));
+        entity.DeadlineDate = ComputeNormalizedDeadline(shape, dto.Deadline);
         entity.Description = dto.Description.Trim();
         var serializedEmails = DeadlineNotificationEmails.Serialize(dto.NotificationEmails);
         if (!string.Equals(entity.NotificationEmail, serializedEmails, StringComparison.Ordinal))
@@ -300,7 +321,7 @@ public class DeadlinesService(CalendarDayDbContext db) : IDeadlinesService
         var periodChanged = shape.Type != previousType ||
             shape.StartDate != previousStart ||
             shape.EndDate != previousEnd ||
-            (shape.Type == Deadline.TypeMultiple && !shape.MultipleDates.SequenceEqual(previousMultipleDates));
+            (shape.Type is Deadline.TypeMultiple or Deadline.TypeMixed && !shape.MultipleDates.SequenceEqual(previousMultipleDates));
         if (periodChanged)
         {
             entity.NotificationSentOn = null;
@@ -397,7 +418,7 @@ public class DeadlinesService(CalendarDayDbContext db) : IDeadlinesService
             .Include(d => d.Regulations)
             .Where(d =>
                 deadlineIdsWithUpcomingDates.Contains(d.Id) ||
-                (d.Type == Deadline.TypeRange && (d.StartDate ?? d.DeadlineDate) <= limit && (d.EndDate ?? d.DeadlineDate) >= today) ||
+                ((d.Type == Deadline.TypeRange || d.Type == Deadline.TypeMixed) && (d.StartDate ?? d.DeadlineDate) <= limit && (d.EndDate ?? d.DeadlineDate) >= today) ||
                 ((d.Type == Deadline.TypeSingle || string.IsNullOrWhiteSpace(d.Type)) && (d.StartDate ?? d.DeadlineDate) >= today && (d.StartDate ?? d.DeadlineDate) <= limit))
             .OrderBy(d => d.DeadlineDate)
             .ToListAsync(ct);
@@ -420,7 +441,7 @@ public class DeadlinesService(CalendarDayDbContext db) : IDeadlinesService
             .Include(d => d.Regulations)
             .Where(d =>
                 deadlineIdsWithOverdueDates.Contains(d.Id) ||
-                (d.Type == Deadline.TypeRange && (d.EndDate ?? d.DeadlineDate) < today) ||
+                ((d.Type == Deadline.TypeRange || d.Type == Deadline.TypeMixed) && (d.EndDate ?? d.DeadlineDate) < today) ||
                 ((d.Type == Deadline.TypeSingle || string.IsNullOrWhiteSpace(d.Type)) && (d.EndDate ?? d.DeadlineDate) < today))
             .OrderByDescending(d => d.DeadlineDate)
             .ToListAsync(ct);

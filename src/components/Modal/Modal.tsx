@@ -1,5 +1,6 @@
 import { useEffect, useMemo, type ReactNode } from 'react'
 import { calculateDaysRemaining, formatDateTime } from '../../utils/dateUtils'
+import { normalizeDateLabel } from '../../shared/utils/deadlineDate'
 import { FALLBACK_TARGET_GROUP_OPTIONS } from '../../utils/electionFilters'
 import type { ModalProps } from '../../interface/index'
 import { API_BASE_URL } from '../../shared/services/apiClient'
@@ -139,6 +140,12 @@ function Modal({ isOpen, onClose, deadline }: ModalProps) {
                 </span>
                 {deadline.additional_info && (
                   <p className="modal-deadline__additional">{deadline.additional_info}</p>
+                )}
+                {deadline.extraDates && deadline.extraDates.length > 0 && (
+                  <div className="modal-deadline__extra-dates">
+                    <span className="modal-deadline__extra-dates-label">Date individuale suplimentare:</span>{' '}
+                    {deadline.extraDates.map(normalizeDateLabel).join(', ')}
+                  </div>
                 )}
               </div>
             </ModalSection>

@@ -6,7 +6,7 @@ export type ApiElection = {
 export type ApiDeadline = {
   id: string;
   title: string;
-  type?: 'RANGE' | 'MULTIPLE' | 'SINGLE';
+  type?: 'RANGE' | 'MULTIPLE' | 'SINGLE' | 'MIXED';
   startDate?: string | null;
   endDate?: string | null;
   deadline: string;

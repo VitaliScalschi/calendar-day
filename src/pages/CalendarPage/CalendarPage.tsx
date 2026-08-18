@@ -11,7 +11,7 @@ import type { DatesSetArg, EventClickArg, EventContentArg, EventInput } from '@f
 import { addDays, format, parseISO } from 'date-fns';
 import * as XLSX from 'xlsx';
 import { Header, Footer, InputSelect, type InputSelectOption, Modal, ScrollToTop, SearchBar, Button } from '../../components';
-import type { EventDeadlineProps } from '../../interface';
+import type { EventDeadlineProps, Regulation } from '../../interface';
 import { useCalendarDeadlinesQuery } from '../../features/elections/hooks/useCalendarDeadlinesQuery';
 import { mapGroupedDeadlinesToCalendarEvents } from '../../shared/utils/mapGroupedDeadlinesToCalendarEvents';
 import './CalendarPage.css';
@@ -124,6 +124,10 @@ function eventClickToDeadlineProps(info: EventClickArg): EventDeadlineProps {
   const additionalInfo = String(ext.additionalInfo ?? '').trim() || undefined;
   const responsible = normalizeStringArray(ext.responsible);
   const group = normalizeStringArray(ext.group);
+  const regulations = Array.isArray(ext.regulations)
+    ? (ext.regulations as Regulation[])
+    : undefined;
+  const extraDates = normalizeStringArray(ext.extraDates);
 
   const title =
     scrutiny && termen ? `${scrutiny} · ${termen}` : termen || scrutiny || 'Termen';
@@ -137,6 +141,8 @@ function eventClickToDeadlineProps(info: EventClickArg): EventDeadlineProps {
     additional_info: additionalInfo,
     responsible,
     group,
+    regulations: regulations?.length ? regulations : undefined,
+    extraDates,
   };
 }
 

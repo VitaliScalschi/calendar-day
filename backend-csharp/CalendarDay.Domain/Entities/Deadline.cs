@@ -5,6 +5,8 @@ public class Deadline
     public const string TypeSingle = "SINGLE";
     public const string TypeMultiple = "MULTIPLE";
     public const string TypeRange = "RANGE";
+    /// <summary>Interval de realizare (StartDate/EndDate) plus date individuale suplimentare (Dates).</summary>
+    public const string TypeMixed = "MIXED";
 
     public Guid Id { get; set; }
     public Guid ElectionId { get; set; }

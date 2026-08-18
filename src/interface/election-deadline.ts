@@ -15,6 +15,8 @@ export interface EventDeadlineProps {
   responsible?: string[];
   description?: string;
   regulations?: Regulation[];
+  /** Date individuale suplimentare, în plus față de intervalul din `deadline` (evenimente MIXED). */
+  extraDates?: string[];
   group?: string[];
   additional_info?: string;
   onClick?: () => void;
