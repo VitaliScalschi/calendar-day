@@ -5,8 +5,6 @@ namespace CalendarDay.Application.Validation;
 
 public class CreateDeadlineDtoValidator : AbstractValidator<CreateDeadlineDto>
 {
-    private static readonly string[] AllowedGroups = ["political", "political_organ", "public", "independent_candidates", "observers", "public_authorities"];
-
     public CreateDeadlineDtoValidator()
     {
         RuleFor(x => x.ElectionId).NotEmpty();
@@ -22,10 +20,7 @@ public class CreateDeadlineDtoValidator : AbstractValidator<CreateDeadlineDto>
         RuleFor(x => x.NotificationEmails).Must(list => list.Count <= 50)
             .WithMessage("Maximum 50 notification emails are allowed.");
         RuleForEach(x => x.Responsible).NotEmpty();
-        RuleForEach(x => x.Group)
-            .NotEmpty()
-            .Must(group => AllowedGroups.Contains(group))
-            .WithMessage("Group must be one of: political, political_organ, public, independent_candidates, observers, public_authorities.");
+        RuleForEach(x => x.Group).NotEmpty();
     }
 }
 
