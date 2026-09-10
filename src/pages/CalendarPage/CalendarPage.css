@@ -8,18 +8,25 @@
   max-width: min(100vw - 1rem, 32rem);
 }
 
-/* Deschidere dinamică pe partea opusă locului unde e linkul +N */
-.calendar-page.calendar-page--more-popover-left .fc-direction-ltr .fc-more-popover {
-  transform: translateX(calc(-100% + 1.25rem));
+/* Deschidere dinamică în partea opusă locului unde e linkul +N (orizontal) și,
+   dacă nu mai e loc pe verticală până la capătul ecranului, deasupra lui în loc
+   de dedesubt — ca să nu mai apară scroll forțat când dai click aproape de
+   finalul paginii. */
+.calendar-page .fc-direction-ltr .fc-more-popover {
+  transform: translate(var(--more-popover-tx, 0), var(--more-popover-ty, 0));
 }
 
-.calendar-page.calendar-page--more-popover-right .fc-direction-ltr .fc-more-popover {
-  transform: none;
+.calendar-page.calendar-page--more-popover-left {
+  --more-popover-tx: calc(-100% + 1.25rem);
+}
+
+.calendar-page.calendar-page--more-popover-up {
+  --more-popover-ty: calc(-100% - 1.25rem);
 }
 
 @media (max-width: 768px) {
   .calendar-page .fc-direction-ltr .fc-more-popover {
-    transform: none;
+    --more-popover-tx: 0;
   }
 }
 
