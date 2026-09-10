@@ -23,6 +23,16 @@
   }
 }
 
+/* Vizualizarea „An” (multiMonthYear): FullCalendar îi setează intern un scroll propriu
+   (overflow-y: auto) cu o înălțime mai mică decât conținutul real (12 luni), ceea ce
+   produce un scroll dublu — unul al paginii, altul, ascuns, în interiorul cardului.
+   Forțăm elementul să crească natural la înălțimea conținutului; pagina rămâne singurul
+   loc care scrollează. */
+.calendar-page .fc .fc-multimonth {
+  overflow: visible !important;
+  height: auto !important;
+}
+
 /* „+N termene”: lista are înălțime limitată și derulează intern, ca popover-ul să nu depășească ecranul */
 .calendar-page .fc .fc-more-popover .fc-popover-body {
   max-height: min(60vh, 420px);
@@ -351,11 +361,8 @@
    subtil, dot albastru pe stânga, text negru.
    ============================================================ */
 
-/* Fără max-width aici: FullCalendar întinde evenimentele multi-zi via left/right negativ
-   (nu prin width), iar un max-width: 100% ar limita bara la lățimea unei singure celule,
-   anulând întinderea pe toate zilele acoperite de interval. */
 .calendar-page .fc .fc-daygrid-event-harness {
-  max-width: none;
+  max-width: 100%;
 }
 
 .calendar-page .fc .fc-daygrid-event,
