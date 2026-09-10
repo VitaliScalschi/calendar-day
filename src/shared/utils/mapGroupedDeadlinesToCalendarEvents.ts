@@ -40,13 +40,6 @@ const calendarExpiredEventColors = {
   textColor: '#842029',
 } as const;
 
-/** Roșu plin — iese în evidență față de evenimentele obișnuite (albastru pal) și cele expirate (roșu pal). */
-const calendarElectionDayColors = {
-  backgroundColor: '#dc3545',
-  borderColor: '#b02a37',
-  textColor: '#ffffff',
-} as const;
-
 function getTodayIso(): string {
   return format(new Date(), 'yyyy-MM-dd');
 }
@@ -73,6 +66,8 @@ export function mapGroupedDeadlinesToCalendarEvents(groups: GroupedElectionBlock
       const startIso = isoDay(d.startDate);
       const endIso = isoDay(d.endDate);
 
+      const isElectionDay = isElectionDayTitle(d.title);
+
       const baseExtended = {
         electionId,
         electionTitle,
@@ -81,9 +76,8 @@ export function mapGroupedDeadlinesToCalendarEvents(groups: GroupedElectionBlock
         additionalInfo: d.additionalInfo ?? undefined,
         responsible: d.responsible ?? undefined,
         group: d.group ?? undefined,
+        isElectionDay,
       };
-
-      const isElectionDay = isElectionDayTitle(d.title);
 
       if (type === 'RANGE' && startIso && endIso) {
         let endExclusive: string;
@@ -93,11 +87,7 @@ export function mapGroupedDeadlinesToCalendarEvents(groups: GroupedElectionBlock
           continue;
         }
         const isExpired = endIso < todayIso;
-        const colors = isElectionDay
-          ? calendarElectionDayColors
-          : isExpired
-            ? calendarExpiredEventColors
-            : calendarPrimaryEventColors;
+        const colors = isExpired ? calendarExpiredEventColors : calendarPrimaryEventColors;
         out.push({
           id: d.id,
           title: d.title,
@@ -129,11 +119,7 @@ export function mapGroupedDeadlinesToCalendarEvents(groups: GroupedElectionBlock
       for (let i = 0; i < dayStarts.length; i += 1) {
         const start = dayStarts[i];
         const isExpired = start < todayIso;
-        const colors = isElectionDay
-          ? calendarElectionDayColors
-          : isExpired
-            ? calendarExpiredEventColors
-            : calendarPrimaryEventColors;
+        const colors = isExpired ? calendarExpiredEventColors : calendarPrimaryEventColors;
         out.push({
           id: dayStarts.length > 1 ? `${d.id}_${start}_${i}` : d.id,
           title: d.title,

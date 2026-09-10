@@ -213,6 +213,22 @@ function CalendarPage() {
     return mapGroupedDeadlinesToCalendarEvents([block]);
   }, [grouped, filterElectionId]);
 
+  /** Zilele „Ziua alegerilor” — celula din grilă e evidențiată, nu doar eticheta evenimentului. */
+  const electionDayDates = useMemo(() => {
+    const dates = new Set<string>();
+    for (const e of events) {
+      if (!(e.extendedProps as Record<string, unknown> | undefined)?.isElectionDay) continue;
+      const iso = eventInputToIsoDate(e.start);
+      if (iso) dates.add(iso);
+    }
+    return dates;
+  }, [events]);
+
+  const dayCellClassNames = useCallback(
+    (arg: { date: Date }) => (electionDayDates.has(format(arg.date, 'yyyy-MM-dd')) ? ['calendar-day-election'] : []),
+    [electionDayDates],
+  );
+
   const displayedEvents = useMemo(() => {
     if (calendarViewType !== 'listMonth') return events;
     return events.filter((e) => matchesListSearchQuery(e, listSearchQuery));
@@ -357,6 +373,7 @@ function CalendarPage() {
                 datesSet={handleDatesSet}
                 eventClick={handleEventClick}
                 eventContent={renderEventContent}
+                dayCellClassNames={dayCellClassNames}
                 dayMaxEvents={3}
                 moreLinkClick="popover"
                 moreLinkText={(n) => `+${n} evenimente`}
@@ -377,7 +394,7 @@ function CalendarPage() {
                     <span className="small"> - evenimente expirate</span>
                   </li>
                   <li className="calendar-page__legend-item d-inline-flex align-items-center gap-2">
-                    <i className="bi bi-star-fill calendar-page__legend-star--election-day" aria-hidden="true" />
+                    <span className="calendar-page__legend-swatch calendar-page__legend-swatch--election-day" aria-hidden />
                     <span className="small"> - ziua alegerilor</span>
                   </li>
                 </ul>
