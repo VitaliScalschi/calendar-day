@@ -28,9 +28,11 @@
    produce un scroll dublu — unul al paginii, altul, ascuns, în interiorul cardului.
    Forțăm elementul să crească natural la înălțimea conținutului; pagina rămâne singurul
    loc care scrollează. */
-.calendar-page .fc .fc-multimonth {
+.calendar-page .fc .fc-multimonth,
+.calendar-page .fc .fc-view-harness {
   overflow: visible !important;
   height: auto !important;
+  min-height: 0 !important;
 }
 
 /* „+N termene”: lista are înălțime limitată și derulează intern, ca popover-ul să nu depășească ecranul */
