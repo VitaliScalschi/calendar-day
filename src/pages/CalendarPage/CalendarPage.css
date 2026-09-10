@@ -358,9 +358,12 @@
    subtil, dot albastru pe stânga, text negru.
    ============================================================ */
 
-.calendar-page .fc .fc-daygrid-event-harness {
-  max-width: 100%;
-}
+/* Notă: NU punem max-width:100% pe .fc-daygrid-event-harness — FullCalendar
+   poziționează absolut (left/right) aceste "harness"-uri ca să întindă un
+   eveniment pe mai multe zile (RANGE) pe toată lățimea săptămânii; un
+   max-width:100% relativ la o singură celulă le taie înapoi la o zi, iar
+   evenimentul multi-zi nu mai apare deloc pe zilele următoare (doar
+   „+N evenimente”). */
 
 .calendar-page .fc .fc-daygrid-event,
 .calendar-page .fc .fc-multimonth .fc-daygrid-event,
