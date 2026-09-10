@@ -30,3 +30,9 @@ dist-ssr
 # SMTP / secrets locale (nu comite parole)
 backend-csharp/CalendarDay.Api/appsettings.Development.local.json
 
+# Certificate SSL si backup-uri baza de date (nu se comit niciodata)
+*.pem
+*.dump
+backup_*.sql
+calendar_day_backup.dump
+
