@@ -23,18 +23,6 @@
   }
 }
 
-/* Vizualizarea „An” (multiMonthYear): FullCalendar îi setează intern un scroll propriu
-   (overflow-y: auto) cu o înălțime mai mică decât conținutul real (12 luni), ceea ce
-   produce un scroll dublu — unul al paginii, altul, ascuns, în interiorul cardului.
-   Forțăm elementul să crească natural la înălțimea conținutului; pagina rămâne singurul
-   loc care scrollează. */
-.calendar-page .fc .fc-multimonth,
-.calendar-page .fc .fc-view-harness {
-  overflow: visible !important;
-  height: auto !important;
-  min-height: 0 !important;
-}
-
 /* „+N termene”: lista are înălțime limitată și derulează intern, ca popover-ul să nu depășească ecranul */
 .calendar-page .fc .fc-more-popover .fc-popover-body {
   max-height: min(60vh, 420px);
@@ -377,6 +365,18 @@
   margin: 0.15rem !important;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
   transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Vizualizarea „An” (multiMonthYear): celulele zilelor sunt foarte înguste, iar un titlu
+   lung, cu `white-space: normal`, se poate întinde pe zeci de linii — inclusiv în
+   copiile invizibile (visibility: hidden) pe care FullCalendar le randează intern
+   pentru a calcula câte evenimente încap înainte de „+N evenimente”. Fiindcă
+   visibility:hidden păstrează spațiul ocupat, o astfel de copie umflată tot împinge
+   în jos restul paginii, producând scroll în plus, disproporționat față de conținut.
+   Limităm înălțimea cutiei unui eveniment în acest view, cu overflow ascuns. */
+.calendar-page .fc .fc-multimonth .fc-daygrid-event {
+  max-height: 2.6rem;
+  overflow: hidden;
 }
 
 .calendar-page .fc .fc-daygrid-event:not(.fc-event-selected),
