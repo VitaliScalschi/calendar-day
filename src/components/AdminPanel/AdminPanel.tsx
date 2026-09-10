@@ -36,6 +36,8 @@ type ScrutinyForm = {
   title: string;
   electionDay: string;
   isActive: boolean;
+  /** Afișează scrutinul în Arhiva evenimentelor, chiar dacă e încă activ. */
+  showInArchive: boolean;
   /** Id-uri `election_types` ca string (chei pentru MultiCheckboxDropdown). */
   electionTypeIds: string[];
 };
@@ -115,6 +117,7 @@ function AdminPanel() {
     title: '',
     electionDay: '',
     isActive: true,
+    showInArchive: false,
     electionTypeIds: [],
   });
   const [scrutinyDocumentFile, setScrutinyDocumentFile] = useState<File | null>(null);
@@ -275,7 +278,7 @@ function AdminPanel() {
 
   const openCreateModal = () => {
     setFormError('');
-    setScrutinyForm({ title: '', electionDay: '', isActive: true, electionTypeIds: [] });
+    setScrutinyForm({ title: '', electionDay: '', isActive: true, showInArchive: false, electionTypeIds: [] });
     setScrutinyDocumentFile(null);
     setExistingScrutinyDocument(null);
     setIsModalOpen(true);
@@ -290,6 +293,7 @@ function AdminPanel() {
       title: election.title,
       electionDay: election.eday,
       isActive: election.isActive,
+      showInArchive: election.showInArchive,
       electionTypeIds: (election.electionTypeIds ?? []).map(String),
     });
     setScrutinyDocumentFile(null);
@@ -330,6 +334,7 @@ function AdminPanel() {
       const payload = {
         title: scrutinyForm.title.trim(),
         isActive: scrutinyForm.isActive,
+        showInArchive: scrutinyForm.showInArchive,
         eday: scrutinyForm.electionDay,
         electionTypeIds,
       };
@@ -677,6 +682,23 @@ function AdminPanel() {
                         </RadioButton>
                       </div>
                     ))}
+                  </div>
+
+                  <div className="mb-3 mt-3">
+                    <div className="form-check">
+                      <input
+                        id="scrutiny-show-in-archive"
+                        type="checkbox"
+                        className="form-check-input"
+                        checked={scrutinyForm.showInArchive}
+                        onChange={(e) =>
+                          setScrutinyForm((prev) => ({ ...prev, showInArchive: e.target.checked }))
+                        }
+                      />
+                      <label className="form-check-label" htmlFor="scrutiny-show-in-archive">
+                        Afișează în Arhiva evenimentelor
+                      </label>
+                    </div>
                   </div>
 
                   {formError ? <div className="alert alert-danger mt-3 mb-0 py-2">{formError}</div> : null}

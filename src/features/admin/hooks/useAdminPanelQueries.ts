@@ -9,7 +9,7 @@ import {
   type UpsertUserPayload,
 } from '../services/adminService';
 
-type UpsertElectionPayload = { title: string; isActive: boolean; eday: string; electionTypeIds: number[] };
+type UpsertElectionPayload = { title: string; isActive: boolean; showInArchive: boolean; eday: string; electionTypeIds: number[] };
 
 export function useAdminPanelQuery(includeUsers = true) {
   return useQuery({
@@ -23,7 +23,7 @@ export function useAdminPanelQuery(includeUsers = true) {
 export function useUpsertElectionMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ payload, electionId, document }: { payload: { title: string; isActive: boolean; eday: string }; electionId?: string; document?: File | null }) =>
+    mutationFn: ({ payload, electionId, document }: { payload: UpsertElectionPayload; electionId?: string; document?: File | null }) =>
       upsertElection(payload, electionId, document),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.panel(true) });

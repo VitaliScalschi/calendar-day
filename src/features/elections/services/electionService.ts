@@ -23,7 +23,7 @@ type ApiDeadline = {
   electionId: string;
   title: string;
   additionalInfo?: string | null;
-  type?: 'RANGE' | 'MULTIPLE' | 'SINGLE' | 'MIXED';
+  type?: 'RANGE' | 'MULTIPLE' | 'SINGLE';
   startDate?: string | null;
   endDate?: string | null;
   deadlines?: string[];
@@ -43,18 +43,11 @@ export type InactiveElection = {
   id: string;
   title: string;
   isActive: boolean;
+  showInArchive?: boolean;
   eday: string;
   hasDocument?: boolean;
   electionTypeIds?: number[];
 };
-
-/** Pentru MIXED, `deadline.deadlines` vine din backend expandat cu toate zilele intervalului — păstrăm doar cele din afara lui. */
-function computeExtraDates(deadline: Pick<ApiDeadline, 'type' | 'startDate' | 'endDate' | 'deadlines'>): string[] {
-  const all = deadline.deadlines ?? [];
-  if (deadline.type !== 'MIXED' || !deadline.startDate || !deadline.endDate) return all;
-  const { startDate, endDate } = deadline;
-  return all.filter((date) => date < startDate || date > endDate);
-}
 
 export type GroupedDeadlines = {
   electionId: string;
@@ -113,9 +106,9 @@ export async function fetchActiveElectionsWithDeadlines(signal?: AbortSignal): P
   }));
 }
 
-export async function fetchInactiveElections(signal?: AbortSignal): Promise<InactiveElection[]> {
-  const list = await apiRequest<InactiveElection[]>('/elections/inactive', { signal });
-  return list.filter((e) => e.isActive === false);
+/** Pentru Arhiva evenimentelor: doar scrutinele bifate explicit "Afișează în Arhiva evenimentelor" (indiferent de status activ/inactiv). */
+export async function fetchArchivedElections(signal?: AbortSignal): Promise<InactiveElection[]> {
+  return apiRequest<InactiveElection[]>('/elections/archived', { signal });
 }
 
 /** Răspuns complet pentru calendar: include denumirea scrutinului (`electionTitle`) și câmpurile brute ale termenelor. */
@@ -136,7 +129,6 @@ export async function fetchGroupedDeadlinesForCalendar(signal?: AbortSignal): Pr
           additionalInfo?: string | null;
           responsible?: string[] | null;
           group?: string[] | null;
-          regulations?: ApiRegulation[] | null;
         }>;
       }>
     >('/deadlines/grouped-by-election', { signal }),
@@ -162,7 +154,7 @@ export async function fetchGroupedDeadlines(signal?: AbortSignal): Promise<Group
     deadlines: Array<{
       id: string;
       title: string;
-      type?: 'RANGE' | 'MULTIPLE' | 'SINGLE' | 'MIXED';
+      type?: 'RANGE' | 'MULTIPLE' | 'SINGLE';
       startDate?: string | null;
       endDate?: string | null;
       deadlines?: string[];

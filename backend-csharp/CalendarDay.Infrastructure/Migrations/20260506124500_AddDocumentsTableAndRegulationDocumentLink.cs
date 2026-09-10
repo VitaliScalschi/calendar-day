@@ -1,4 +1,7 @@
 using System;
+using CalendarDay.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -6,65 +9,25 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CalendarDay.Infrastructure.Migrations
 {
     /// <inheritdoc />
+    [DbContext(typeof(CalendarDayDbContext))]
+    [Migration("20260506124500_AddDocumentsTableAndRegulationDocumentLink")]
     public partial class AddDocumentsTableAndRegulationDocumentLink : Migration
     {
-        /// <inheritdoc />
+        /// <summary>
+        /// No-op intenționat: tabelul "documents" + coloana Regulations.DocumentId sunt create, de fapt,
+        /// de migrația SyncPendingModelChanges (20260506131547) — generată corect de `dotnet ef` puțin mai
+        /// târziu, tocmai pentru că această migrație nu era pe atunci recunoscută de EF (îi lipsea
+        /// atributul [Migration]) și modelul a fost re-detectat ca "neaplicat". Odată adăugat atributul,
+        /// dacă am reface aici crearea, am intra în conflict "already exists" cu SyncPendingModelChanges
+        /// pe orice bază de date nouă. Migrația rămâne în istoric doar ca să păstreze ordinea cronologică.
+        /// </summary>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "documents",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    OriginalName = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    StoredName = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    RelativeUrl = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: false),
-                    ContentType = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    SizeBytes = table.Column<long>(type: "bigint", nullable: false),
-                    CreatedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_documents", x => x.Id);
-                });
-
-            migrationBuilder.AddColumn<Guid>(
-                name: "DocumentId",
-                table: "Regulations",
-                type: "uuid",
-                nullable: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Regulations_DocumentId",
-                table: "Regulations",
-                column: "DocumentId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Regulations_documents_DocumentId",
-                table: "Regulations",
-                column: "DocumentId",
-                principalTable: "documents",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.SetNull);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Regulations_documents_DocumentId",
-                table: "Regulations");
-
-            migrationBuilder.DropTable(
-                name: "documents");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Regulations_DocumentId",
-                table: "Regulations");
-
-            migrationBuilder.DropColumn(
-                name: "DocumentId",
-                table: "Regulations");
         }
     }
 }

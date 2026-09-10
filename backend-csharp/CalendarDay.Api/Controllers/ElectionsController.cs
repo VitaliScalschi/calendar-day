@@ -20,11 +20,17 @@ public class ElectionsController(IElectionsService service, CalendarDayDbContext
     public async Task<ActionResult<IReadOnlyList<ElectionDto>>> GetAll(CancellationToken ct)
         => Ok(await service.GetAllAsync(ct));
 
-    /// <summary>Programe inactive (<c>IsActive == false</c>) pentru arhivă / pagina History.</summary>
+    /// <summary>Programe inactive (<c>IsActive == false</c>), folosit de panoul de admin pentru gestionare.</summary>
     [AllowAnonymous]
     [HttpGet("inactive")]
     public async Task<ActionResult<IReadOnlyList<ElectionDto>>> GetInactive(CancellationToken ct)
         => Ok(await service.GetInactiveAsync(ct));
+
+    /// <summary>Programe bifate "Afișează în Arhiva evenimentelor" — pentru pagina Arhivă (History).</summary>
+    [AllowAnonymous]
+    [HttpGet("archived")]
+    public async Task<ActionResult<IReadOnlyList<ElectionDto>>> GetArchived(CancellationToken ct)
+        => Ok(await service.GetArchivedAsync(ct));
 
     [AllowAnonymous]
     [HttpGet("{id:guid}")]

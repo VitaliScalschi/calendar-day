@@ -16,6 +16,7 @@ type ApiElection = {
   id: string;
   title: string;
   isActive: boolean;
+  showInArchive?: boolean;
   eday: string;
   hasDocument?: boolean;
   electionTypeIds?: number[];
@@ -100,7 +101,7 @@ function HistoryPage() {
       const groupedMap = new Map<string, ApiDeadline[]>();
       archiveQuery.data.grouped.forEach((item) => groupedMap.set(item.electionId, item.deadlines || []));
       const sorted = [...archiveQuery.data.elections]
-        .filter((e) => e.isActive === false)
+        .filter((e) => e.showInArchive === true)
         .sort((a, b) => new Date(b.eday).getTime() - new Date(a.eday).getTime());
       setElections(sorted as ApiElection[]);
       setGrouped(groupedMap);

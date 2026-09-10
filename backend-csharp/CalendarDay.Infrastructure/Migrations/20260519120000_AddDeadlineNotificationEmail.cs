@@ -1,3 +1,6 @@
+using CalendarDay.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -5,28 +8,21 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CalendarDay.Infrastructure.Migrations
 {
     /// <inheritdoc />
+    [DbContext(typeof(CalendarDayDbContext))]
+    [Migration("20260519120000_AddDeadlineNotificationEmail")]
     public partial class AddDeadlineNotificationEmail : Migration
     {
-        /// <inheritdoc />
+        /// <summary>
+        /// SQL idempotent (IF NOT EXISTS) — vezi nota din AddDocumentsTableAndRegulationDocumentLink.
+        /// </summary>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "NotificationEmail",
-                table: "Deadlines",
-                type: "text",
-                nullable: true);
-
-            migrationBuilder.AddColumn<DateOnly>(
-                name: "NotificationSentOn",
-                table: "Deadlines",
-                type: "date",
-                nullable: true);
-
-            migrationBuilder.AddColumn<DateOnly>(
-                name: "NotificationSentOn",
-                table: "deadline_dates",
-                type: "date",
-                nullable: true);
+            migrationBuilder.Sql(
+                """
+                ALTER TABLE "Deadlines" ADD COLUMN IF NOT EXISTS "NotificationEmail" text NULL;
+                ALTER TABLE "Deadlines" ADD COLUMN IF NOT EXISTS "NotificationSentOn" date NULL;
+                ALTER TABLE deadline_dates ADD COLUMN IF NOT EXISTS "NotificationSentOn" date NULL;
+                """);
         }
 
         /// <inheritdoc />

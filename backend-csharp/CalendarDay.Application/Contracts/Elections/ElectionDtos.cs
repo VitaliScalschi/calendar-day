@@ -4,6 +4,7 @@ public record ElectionDto(
     Guid Id,
     string Title,
     bool IsActive,
+    bool ShowInArchive,
     DateOnly Eday,
     bool HasDocument,
     IReadOnlyList<int> ElectionTypeIds,
@@ -15,6 +16,7 @@ public class CreateElectionDto
 {
     public string Title { get; set; } = string.Empty;
     public bool IsActive { get; set; }
+    public bool ShowInArchive { get; set; }
     public DateOnly Eday { get; set; }
     public List<int>? ElectionTypeIds { get; set; }
 }
@@ -23,6 +25,7 @@ public class UpdateElectionDto
 {
     public string Title { get; set; } = string.Empty;
     public bool IsActive { get; set; }
+    public bool ShowInArchive { get; set; }
     public DateOnly Eday { get; set; }
     public List<int>? ElectionTypeIds { get; set; }
 }

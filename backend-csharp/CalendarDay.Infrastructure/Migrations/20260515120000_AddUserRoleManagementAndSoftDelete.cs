@@ -1,3 +1,6 @@
+using CalendarDay.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -8,6 +11,8 @@ namespace CalendarDay.Infrastructure.Migrations;
 /// Role tables + soft-delete columns were documented in Sql/20260508_role_management.sql
 /// but never shipped as an EF migration; production DBs created via MigrateAsync were missing them.
 /// </summary>
+[DbContext(typeof(CalendarDayDbContext))]
+[Migration("20260515120000_AddUserRoleManagementAndSoftDelete")]
 public partial class AddUserRoleManagementAndSoftDelete : Migration
 {
     protected override void Up(MigrationBuilder migrationBuilder)
