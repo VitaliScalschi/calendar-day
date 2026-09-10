@@ -376,6 +376,10 @@ function CalendarPage() {
                     <span className="calendar-page__legend-dot calendar-page__legend-dot--expired" aria-hidden />
                     <span className="small"> - evenimente expirate</span>
                   </li>
+                  <li className="calendar-page__legend-item d-inline-flex align-items-center gap-2">
+                    <i className="bi bi-star-fill calendar-page__legend-star--election-day" aria-hidden="true" />
+                    <span className="small"> - ziua alegerilor</span>
+                  </li>
                 </ul>
               </div>
             </div>
