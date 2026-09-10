@@ -4,6 +4,7 @@ export type AdminElection = {
   id: string;
   title: string;
   isActive: boolean;
+  showInArchive: boolean;
   eday: string;
   hasDocument?: boolean;
   electionTypeIds?: number[];
@@ -57,7 +58,7 @@ export async function fetchAdminPanelData(
 }
 
 export async function upsertElection(
-  payload: { title: string; isActive: boolean; eday: string; electionTypeIds: number[] },
+  payload: { title: string; isActive: boolean; showInArchive: boolean; eday: string; electionTypeIds: number[] },
   electionId?: string,
   document?: File | null,
 ) {

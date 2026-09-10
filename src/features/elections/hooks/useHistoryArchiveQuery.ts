@@ -1,12 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '../../../shared/query/queryKeys';
-import { fetchGroupedDeadlines, fetchInactiveElections } from '../services/electionService';
+import { fetchGroupedDeadlines, fetchArchivedElections } from '../services/electionService';
 
 export function useHistoryArchiveQuery() {
   return useQuery({
     queryKey: ['history', 'archive'],
     queryFn: async ({ signal }) => {
-      const [elections, grouped] = await Promise.all([fetchInactiveElections(signal), fetchGroupedDeadlines(signal)]);
+      const [elections, grouped] = await Promise.all([fetchArchivedElections(signal), fetchGroupedDeadlines(signal)]);
       return { elections, grouped };
     },
     staleTime: 45_000,

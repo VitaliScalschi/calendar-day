@@ -5,6 +5,8 @@ public class Election
     public Guid Id { get; set; }
     public string Title { get; set; } = string.Empty;
     public bool IsActive { get; set; }
+    /// <summary>Forțează afișarea acestui scrutin în Arhiva evenimentelor, chiar dacă e încă activ.</summary>
+    public bool ShowInArchive { get; set; }
     public DateOnly Eday { get; set; }
     public List<int> ElectionTypeIds { get; set; } = [];
     public string? DocumentOriginalName { get; set; }

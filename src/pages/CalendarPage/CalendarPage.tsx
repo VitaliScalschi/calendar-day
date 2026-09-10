@@ -11,7 +11,7 @@ import type { DatesSetArg, EventClickArg, EventContentArg, EventInput } from '@f
 import { addDays, format, parseISO } from 'date-fns';
 import * as XLSX from 'xlsx';
 import { Header, Footer, InputSelect, type InputSelectOption, Modal, ScrollToTop, SearchBar, Button } from '../../components';
-import type { EventDeadlineProps, Regulation } from '../../interface';
+import type { EventDeadlineProps } from '../../interface';
 import { useCalendarDeadlinesQuery } from '../../features/elections/hooks/useCalendarDeadlinesQuery';
 import { mapGroupedDeadlinesToCalendarEvents } from '../../shared/utils/mapGroupedDeadlinesToCalendarEvents';
 import './CalendarPage.css';
@@ -124,10 +124,6 @@ function eventClickToDeadlineProps(info: EventClickArg): EventDeadlineProps {
   const additionalInfo = String(ext.additionalInfo ?? '').trim() || undefined;
   const responsible = normalizeStringArray(ext.responsible);
   const group = normalizeStringArray(ext.group);
-  const regulations = Array.isArray(ext.regulations)
-    ? (ext.regulations as Regulation[])
-    : undefined;
-  const extraDates = normalizeStringArray(ext.extraDates);
 
   const title =
     scrutiny && termen ? `${scrutiny} · ${termen}` : termen || scrutiny || 'Termen';
@@ -141,8 +137,6 @@ function eventClickToDeadlineProps(info: EventClickArg): EventDeadlineProps {
     additional_info: additionalInfo,
     responsible,
     group,
-    regulations: regulations?.length ? regulations : undefined,
-    extraDates,
   };
 }
 
@@ -178,6 +172,8 @@ function CalendarPage() {
   const [calendarViewType, setCalendarViewType] = useState('dayGridMonth');
   const [listSearchQuery, setListSearchQuery] = useState('');
   const [morePopoverDirection, setMorePopoverDirection] = useState<'left' | 'right'>('left');
+  /** „down” = deschide sub link (implicit); „up” = deasupra, când nu mai e loc jos. */
+  const [morePopoverVertical, setMorePopoverVertical] = useState<'up' | 'down'>('down');
 
   const scrutinyOptions = useMemo(() => {
     if (!grouped?.length) return [];
@@ -217,6 +213,22 @@ function CalendarPage() {
     return mapGroupedDeadlinesToCalendarEvents([block]);
   }, [grouped, filterElectionId]);
 
+  /** Zilele „Ziua alegerilor” — celula din grilă e evidențiată, nu doar eticheta evenimentului. */
+  const electionDayDates = useMemo(() => {
+    const dates = new Set<string>();
+    for (const e of events) {
+      if (!(e.extendedProps as Record<string, unknown> | undefined)?.isElectionDay) continue;
+      const iso = eventInputToIsoDate(e.start);
+      if (iso) dates.add(iso);
+    }
+    return dates;
+  }, [events]);
+
+  const dayCellClassNames = useCallback(
+    (arg: { date: Date }) => (electionDayDates.has(format(arg.date, 'yyyy-MM-dd')) ? ['calendar-day-election'] : []),
+    [electionDayDates],
+  );
+
   const displayedEvents = useMemo(() => {
     if (calendarViewType !== 'listMonth') return events;
     return events.filter((e) => matchesListSearchQuery(e, listSearchQuery));
@@ -253,13 +265,21 @@ function CalendarPage() {
     const clickedOnLeftHalf = rect.left + rect.width / 2 < window.innerWidth / 2;
     // Deschidem în partea opusă locului unde e linkul.
     setMorePopoverDirection(clickedOnLeftHalf ? 'right' : 'left');
+
+    // Dacă jos nu mai e loc pentru popover (ex. lângă finalul paginii), îl deschidem
+    // deasupra linkului — altfel browserul forțează scroll ca să-l arate în întregime.
+    const estimatedPopoverHeight = 460; // corp listă (max 420px) + antet + margini
+    const spaceBelow = window.innerHeight - rect.top;
+    const spaceAbove = rect.top;
+    const shouldOpenUp = spaceBelow < estimatedPopoverHeight && spaceAbove > spaceBelow;
+    setMorePopoverVertical(shouldOpenUp ? 'up' : 'down');
   }, []);
 
   return (
     <div className="App d-flex flex-column min-vh-100">
       <Header />
       <main
-        className={`main-content container-fluid my-3 flex-grow-1 calendar-page calendar-page--more-popover-${morePopoverDirection}`}
+        className={`main-content container-fluid my-3 flex-grow-1 calendar-page calendar-page--more-popover-${morePopoverDirection} calendar-page--more-popover-${morePopoverVertical}`}
       >
         <div className="container">
           <div className="calendar-page__intro">
@@ -353,6 +373,7 @@ function CalendarPage() {
                 datesSet={handleDatesSet}
                 eventClick={handleEventClick}
                 eventContent={renderEventContent}
+                dayCellClassNames={dayCellClassNames}
                 dayMaxEvents={3}
                 moreLinkClick="popover"
                 moreLinkText={(n) => `+${n} evenimente`}
@@ -371,6 +392,10 @@ function CalendarPage() {
                   <li className="calendar-page__legend-item d-inline-flex align-items-center gap-2">
                     <span className="calendar-page__legend-dot calendar-page__legend-dot--expired" aria-hidden />
                     <span className="small"> - evenimente expirate</span>
+                  </li>
+                  <li className="calendar-page__legend-item d-inline-flex align-items-center gap-2">
+                    <span className="calendar-page__legend-swatch calendar-page__legend-swatch--election-day" aria-hidden />
+                    <span className="small"> - ziua alegerilor</span>
                   </li>
                 </ul>
               </div>

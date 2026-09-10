@@ -12,7 +12,6 @@ export type GroupedDeadlineRow = {
   additionalInfo?: string | null;
   responsible?: string[] | null;
   group?: string[] | null;
-  regulations?: Array<{ id: string; title: string; link: string }> | null;
 };
 
 export type GroupedElectionBlock = {
@@ -45,6 +44,11 @@ function getTodayIso(): string {
   return format(new Date(), 'yyyy-MM-dd');
 }
 
+/** „Ziua alegerilor” / „Ziua Alegerii” etc. — termenul prin care CEC marchează data scrutinului. */
+function isElectionDayTitle(title: string): boolean {
+  return title.trim().toLowerCase().startsWith('ziua alegeri');
+}
+
 /**
  * Transformă răspunsul grouped-by-election în evenimente FullCalendar.
  * Titlul evenimentului rămâne scurt pentru API FC; denumirea scrutinului e în extendedProps + eventContent.
@@ -62,6 +66,8 @@ export function mapGroupedDeadlinesToCalendarEvents(groups: GroupedElectionBlock
       const startIso = isoDay(d.startDate);
       const endIso = isoDay(d.endDate);
 
+      const isElectionDay = isElectionDayTitle(d.title);
+
       const baseExtended = {
         electionId,
         electionTitle,
@@ -70,17 +76,15 @@ export function mapGroupedDeadlinesToCalendarEvents(groups: GroupedElectionBlock
         additionalInfo: d.additionalInfo ?? undefined,
         responsible: d.responsible ?? undefined,
         group: d.group ?? undefined,
-        regulations: d.regulations ?? undefined,
-        extraDates: undefined as string[] | undefined,
+        isElectionDay,
       };
 
-      const pushRangeEvent = (): boolean => {
-        if (!startIso || !endIso) return false;
+      if (type === 'RANGE' && startIso && endIso) {
         let endExclusive: string;
         try {
           endExclusive = format(addDays(parseISO(endIso), 1), 'yyyy-MM-dd');
         } catch {
-          return false;
+          continue;
         }
         const isExpired = endIso < todayIso;
         const colors = isExpired ? calendarExpiredEventColors : calendarPrimaryEventColors;
@@ -93,46 +97,13 @@ export function mapGroupedDeadlinesToCalendarEvents(groups: GroupedElectionBlock
           backgroundColor: colors.backgroundColor,
           borderColor: colors.borderColor,
           textColor: colors.textColor,
-          classNames: isExpired ? ['calendar-event-expired'] : undefined,
+          classNames: isElectionDay
+            ? ['calendar-event-election-day']
+            : isExpired
+              ? ['calendar-event-expired']
+              : undefined,
           extendedProps: baseExtended,
         });
-        return true;
-      };
-
-      const pushDayEvents = (dayStarts: string[]) => {
-        for (let i = 0; i < dayStarts.length; i += 1) {
-          const start = dayStarts[i];
-          const isExpired = start < todayIso;
-          const colors = isExpired ? calendarExpiredEventColors : calendarPrimaryEventColors;
-          out.push({
-            id: dayStarts.length > 1 ? `${d.id}_${start}_${i}` : d.id,
-            title: d.title,
-            start,
-            allDay: true,
-            backgroundColor: colors.backgroundColor,
-            borderColor: colors.borderColor,
-            textColor: colors.textColor,
-            classNames: isExpired ? ['calendar-event-expired'] : undefined,
-            extendedProps: baseExtended,
-          });
-        }
-      };
-
-      if (type === 'MIXED' && startIso && endIso) {
-        // Interval + date individuale suplimentare: o bară pentru interval, plus câte un
-        // eveniment separat pentru fiecare dată din afara intervalului. `rawDates` vine deja
-        // expandat cu toate zilele intervalului (din backend), deci le filtrăm pe cele acoperite.
-        const extraDates = rawDates.filter((date) => date < startIso || date > endIso);
-        // Doar bara de interval (evenimentul "principal") duce cu ea și lista de date
-        // suplimentare — marcatorii individuali de zi rămân la fel de simpli ca la MULTIPLE.
-        if (pushRangeEvent()) {
-          out[out.length - 1].extendedProps = { ...baseExtended, extraDates };
-          pushDayEvents(extraDates);
-        }
-        continue;
-      }
-
-      if (type === 'RANGE' && pushRangeEvent()) {
         continue;
       }
 
@@ -145,7 +116,26 @@ export function mapGroupedDeadlinesToCalendarEvents(groups: GroupedElectionBlock
               ? [endIso]
               : [];
 
-      pushDayEvents(dayStarts);
+      for (let i = 0; i < dayStarts.length; i += 1) {
+        const start = dayStarts[i];
+        const isExpired = start < todayIso;
+        const colors = isExpired ? calendarExpiredEventColors : calendarPrimaryEventColors;
+        out.push({
+          id: dayStarts.length > 1 ? `${d.id}_${start}_${i}` : d.id,
+          title: d.title,
+          start,
+          allDay: true,
+          backgroundColor: colors.backgroundColor,
+          borderColor: colors.borderColor,
+          textColor: colors.textColor,
+          classNames: isElectionDay
+            ? ['calendar-event-election-day']
+            : isExpired
+              ? ['calendar-event-expired']
+              : undefined,
+          extendedProps: baseExtended,
+        });
+      }
     }
   }
 

@@ -9,6 +9,8 @@ import { useDebounce } from '../../shared/hooks/useDebounce';
 import { useFilters } from '../../shared/hooks/useFilters';
 import { useModal } from '../../shared/hooks/useModal';
 import { usePagination } from '../../shared/hooks/usePagination';
+import { formatDeadlineLabel } from '../../shared/utils/deadlineDate';
+import { getDeadlineRangeFromString } from '../../shared/utils/deadlineTodayKind';
 import './HistoryPage.css';
 import '../../components/EventFilter/EventFilter.css';
 
@@ -16,6 +18,7 @@ type ApiElection = {
   id: string;
   title: string;
   isActive: boolean;
+  showInArchive?: boolean;
   eday: string;
   hasDocument?: boolean;
   electionTypeIds?: number[];
@@ -60,11 +63,14 @@ function inferScrutinyType(title: string, typeNames: readonly string[]): string 
   return null;
 }
 
-const toRoDate = (value: string) => new Date(value).toLocaleDateString('ro-RO');
 const toCompactDate = (value: string) =>
   new Date(value).toLocaleDateString('ro-RO', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
-const getStatusLabel = (deadline: string) => (new Date(deadline) < new Date() ? 'Finalizat' : 'Rămas');
+const getStatusLabel = (deadline: string) => {
+  const range = getDeadlineRangeFromString(deadline);
+  const referenceDate = range ? range.end : deadline;
+  return new Date(referenceDate) < new Date() ? 'Finalizat' : 'Rămas';
+};
 const getStatusClass = (status: string) => (status === 'Finalizat' ? 'is-done' : 'is-upcoming');
 const groupLabel = (groups: string[]) =>
   (groups[0] || '')
@@ -100,7 +106,7 @@ function HistoryPage() {
       const groupedMap = new Map<string, ApiDeadline[]>();
       archiveQuery.data.grouped.forEach((item) => groupedMap.set(item.electionId, item.deadlines || []));
       const sorted = [...archiveQuery.data.elections]
-        .filter((e) => e.isActive === false)
+        .filter((e) => e.showInArchive === true)
         .sort((a, b) => new Date(b.eday).getTime() - new Date(a.eday).getTime());
       setElections(sorted as ApiElection[]);
       setGrouped(groupedMap);
@@ -324,7 +330,7 @@ function HistoryPage() {
                 <tbody>
                   {pageItems.map((item) => (
                     <tr key={item.id}>
-                      <td>{toRoDate(item.deadline)}</td>
+                      <td>{formatDeadlineLabel(item.deadline)}</td>
                       <td className="history-event-title">{item.title}</td>
                       <td>{groupLabel(item.group || [])}</td>
                       <td>

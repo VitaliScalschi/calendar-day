@@ -8,18 +8,25 @@
   max-width: min(100vw - 1rem, 32rem);
 }
 
-/* Deschidere dinamică pe partea opusă locului unde e linkul +N */
-.calendar-page.calendar-page--more-popover-left .fc-direction-ltr .fc-more-popover {
-  transform: translateX(calc(-100% + 1.25rem));
+/* Deschidere dinamică în partea opusă locului unde e linkul +N (orizontal) și,
+   dacă nu mai e loc pe verticală până la capătul ecranului, deasupra lui în loc
+   de dedesubt — ca să nu mai apară scroll forțat când dai click aproape de
+   finalul paginii. */
+.calendar-page .fc-direction-ltr .fc-more-popover {
+  transform: translate(var(--more-popover-tx, 0), var(--more-popover-ty, 0));
 }
 
-.calendar-page.calendar-page--more-popover-right .fc-direction-ltr .fc-more-popover {
-  transform: none;
+.calendar-page.calendar-page--more-popover-left {
+  --more-popover-tx: calc(-100% + 1.25rem);
+}
+
+.calendar-page.calendar-page--more-popover-up {
+  --more-popover-ty: calc(-100% - 1.25rem);
 }
 
 @media (max-width: 768px) {
   .calendar-page .fc-direction-ltr .fc-more-popover {
-    transform: none;
+    --more-popover-tx: 0;
   }
 }
 
@@ -351,12 +358,12 @@
    subtil, dot albastru pe stânga, text negru.
    ============================================================ */
 
-/* Fără max-width aici: FullCalendar întinde evenimentele multi-zi via left/right negativ
-   (nu prin width), iar un max-width: 100% ar limita bara la lățimea unei singure celule,
-   anulând întinderea pe toate zilele acoperite de interval. */
-.calendar-page .fc .fc-daygrid-event-harness {
-  max-width: none;
-}
+/* Notă: NU punem max-width:100% pe .fc-daygrid-event-harness — FullCalendar
+   poziționează absolut (left/right) aceste "harness"-uri ca să întindă un
+   eveniment pe mai multe zile (RANGE) pe toată lățimea săptămânii; un
+   max-width:100% relativ la o singură celulă le taie înapoi la o zi, iar
+   evenimentul multi-zi nu mai apare deloc pe zilele următoare (doar
+   „+N evenimente”). */
 
 .calendar-page .fc .fc-daygrid-event,
 .calendar-page .fc .fc-multimonth .fc-daygrid-event,
@@ -368,6 +375,18 @@
   margin: 0.15rem !important;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
   transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Vizualizarea „An” (multiMonthYear): celulele zilelor sunt foarte înguste, iar un titlu
+   lung, cu `white-space: normal`, se poate întinde pe zeci de linii — inclusiv în
+   copiile invizibile (visibility: hidden) pe care FullCalendar le randează intern
+   pentru a calcula câte evenimente încap înainte de „+N evenimente”. Fiindcă
+   visibility:hidden păstrează spațiul ocupat, o astfel de copie umflată tot împinge
+   în jos restul paginii, producând scroll în plus, disproporționat față de conținut.
+   Limităm înălțimea cutiei unui eveniment în acest view, cu overflow ascuns. */
+.calendar-page .fc .fc-multimonth .fc-daygrid-event {
+  max-height: 2.6rem;
+  overflow: hidden;
 }
 
 .calendar-page .fc .fc-daygrid-event:not(.fc-event-selected),
@@ -483,6 +502,21 @@
 .calendar-page .fc .calendar-event-expired .calendar-fc-event-inner__dot {
   background-color: #dc3545;
   box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.12);
+}
+
+/* ============================================================
+   Ziua Alegerilor — se evidențiază CELULA zilei din grilă (fundal
+   roșu transparent), nu eticheta evenimentului „Ziua alegerilor”,
+   care rămâne cu stilul normal ca orice alt eveniment.
+   ============================================================ */
+
+.calendar-page .fc .fc-daygrid-day.calendar-day-election,
+.calendar-page .fc .fc-multimonth .fc-daygrid-day.calendar-day-election {
+  background-color: #b4231866;
+}
+
+.calendar-page .fc .fc-list-event.calendar-event-election-day td {
+  font-weight: 700;
 }
 
 /* ============================================================
@@ -689,4 +723,16 @@
 .calendar-page__legend-dot--expired {
   background-color: #dc3545;
   box-shadow: 0 0 0 1px rgba(220, 53, 69, 0.35);
+}
+
+.calendar-page__legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.calendar-page__legend-swatch--election-day {
+  background-color: #b4231866;
+  box-shadow: 0 0 0 1px rgba(180, 35, 24, 0.5);
 }

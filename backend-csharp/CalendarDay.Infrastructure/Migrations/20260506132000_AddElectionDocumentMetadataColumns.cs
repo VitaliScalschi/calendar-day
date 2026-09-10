@@ -1,4 +1,7 @@
 using System;
+using CalendarDay.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -6,67 +9,21 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CalendarDay.Infrastructure.Migrations
 {
     /// <inheritdoc />
+    [DbContext(typeof(CalendarDayDbContext))]
+    [Migration("20260506132000_AddElectionDocumentMetadataColumns")]
     public partial class AddElectionDocumentMetadataColumns : Migration
     {
-        /// <inheritdoc />
+        /// <summary>
+        /// No-op intenționat: aceste coloane sunt create, de fapt, de migrația SyncPendingModelChanges
+        /// (20260506131547) — vezi nota din AddDocumentsTableAndRegulationDocumentLink pentru context.
+        /// </summary>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "DocumentContentType",
-                table: "Elections",
-                type: "character varying(200)",
-                maxLength: 200,
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "DocumentOriginalName",
-                table: "Elections",
-                type: "character varying(500)",
-                maxLength: 500,
-                nullable: true);
-
-            migrationBuilder.AddColumn<long>(
-                name: "DocumentSizeBytes",
-                table: "Elections",
-                type: "bigint",
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "DocumentStoredName",
-                table: "Elections",
-                type: "character varying(500)",
-                maxLength: 500,
-                nullable: true);
-
-            migrationBuilder.AddColumn<DateTime>(
-                name: "DocumentUploadedAtUtc",
-                table: "Elections",
-                type: "timestamp with time zone",
-                nullable: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "DocumentContentType",
-                table: "Elections");
-
-            migrationBuilder.DropColumn(
-                name: "DocumentOriginalName",
-                table: "Elections");
-
-            migrationBuilder.DropColumn(
-                name: "DocumentSizeBytes",
-                table: "Elections");
-
-            migrationBuilder.DropColumn(
-                name: "DocumentStoredName",
-                table: "Elections");
-
-            migrationBuilder.DropColumn(
-                name: "DocumentUploadedAtUtc",
-                table: "Elections");
         }
     }
 }
