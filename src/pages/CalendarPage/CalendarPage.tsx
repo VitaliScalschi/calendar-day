@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import FullCalendar from '@fullcalendar/react';
 import bootstrap5Plugin from '@fullcalendar/bootstrap5';
@@ -167,6 +168,7 @@ function CalendarEventInner({ arg }: { arg: EventContentArg }) {
 
 function CalendarPage() {
   const { data: grouped, isLoading, isError, error, refetch, isFetching } = useCalendarDeadlinesQuery();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [filterElectionId, setFilterElectionId] = useState('');
   const [modalDeadline, setModalDeadline] = useState<EventDeadlineProps | null>(null);
   const [calendarViewType, setCalendarViewType] = useState('dayGridMonth');
@@ -192,17 +194,34 @@ function CalendarPage() {
     [scrutinyOptions, filterElectionId],
   );
 
-  /** Fără „toate”: mereu un scrutin; implicit primul din listă. */
+  /**
+   * Fără „toate”: mereu un scrutin. La încărcare preferăm ?scrutin=<id> din URL
+   * (link direct către un anumit scrutin); altfel implicit primul din listă.
+   */
   useEffect(() => {
     if (scrutinyOptions.length === 0) {
-      setFilterElectionId('');
+      if (filterElectionId !== '') setFilterElectionId('');
       return;
     }
-    setFilterElectionId((prev) => {
-      if (prev && scrutinyOptions.some((o) => o.id === prev)) return prev;
-      return scrutinyOptions[0].id;
-    });
-  }, [scrutinyOptions]);
+    if (filterElectionId && scrutinyOptions.some((o) => o.id === filterElectionId)) return;
+    const fromUrl = searchParams.get('scrutin');
+    const next = fromUrl && scrutinyOptions.some((o) => o.id === fromUrl) ? fromUrl : scrutinyOptions[0].id;
+    setFilterElectionId(next);
+  }, [scrutinyOptions, searchParams, filterElectionId]);
+
+  /** Ține URL-ul sincronizat cu scrutinul afișat, ca linkul curent să poată fi distribuit/salvat. */
+  useEffect(() => {
+    if (!filterElectionId) return;
+    if (searchParams.get('scrutin') === filterElectionId) return;
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.set('scrutin', filterElectionId);
+        return next;
+      },
+      { replace: true },
+    );
+  }, [filterElectionId, searchParams, setSearchParams]);
 
   const showScrutinySelector = scrutinyOptions.length > 1;
 

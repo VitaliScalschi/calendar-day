@@ -144,8 +144,7 @@ export async function fetchGroupedDeadlinesForCalendar(signal?: AbortSignal): Pr
     electionTitle: (entry.electionTitle ?? '').trim() || 'Scrutin fără denumire',
     deadlines: entry.deadlines ?? [],
   }))
-    .filter((entry) => activeElectionIds.has(entry.electionId))
-    .filter((entry) => entry.deadlines.length > 0);
+    .filter((entry) => activeElectionIds.has(entry.electionId));
 }
 
 export async function fetchGroupedDeadlines(signal?: AbortSignal): Promise<GroupedDeadlines[]> {
