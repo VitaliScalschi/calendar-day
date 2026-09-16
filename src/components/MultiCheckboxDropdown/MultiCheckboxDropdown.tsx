@@ -47,6 +47,7 @@ export function MultiCheckboxDropdown({
   size = 'md',
 }: MultiCheckboxDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const rootRef = useRef<HTMLDivElement | null>(null);
 
   const visibleOptions = useMemo(() => {
@@ -57,8 +58,17 @@ export function MultiCheckboxDropdown({
     return options.filter((o) => allow.has(o.key));
   }, [options, allowedKeys]);
 
+  const normalizedSearch = searchQuery.trim().toLowerCase();
+  const filteredOptions = useMemo(() => {
+    if (!normalizedSearch) return visibleOptions;
+    return visibleOptions.filter((o) => o.label.toLowerCase().includes(normalizedSearch));
+  }, [visibleOptions, normalizedSearch]);
+
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      setSearchQuery('');
+      return;
+    }
 
     const handleClickOutside = (event: MouseEvent) => {
       if (!rootRef.current) return;
@@ -108,17 +118,34 @@ export function MultiCheckboxDropdown({
       </div>
       {isOpen ? (
         <div className="event-filter-dropdown__menu">
-          {visibleOptions.map((option) => (
-            <label key={option.key} className="event-filter-election-item event-filter-dropdown__item">
+          {visibleOptions.length > 5 ? (
+            <div className="multi-checkbox-dropdown__search">
+              <i className="fa-solid fa-magnifying-glass multi-checkbox-dropdown__search-icon" aria-hidden="true" />
               <input
-                type="checkbox"
-                name={checkboxGroupName}
-                checked={selectedKeys.includes(option.key)}
-                onChange={() => onToggle(option.key)}
+                type="text"
+                className="multi-checkbox-dropdown__search-input"
+                placeholder="Caută..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                autoFocus
               />
-              <span>{option.label}</span>
-            </label>
-          ))}
+            </div>
+          ) : null}
+          {filteredOptions.length === 0 ? (
+            <div className="multi-checkbox-dropdown__empty">Nicio opțiune găsită.</div>
+          ) : (
+            filteredOptions.map((option) => (
+              <label key={option.key} className="event-filter-election-item event-filter-dropdown__item">
+                <input
+                  type="checkbox"
+                  name={checkboxGroupName}
+                  checked={selectedKeys.includes(option.key)}
+                  onChange={() => onToggle(option.key)}
+                />
+                <span>{option.label}</span>
+              </label>
+            ))
+          )}
         </div>
       ) : null}
       {showSelectionChips && hasSelection ? (

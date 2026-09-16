@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {Header, Footer, Main, ScrollToTop} from '../../components/index'
 import type { ElectionItem } from '../../interface/index'
 import { formatElectionDayFooterLabel } from '../../utils/dateUtils'
@@ -11,6 +12,7 @@ function HomePage() {
   const [elections, setElections] = useState<ElectionItem[]>([])
   const [errorElections, setErrorElections] = useState<string | null>(null)
   const [activeElectionId, setActiveElectionId] = useState<string | null>(null)
+  const [searchParams, setSearchParams] = useSearchParams()
   const shouldUseMock = import.meta.env.VITE_USE_MOCK_TABS === 'true';
   const homeQuery = useHomeElectionsQuery(!shouldUseMock);
   const audiencesQuery = useAudiencesQuery(!shouldUseMock);
@@ -22,28 +24,53 @@ function HomePage() {
     return FALLBACK_TARGET_GROUP_OPTIONS;
   }, [audiencesQuery.data]);
 
+  /** La încărcare preferăm ?scrutin=<id> din URL (link direct către un anumit scrutin). */
   useEffect(() => {
+    const fromUrl = searchParams.get('scrutin');
     if (shouldUseMock) {
       setElections(data);
-      const activeElection = data.find(election => election.is_active) || data[0];
+      const activeElection =
+        (fromUrl && data.find((election) => election.id === fromUrl)) ||
+        data.find(election => election.is_active) ||
+        data[0];
       setActiveElectionId(activeElection?.id ?? null);
       setErrorElections(null);
       return;
     }
     if (homeQuery.data) {
       setElections(homeQuery.data);
-      const activeElection = homeQuery.data.find((election) => election.is_active) || homeQuery.data[0];
+      const activeElection =
+        (fromUrl && homeQuery.data.find((election) => election.id === fromUrl)) ||
+        homeQuery.data.find((election) => election.is_active) ||
+        homeQuery.data[0];
       setActiveElectionId((previous) => previous ?? activeElection?.id ?? null);
       setErrorElections(null);
       return;
     }
     if (homeQuery.isError) {
       setElections(data);
-      const activeElection = data.find((election) => election.is_active) || data[0];
+      const activeElection =
+        (fromUrl && data.find((election) => election.id === fromUrl)) ||
+        data.find((election) => election.is_active) ||
+        data[0];
       setActiveElectionId(activeElection?.id ?? null);
       setErrorElections('Nu am putut incarca datele din backend C#. Se folosesc date locale.');
     }
-  }, [homeQuery.data, homeQuery.isError, shouldUseMock])
+  }, [homeQuery.data, homeQuery.isError, shouldUseMock, searchParams])
+
+  /** Ține URL-ul sincronizat cu scrutinul afișat, ca linkul curent să poată fi distribuit/salvat. */
+  useEffect(() => {
+    if (!activeElectionId) return;
+    if (searchParams.get('scrutin') === activeElectionId) return;
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.set('scrutin', activeElectionId);
+        return next;
+      },
+      { replace: true },
+    );
+  }, [activeElectionId, searchParams, setSearchParams])
 
   const footerElectionDayLabel = useMemo(() => {
     const election =

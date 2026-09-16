@@ -1,3 +1,37 @@
+.multi-checkbox-dropdown__search {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.6rem;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.multi-checkbox-dropdown__search-icon {
+  color: #9aa1ac;
+  font-size: 0.78rem;
+  flex-shrink: 0;
+}
+
+.multi-checkbox-dropdown__search-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  font-size: 0.82rem;
+  background: transparent;
+}
+
+.multi-checkbox-dropdown__empty {
+  padding: 0.6rem;
+  font-size: 0.8rem;
+  color: #9aa1ac;
+  text-align: center;
+}
+
 .multi-checkbox-dropdown__chips {
   display: flex;
   flex-wrap: wrap;
