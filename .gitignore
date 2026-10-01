@@ -36,3 +36,6 @@ backend-csharp/CalendarDay.Api/appsettings.Development.local.json
 backup_*.sql
 calendar_day_backup.dump
 
+# Secrete locale (parole reale) - vezi .env.prod.example pentru template
+.env
+
